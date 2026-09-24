@@ -1,7 +1,8 @@
-import { RelayConnection } from './relay.js?v=1.1.0';
-import { LIMITS } from '../core/config.js?v=1.1.0';
-import { canonicalFilters, chunks, normalizeRelay, sortEvents, stableJSON, unique } from '../core/utils.js?v=1.1.0';
-import { verifyEvent } from '../core/crypto.js?v=1.1.0';
+import { RelayConnection } from './relay.js?v=1.1.1';
+import { LIMITS } from '../core/config.js?v=1.1.1';
+import { canonicalFilters, chunks, normalizeRelay, sortEvents, stableJSON, unique } from '../core/utils.js?v=1.1.1';
+import { missingProfileFilters } from './profile-batch.js?v=1.1.1';
+import { verifyEvent } from '../core/crypto.js?v=1.1.1';
 
 export class RelayPool {
   constructor(storage, options = {}) { this.storage = storage; this.options = options; this.connections = new Map(); this.inflight = new Map(); this.coalesced = 0; }
@@ -10,7 +11,7 @@ export class RelayPool {
     const conn = this.connections.get(url); conn.gap = Math.max(gap, this.options.gap ?? 0); return conn;
   }
   urls(relays) { const urls = unique(relays.map(normalizeRelay).filter(Boolean)); if (!urls.length || urls.length > LIMITS.relays) throw new Error('リレー設定が不正です'); return urls; }
-  async query({ relays, filters, gap = 1200 }) {
+  async query({ relays, filters, gap = 1200, profileBatch = false }) {
     const urls = this.urls(relays), normalized = canonicalFilters(filters);
     if (!normalized.length) return { events: [], complete: true, errors: [] };
     if (normalized.length > 400) throw new Error('一度の問い合わせが大きすぎます。フォロー数を減らすか、個別のプロフィールを開いてください');
@@ -18,14 +19,24 @@ export class RelayPool {
       if (!Number.isInteger(f.limit) || f.limit < 1 || f.limit > LIMITS.maxPageLimit) throw new Error('取得上限が不正です');
       if (Object.values(f).some(v => Array.isArray(v) && !v.length)) throw new Error('空の検索条件は利用できません');
     }
-    const key = `query:${stableJSON([urls, normalized])}`;
+    const key = `query:${stableJSON([urls, normalized, profileBatch])}`;
     if (this.inflight.has(key)) { this.coalesced++; return this.inflight.get(key); }
     const task = (async () => {
       const events = [], errors = [];
       // Every relay finishes independently. The fastest relay cannot truncate the others.
       await Promise.all(urls.map(async url => {
         for (const group of chunks(normalized, LIMITS.filters)) {
-          try { events.push(...await this.connection(url, gap).query(group)); }
+          try {
+            const received = await this.connection(url, gap).query(group);
+            events.push(...received);
+            if (profileBatch) {
+              // One repair pass, per relay; a result from another relay cannot
+              // hide this relay's missing/newer profile. Rate limiting stops here.
+              for (const repair of chunks(missingProfileFilters(group, received), LIMITS.filters)) {
+                events.push(...await this.connection(url, gap).query(repair));
+              }
+            }
+          }
           catch (e) { events.push(...(e.partial ?? [])); errors.push({ relay: url, reason: e.message }); break; }
         }
       }));

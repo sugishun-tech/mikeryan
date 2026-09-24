@@ -1,20 +1,20 @@
-import { Storage } from './core/storage.js?v=1.1.0';
-import { Settings } from './settings/store.js?v=1.1.0';
-import { NetworkClient } from './network/client.js?v=1.1.0';
-import { Session } from './auth/session.js?v=1.1.0';
-import { Repository } from './core/repository.js?v=1.1.0';
-import { Nip05 } from './profiles/nip05.js?v=1.1.0';
-import { Social } from './social/service.js?v=1.1.0';
-import { Moderation } from './feed/moderation.js?v=1.1.0';
-import { Identity } from './ui/identity.js?v=1.1.0';
-import { Posts } from './ui/posts.js?v=1.1.0';
-import { Router, profileHref, threadHref } from './core/router.js?v=1.1.0';
-import { FeedView, feedFilters, composer } from './feed/view.js?v=1.1.0';
-import { ProfileView } from './profiles/view.js?v=1.1.0';
-import { settingsView } from './settings/view.js?v=1.1.0';
-import { el, button, busy, icon, avatar, loading, empty, toast } from './ui/dom.js?v=1.1.0';
-import { parentId, stableJSON, matchesFilter } from './core/utils.js?v=1.1.0';
-import { decodeKey } from './core/nip19.js?v=1.1.0';
+import { Storage } from './core/storage.js?v=1.1.1';
+import { Settings } from './settings/store.js?v=1.1.1';
+import { NetworkClient } from './network/client.js?v=1.1.1';
+import { Session } from './auth/session.js?v=1.1.1';
+import { Repository } from './core/repository.js?v=1.1.1';
+import { Nip05 } from './profiles/nip05.js?v=1.1.1';
+import { Social } from './social/service.js?v=1.1.1';
+import { Moderation } from './feed/moderation.js?v=1.1.1';
+import { Identity } from './ui/identity.js?v=1.1.1';
+import { Posts } from './ui/posts.js?v=1.1.1';
+import { Router, profileHref, threadHref } from './core/router.js?v=1.1.1';
+import { FeedView, feedFilters, composer } from './feed/view.js?v=1.1.1';
+import { ProfileView } from './profiles/view.js?v=1.1.1';
+import { settingsView } from './settings/view.js?v=1.1.1';
+import { el, button, busy, icon, avatar, loading, empty, toast } from './ui/dom.js?v=1.1.1';
+import { parentId, stableJSON, matchesFilter } from './core/utils.js?v=1.1.1';
+import { decodeKey } from './core/nip19.js?v=1.1.1';
 class App {
   async start(){
     this.settings=new Settings();await this.settings.load();this.storage=new Storage();
@@ -37,7 +37,7 @@ class App {
     document.getElementById('search-form').addEventListener('submit',e=>{e.preventDefault();const b=document.getElementById('search-button');void busy(b,async()=>{const input=document.getElementById('search-input').value.trim();if(!input)return;
       await this.search(input);
     });});
-    this.session.on('change',()=>{this.accountKey=null;this.updateAccount();void this.render(this.router.route??{view:'global'});});
+    this.session.on('change',()=>{this.repo.resetSession();this.accountKey=null;this.updateAccount();void this.render(this.router.route??{view:'global'});});
     this.social.on('following',()=>this.identity.updateFollows());this.social.on('followBusy',()=>this.identity.updateFollows());
     this.social.on('like',()=>this.posts.updateLikes());this.social.on('likes',()=>this.posts.updateLikes());
     this.social.on('notice',message=>toast(message));

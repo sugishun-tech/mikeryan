@@ -1,4 +1,4 @@
-# Architecture · 1.1.0
+# Architecture · 1.1.1
 
 ## Read lifecycle
 
@@ -16,11 +16,17 @@ Older reads include the anchor second, request space for its known same-second p
 
 Newer reads initially cover ten minutes from the anchor and narrow saturated intervals. Completed empty intervals can be advanced and widened. At most six range queries are attempted per click. A continuation stores only anchor/range/limit numbers, not response data. A failed relay prevents declaring a range exhausted. Up to 1600 events per filter may be requested for a heavily saturated same-second boundary. Combined responses are deduplicated; at most 30 posts are reflected in the timeline per operation. A relay can impose smaller internal limits or omit events: exhaustive recovery is not guaranteed.
 
-## Reducing communication without caches
+## Reducing communication without persistent caches
 
 Each relay has one connection per transport pool. SharedWorker-capable browsers share the pool across tabs for this application version; fallback is one pool per tab. The worker holds connection/queue state, not a response cache. Identical concurrent requests coalesce only while their Promise is unresolved. A later identical query is sent again.
 
-Profiles use one kind-0 filter per author with limit 1; filters are grouped, at most 20 per REQ. The signed-in user's kind-7 reactions are constrained to the selected page IDs and are included with those filters. Authors are not fetched once per post. Large following lists are split into bounded author filters. No complete reactions history or unopened profile list is downloaded.
+Successful, valid kind-0 metadata is retained in this tab's session. `Repository.profileReads` records the selected relay scope for up to 2000 identities. Scope changes and `fresh`, `all`, or `required` reads bypass reuse. A new tab/reload and logout/account changes discard it. This is explicitly in-memory metadata reuse, not a persisted read-response cache. It can be stale until a manual profile refresh; read-before-write always queries all configured relays.
+
+`Repository.batchQuery()` coalesces metadata/detail reads for 60ms, grouped by a snapshot of relay URLs and session generation. `replacementRead()` shares in-flight identity queries across feed and profile paths. `profile-batch.js` compacts only unfiltered-in-time kind-0 queries whose limit equals the number of authors. It never widens ordinary event, time-constrained or tag-constrained filters. At most 100 authors are put in one filter. The signed-in user's kind-7 reactions are constrained to the selected page IDs and share this REQ. Reactions and post queries are always fresh, even when negative. No unopened list, full reactions history, or unseen author prefetch is introduced.
+
+NIP-01 specifies that replaceable-event reads should return only the latest event for each author/kind. A conforming relay can therefore return 30 profiles for one authors-list filter with limit 30. Relays may clamp the limit or retain/return duplicates. With `profileBatch:true`, `RelayPool` checks missing authors independently on EACH relay after a positive successful response. One repair pass uses single-author limit-1 filters, at most 20 per REQ. It never repeats returned authors or the reaction filter. An entirely empty EOSE has no evidence of truncation and triggers no repair. Failed queries do not trigger repair; failure during repair stops remaining chunks for that relay. This bounded fallback is not a completeness guarantee for arbitrary relays. The fastest relay cannot suppress missing-author checks on another relay.
+
+Malformed, absent and partial/error responses do not become positive reusable metadata. No negative-cache entries are created. An old valid version cannot mark a newer malformed replacement as successful. Logout generations prevent late metadata responses from re-populating a cleared session. Published own metadata updates the in-memory display without a redundant fetch. `fresh:true` returns only the actual newly received event for write preflights, not an old fallback.
 
 Each selected relay is awaited independently. A fast relay's EOSE cannot truncate a slower relay. EOSE finishes that finite query and sends CLOSE; timeout and cancellation paths also close subscriptions. No polling or scrolling-triggered post REQ is used. Queue gaps, bounded timeouts, idle close, and rate-limit cooldowns remain. No proxy rotation or restriction evasion is implemented.
 
@@ -30,7 +36,7 @@ NIP-05 is a separate HTTPS request. Only unresolved identical checks coalesce. C
 
 localStorage retains the public key, settings, drafts, authored failed/partial sends, and relay cooldowns. `Storage` accepts only `outbox:` and `health:` operational keys; other keys are rejected. Outbox retry carries forward prior relay acceptance and contacts only undelivered relays. There is no IndexedDB access, Service Worker, persisted read response, saved timeline, or negative profile cache.
 
-Current-screen maps are discarded on navigation (except the active account's UI/list state). Reads do not return those maps instead of making a request. A reply preview can display another post already on the screen; otherwise it fetches the named event only on a user click. Protocol synchronization that relies on a local archive, such as set reconciliation, is not enabled.
+Post maps are discarded on navigation. Only positive session profiles and the active account's UI/list state are retained. Post/detail reads never substitute those maps for a request; explicit profile refresh and all read-before-write paths bypass profile reuse. A reply preview can display another post already on the screen; otherwise it fetches the named event only on a user click. Protocol synchronization that relies on a local archive, such as set reconciliation, is not enabled.
 
 ## Protocol references
 
@@ -42,3 +48,7 @@ Current-screen maps are discarded on navigation (except the active account's UI/
 - NIP-65: https://github.com/nostr-protocol/nips/blob/master/65.md
 
 The statements above describe the implementation, not guarantees that all relays implement every convention identically.
+
+## Measurement
+
+See TRAFFIC.md and traffic-results.json for the actual production-code wire-counter comparison against the uploaded 1.1.0 source. REQ/filter/event/JSON-byte counts are not estimates of relay CPU or I/O. Missing-author repair and upward range probes are excluded from that typical-case benchmark and covered by separate tests.

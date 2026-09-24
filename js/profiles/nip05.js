@@ -1,4 +1,4 @@
-import { isHex, Emitter } from '../core/utils.js?v=1.1.0';
+import { isHex, Emitter } from '../core/utils.js?v=1.1.1';
 export function parseIdentifier(value) {
   if (typeof value !== 'string' || value.length > 320) return null;
   const match = value.trim().match(/^([a-z0-9._-]+)@([a-z0-9.-]+)$/i);

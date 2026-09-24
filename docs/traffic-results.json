@@ -1,0 +1,509 @@
+{
+  "conditions": {
+    "fixture": "tests/fixtures/traffic.json; public signed TEST data",
+    "signatureVerification": "Production BIP-340/id verification enabled",
+    "transport": "In-process WebSocket fixture using production RelayConnection; newest-first, bounded per-filter results",
+    "operations": "Five signed-in post/decorate reads, no logout; two selected relays; 30 posts per read; one own positive reaction per post. Independent anonymous sessions are measured separately.",
+    "excluded": "Account bootstrap, NIP-05 HTTP, images, TCP/TLS framing/handshakes, server CPU/I/O/latency and public-relay variation. Upward range probes and missing-profile repairs are separate tests.",
+    "note": "Metadata is complete on both fixture relays; this is not a universal request-count bound or a benchmark against original mynostr."
+  },
+  "runs": [
+    {
+      "version": "1.1.0",
+      "relayCount": 2,
+      "steps": [
+        {
+          "name": "cold: 30 unknown authors, signed in",
+          "requests": 6,
+          "closes": 6,
+          "receivedEvents": 180,
+          "sentJSONBytes": 10666,
+          "receivedJSONBytes": 84660,
+          "profileAuthorOccurrences": 60,
+          "filters": 64,
+          "requestsPerRelay": [
+            {
+              "relay": "wss://benchmark-one.example/",
+              "count": 3
+            },
+            {
+              "relay": "wss://benchmark-two.example/",
+              "count": 3
+            }
+          ],
+          "profileAuthorsPerRelay": [
+            {
+              "relay": "wss://benchmark-one.example/",
+              "count": 30
+            },
+            {
+              "relay": "wss://benchmark-two.example/",
+              "count": 30
+            }
+          ]
+        },
+        {
+          "name": "next: same 30 authors, different posts, signed in",
+          "requests": 6,
+          "closes": 6,
+          "receivedEvents": 180,
+          "sentJSONBytes": 10666,
+          "receivedJSONBytes": 84660,
+          "profileAuthorOccurrences": 60,
+          "filters": 64,
+          "requestsPerRelay": [
+            {
+              "relay": "wss://benchmark-one.example/",
+              "count": 3
+            },
+            {
+              "relay": "wss://benchmark-two.example/",
+              "count": 3
+            }
+          ],
+          "profileAuthorsPerRelay": [
+            {
+              "relay": "wss://benchmark-one.example/",
+              "count": 30
+            },
+            {
+              "relay": "wss://benchmark-two.example/",
+              "count": 30
+            }
+          ]
+        },
+        {
+          "name": "mixed: 20 known + 10 unknown authors, signed in",
+          "requests": 6,
+          "closes": 6,
+          "receivedEvents": 180,
+          "sentJSONBytes": 10666,
+          "receivedJSONBytes": 84660,
+          "profileAuthorOccurrences": 60,
+          "filters": 64,
+          "requestsPerRelay": [
+            {
+              "relay": "wss://benchmark-one.example/",
+              "count": 3
+            },
+            {
+              "relay": "wss://benchmark-two.example/",
+              "count": 3
+            }
+          ],
+          "profileAuthorsPerRelay": [
+            {
+              "relay": "wss://benchmark-one.example/",
+              "count": 30
+            },
+            {
+              "relay": "wss://benchmark-two.example/",
+              "count": 30
+            }
+          ]
+        },
+        {
+          "name": "return: same 30 authors, signed in",
+          "requests": 6,
+          "closes": 6,
+          "receivedEvents": 180,
+          "sentJSONBytes": 10678,
+          "receivedJSONBytes": 84846,
+          "profileAuthorOccurrences": 60,
+          "filters": 64,
+          "requestsPerRelay": [
+            {
+              "relay": "wss://benchmark-one.example/",
+              "count": 3
+            },
+            {
+              "relay": "wss://benchmark-two.example/",
+              "count": 3
+            }
+          ],
+          "profileAuthorsPerRelay": [
+            {
+              "relay": "wss://benchmark-one.example/",
+              "count": 30
+            },
+            {
+              "relay": "wss://benchmark-two.example/",
+              "count": 30
+            }
+          ]
+        },
+        {
+          "name": "repeat: same 30 authors, still signed in",
+          "requests": 6,
+          "closes": 6,
+          "receivedEvents": 180,
+          "sentJSONBytes": 10678,
+          "receivedJSONBytes": 84846,
+          "profileAuthorOccurrences": 60,
+          "filters": 64,
+          "requestsPerRelay": [
+            {
+              "relay": "wss://benchmark-one.example/",
+              "count": 3
+            },
+            {
+              "relay": "wss://benchmark-two.example/",
+              "count": 3
+            }
+          ],
+          "profileAuthorsPerRelay": [
+            {
+              "relay": "wss://benchmark-one.example/",
+              "count": 30
+            },
+            {
+              "relay": "wss://benchmark-two.example/",
+              "count": 30
+            }
+          ]
+        }
+      ],
+      "total": {
+        "requests": 30,
+        "closes": 30,
+        "receivedEvents": 900,
+        "sentJSONBytes": 53354,
+        "receivedJSONBytes": 423672,
+        "profileAuthorOccurrences": 300,
+        "filters": 320
+      },
+      "connections": 2
+    },
+    {
+      "version": "1.1.1",
+      "relayCount": 2,
+      "steps": [
+        {
+          "name": "cold: 30 unknown authors, signed in",
+          "requests": 4,
+          "closes": 4,
+          "receivedEvents": 180,
+          "sentJSONBytes": 8528,
+          "receivedJSONBytes": 84634,
+          "profileAuthorOccurrences": 60,
+          "filters": 6,
+          "requestsPerRelay": [
+            {
+              "relay": "wss://benchmark-one.example/",
+              "count": 2
+            },
+            {
+              "relay": "wss://benchmark-two.example/",
+              "count": 2
+            }
+          ],
+          "profileAuthorsPerRelay": [
+            {
+              "relay": "wss://benchmark-one.example/",
+              "count": 30
+            },
+            {
+              "relay": "wss://benchmark-two.example/",
+              "count": 30
+            }
+          ]
+        },
+        {
+          "name": "next: same 30 authors, different posts, signed in",
+          "requests": 4,
+          "closes": 4,
+          "receivedEvents": 120,
+          "sentJSONBytes": 4434,
+          "receivedJSONBytes": 56074,
+          "profileAuthorOccurrences": 0,
+          "filters": 4,
+          "requestsPerRelay": [
+            {
+              "relay": "wss://benchmark-one.example/",
+              "count": 2
+            },
+            {
+              "relay": "wss://benchmark-two.example/",
+              "count": 2
+            }
+          ],
+          "profileAuthorsPerRelay": [
+            {
+              "relay": "wss://benchmark-one.example/",
+              "count": 0
+            },
+            {
+              "relay": "wss://benchmark-two.example/",
+              "count": 0
+            }
+          ]
+        },
+        {
+          "name": "mixed: 20 known + 10 unknown authors, signed in",
+          "requests": 4,
+          "closes": 4,
+          "receivedEvents": 140,
+          "sentJSONBytes": 5848,
+          "receivedJSONBytes": 65594,
+          "profileAuthorOccurrences": 20,
+          "filters": 6,
+          "requestsPerRelay": [
+            {
+              "relay": "wss://benchmark-one.example/",
+              "count": 2
+            },
+            {
+              "relay": "wss://benchmark-two.example/",
+              "count": 2
+            }
+          ],
+          "profileAuthorsPerRelay": [
+            {
+              "relay": "wss://benchmark-one.example/",
+              "count": 10
+            },
+            {
+              "relay": "wss://benchmark-two.example/",
+              "count": 10
+            }
+          ]
+        },
+        {
+          "name": "return: same 30 authors, signed in",
+          "requests": 4,
+          "closes": 4,
+          "receivedEvents": 120,
+          "sentJSONBytes": 4434,
+          "receivedJSONBytes": 56074,
+          "profileAuthorOccurrences": 0,
+          "filters": 4,
+          "requestsPerRelay": [
+            {
+              "relay": "wss://benchmark-one.example/",
+              "count": 2
+            },
+            {
+              "relay": "wss://benchmark-two.example/",
+              "count": 2
+            }
+          ],
+          "profileAuthorsPerRelay": [
+            {
+              "relay": "wss://benchmark-one.example/",
+              "count": 0
+            },
+            {
+              "relay": "wss://benchmark-two.example/",
+              "count": 0
+            }
+          ]
+        },
+        {
+          "name": "repeat: same 30 authors, still signed in",
+          "requests": 4,
+          "closes": 4,
+          "receivedEvents": 120,
+          "sentJSONBytes": 4438,
+          "receivedJSONBytes": 56136,
+          "profileAuthorOccurrences": 0,
+          "filters": 4,
+          "requestsPerRelay": [
+            {
+              "relay": "wss://benchmark-one.example/",
+              "count": 2
+            },
+            {
+              "relay": "wss://benchmark-two.example/",
+              "count": 2
+            }
+          ],
+          "profileAuthorsPerRelay": [
+            {
+              "relay": "wss://benchmark-one.example/",
+              "count": 0
+            },
+            {
+              "relay": "wss://benchmark-two.example/",
+              "count": 0
+            }
+          ]
+        }
+      ],
+      "total": {
+        "requests": 20,
+        "closes": 20,
+        "receivedEvents": 680,
+        "sentJSONBytes": 27682,
+        "receivedJSONBytes": 318512,
+        "profileAuthorOccurrences": 80,
+        "filters": 24
+      },
+      "connections": 2
+    }
+  ],
+  "anonymousRuns": [
+    {
+      "version": "1.1.0",
+      "relayCount": 2,
+      "steps": [
+        {
+          "name": "anonymous cold: 30 unknown authors",
+          "requests": 6,
+          "closes": 6,
+          "receivedEvents": 120,
+          "sentJSONBytes": 6424,
+          "receivedJSONBytes": 54480,
+          "profileAuthorOccurrences": 60,
+          "filters": 62,
+          "requestsPerRelay": [
+            {
+              "relay": "wss://benchmark-one.example/",
+              "count": 3
+            },
+            {
+              "relay": "wss://benchmark-two.example/",
+              "count": 3
+            }
+          ],
+          "profileAuthorsPerRelay": [
+            {
+              "relay": "wss://benchmark-one.example/",
+              "count": 30
+            },
+            {
+              "relay": "wss://benchmark-two.example/",
+              "count": 30
+            }
+          ]
+        },
+        {
+          "name": "anonymous next: same 30 authors",
+          "requests": 6,
+          "closes": 6,
+          "receivedEvents": 120,
+          "sentJSONBytes": 6424,
+          "receivedJSONBytes": 54480,
+          "profileAuthorOccurrences": 60,
+          "filters": 62,
+          "requestsPerRelay": [
+            {
+              "relay": "wss://benchmark-one.example/",
+              "count": 3
+            },
+            {
+              "relay": "wss://benchmark-two.example/",
+              "count": 3
+            }
+          ],
+          "profileAuthorsPerRelay": [
+            {
+              "relay": "wss://benchmark-one.example/",
+              "count": 30
+            },
+            {
+              "relay": "wss://benchmark-two.example/",
+              "count": 30
+            }
+          ]
+        }
+      ],
+      "total": {
+        "requests": 12,
+        "closes": 12,
+        "receivedEvents": 240,
+        "sentJSONBytes": 12848,
+        "receivedJSONBytes": 108960,
+        "profileAuthorOccurrences": 120,
+        "filters": 124
+      },
+      "connections": 2
+    },
+    {
+      "version": "1.1.1",
+      "relayCount": 2,
+      "steps": [
+        {
+          "name": "anonymous cold: 30 unknown authors",
+          "requests": 4,
+          "closes": 4,
+          "receivedEvents": 120,
+          "sentJSONBytes": 4286,
+          "receivedJSONBytes": 54454,
+          "profileAuthorOccurrences": 60,
+          "filters": 4,
+          "requestsPerRelay": [
+            {
+              "relay": "wss://benchmark-one.example/",
+              "count": 2
+            },
+            {
+              "relay": "wss://benchmark-two.example/",
+              "count": 2
+            }
+          ],
+          "profileAuthorsPerRelay": [
+            {
+              "relay": "wss://benchmark-one.example/",
+              "count": 30
+            },
+            {
+              "relay": "wss://benchmark-two.example/",
+              "count": 30
+            }
+          ]
+        },
+        {
+          "name": "anonymous next: same 30 authors",
+          "requests": 2,
+          "closes": 2,
+          "receivedEvents": 60,
+          "sentJSONBytes": 140,
+          "receivedJSONBytes": 25868,
+          "profileAuthorOccurrences": 0,
+          "filters": 2,
+          "requestsPerRelay": [
+            {
+              "relay": "wss://benchmark-one.example/",
+              "count": 1
+            },
+            {
+              "relay": "wss://benchmark-two.example/",
+              "count": 1
+            }
+          ],
+          "profileAuthorsPerRelay": [
+            {
+              "relay": "wss://benchmark-one.example/",
+              "count": 0
+            },
+            {
+              "relay": "wss://benchmark-two.example/",
+              "count": 0
+            }
+          ]
+        }
+      ],
+      "total": {
+        "requests": 6,
+        "closes": 6,
+        "receivedEvents": 180,
+        "sentJSONBytes": 4426,
+        "receivedJSONBytes": 80322,
+        "profileAuthorOccurrences": 60,
+        "filters": 6
+      },
+      "connections": 2
+    }
+  ],
+  "reduction": {
+    "requests": 33.33,
+    "sentJSONBytes": 48.12,
+    "receivedJSONBytes": 24.82,
+    "receivedEvents": 24.44,
+    "filters": 92.5
+  },
+  "baselineArchive": {
+    "filename": "mikeryan-1.1.0.zip",
+    "sha256": "abe72243172008c689eb5659664e6a4a112996e33ac6b47e9c0a581f1fe6374d"
+  }
+}

@@ -1,17 +1,17 @@
-import { editProfileDialog } from './editor.js?v=1.1.0';
+import { editProfileDialog } from './editor.js?v=1.1.1';
 export { editProfileDialog };
-import { EventPager } from '../feed/pagination.js?v=1.1.0';
-import { FeedView } from '../feed/view.js?v=1.1.0';
-import { pubkeys } from '../social/service.js?v=1.1.0';
-import { el, avatar, button, busy, empty, loading, richText, copy } from '../ui/dom.js?v=1.1.0';
-import { profileHref } from '../core/router.js?v=1.1.0';
-import { encodeKey } from '../core/nip19.js?v=1.1.0';
-import { safeURL, unique, stableJSON } from '../core/utils.js?v=1.1.0';
+import { EventPager } from '../feed/pagination.js?v=1.1.1';
+import { FeedView } from '../feed/view.js?v=1.1.1';
+import { pubkeys } from '../social/service.js?v=1.1.1';
+import { el, avatar, button, busy, empty, loading, richText, copy } from '../ui/dom.js?v=1.1.1';
+import { profileHref } from '../core/router.js?v=1.1.1';
+import { encodeKey } from '../core/nip19.js?v=1.1.1';
+import { safeURL, unique, stableJSON } from '../core/utils.js?v=1.1.1';
 export class ProfileView {
   constructor(app,route,host){this.app=app;this.route=route;this.host=host;this.owner=route.pubkey;this.offset=0;this.loadedUsers=new Set();this.list=el('div',{class:'profile-tab-content'});}
   async init(){
     const {app,owner}=this;this.host.append(loading());
-    const profile=await app.repo.profile(owner);if(!this.host.isConnected)return;
+    const profile=await app.repo.profile(owner,{fresh:!!this.route.freshProfile});if(!this.host.isConnected)return;
     const cover=el('div',{class:'profile-banner'}),url=safeURL(profile.banner,{image:true});if(url&&app.settings.value.loadImages)cover.append(el('img',{src:url,alt:'',referrerPolicy:'no-referrer',loading:'lazy'}));
     const actions=el('div',{class:'profile-actions'});
     if(owner===app.session.pubkey){
@@ -26,7 +26,7 @@ export class ProfileView {
     if(profile.nip05)info.append(el('div',{class:'profile-identifier'},String(profile.nip05)));
     const website=safeURL(profile.website);if(website)info.append(el('a',{href:website,target:'_blank',rel:'noopener noreferrer',class:'profile-website'},website));
     if(profile.lud16)info.append(el('div',{class:'muted-text'},'⚡ '+String(profile.lud16)));
-    const refreshProfile=button('プロフィール更新',()=>busy(refreshProfile,async()=>{await app.render(this.route);}), 'text-button');
+    const refreshProfile=button('プロフィール更新',()=>busy(refreshProfile,async()=>{await app.render({...this.route,freshProfile:true});}), 'text-button');
     info.append(el('div',{class:'key-actions'},refreshProfile,button('npubをコピー',()=>copy(encodeKey('npub',owner)),'text-button'),button('hexをコピー',()=>copy(owner),'text-button')));
     const tabs=el('nav',{class:'profile-tabs','aria-label':'プロフィールの項目'});
     for(const [id,label]of Object.entries({posts:'投稿',following:'フォロー',followers:'フォロワー',mutes:'ミュート',relays:'リレー'}))tabs.append(el('a',{href:profileHref(owner,id),class:this.route.tab===id?'active':'','aria-current':this.route.tab===id?'page':null},label));

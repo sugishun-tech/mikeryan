@@ -1,7 +1,7 @@
-import { el, avatar, icon, button, busy } from './dom.js?v=1.1.0';
-import { profileHref } from '../core/router.js?v=1.1.0';
-import { shortKey } from '../core/utils.js?v=1.1.0';
-import { pubkeys } from '../social/service.js?v=1.1.0';
+import { el, avatar, icon, button, busy } from './dom.js?v=1.1.1';
+import { profileHref } from '../core/router.js?v=1.1.1';
+import { shortKey } from '../core/utils.js?v=1.1.1';
+import { pubkeys } from '../social/service.js?v=1.1.1';
 /** The same identity renderer is used by posts, notifications and profile lists. */
 export class Identity {
   constructor(app){this.app=app;this.observer=new IntersectionObserver(entries=>{for(const entry of entries)if(entry.isIntersecting){const node=entry.target;this.observer.unobserve(node);node._hydrate?.();}},{rootMargin:'120px'});}

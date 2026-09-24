@@ -1,7 +1,7 @@
-import { EventPager } from './pagination.js?v=1.1.0';
-import { chunks, sortEvents } from '../core/utils.js?v=1.1.0';
-import { el, button, busy, empty, avatar, toast } from '../ui/dom.js?v=1.1.0';
-import { local } from '../core/storage.js?v=1.1.0';
+import { EventPager } from './pagination.js?v=1.1.1';
+import { chunks, sortEvents } from '../core/utils.js?v=1.1.1';
+import { el, button, busy, empty, avatar, toast } from '../ui/dom.js?v=1.1.1';
+import { local } from '../core/storage.js?v=1.1.1';
 export function composer(app,parent=null){
   const area=el('textarea',{rows:3,placeholder:parent?'返信を投稿':'いまどうしてる？',maxLength:16000,'aria-label':parent?'返信本文':'投稿本文'});
   const draftKey=`draft:${app.session.pubkey}:${parent?.id??'post'}`;area.value=local.get(draftKey)??'';

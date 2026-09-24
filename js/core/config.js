@@ -1,5 +1,5 @@
 export const APP_NAME = 'mikeryan';
-export const VERSION = '1.1.0';
+export const VERSION = '1.1.1';
 export const DEFAULTS = Object.freeze({
   relays: ['wss://relay-jp.nostr.wirednet.jp/', 'wss://yabu.me/'],
   batchSize: 30,
@@ -15,7 +15,7 @@ export const DEFAULTS = Object.freeze({
 });
 export const OUTBOX_RETENTION = 7 * 24 * 3600000;
 export const LIMITS = Object.freeze({
-  filters: 20, authors: 100, page: 30, relays: 12,
+  filters: 20, authors: 100, page: 30, relays: 12, sessionProfiles: 2000,
   eventBytes: 262144, frameBytes: 524288, tags: 10000,
   requestTimeout: 10000, connectionTimeout: 6000, publishTimeout: 10000,
   idleTimeout: 120000, maxPageLimit: 1600, upwardQueries: 6

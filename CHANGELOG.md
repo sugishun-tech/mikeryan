@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.1.1 (2026-09-24)
+
+- Replace per-author kind-0 filters with bounded authors-list batches and share the REQ with page-scoped own reactions.
+- Share the repository's pending metadata work across feed/profile/list paths; query only unknown authors.
+- Retain successful, valid profiles in tab memory only. Reload/logout/account changes clear reuse; changed relay scope, explicit refresh and read-before-write bypass it. No fetched data is persisted.
+- Repair missing profiles on the affected relay only, once, without resending reactions or already returned authors. Stop after refusal/timeout; no retry loop or negative-result caching.
+- Keep the three viewport-anchored 30-post buttons and all existing UI/removal choices unchanged.
+- Keep each post/like read fresh; preserve full latest-state verification before profile/follow writes.
+- Add signed 30-author wire-count benchmarks against the unchanged 1.1.0 source and failure/scope/refresh regressions. See docs/TEST_RESULTS.md and docs/TRAFFIC.md for measured results and unverified integration boundaries.
+- Version all JS module imports, entry CSS and SharedWorker as 1.1.1; storage/default settings stay unchanged.
+
 ## 1.1.0 (2026-09-24)
 
 - Restore the three manual controls: 下に読み込む, 上に読み込む, 最新を読み込む.
