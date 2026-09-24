@@ -1,4 +1,4 @@
-# Test results — 2026-09-24
+# Test results: 1.0.1 (2026-09-24)
 
 ## Executed
 
@@ -13,15 +13,33 @@
 | Metadata batching, persistent-cache abstraction, stale replaceables | Passed |
 | Public-key restore, changed account, denied signature | Passed |
 | NIP-05 cross-user mismatch, cache, 2-request concurrency, HTTP failures | Passed |
-| Offline Chromium DOM test | 24 checks passed; no uncaught renderer exceptions |
+| Strict-mode offline Chromium DOM test | 24 checks passed; no uncaught renderer exceptions |
+| Native ES-module profile regression | 14 checks passed; no uncaught exceptions or HTTP requests |
 | Offline viewport | 1440×1050 desktop; 390×844 mobile; no horizontal overflow |
 
 Environment: Node.js v22.16.0; Chromium 144.0.7559.96; Python 3.13.
 
-The offline browser harness uses deterministic fixture accounts and adapters.
+The offline browser harness now retains strict-mode semantics. It uses
+deterministic fixture accounts and adapters.
 It exercised the actual feature modules and the relay/pool logic with mock
 messages, not a live socket or the actual SharedWorker. The SHA-256 adapter
 used Python hashlib; the separate Node signature tests used Web Crypto.
+
+## Profile-editor regression
+
+The 1.0.0 failure was reproduced in Chromium with strict-mode execution:
+`TypeError: Cannot set property type of #<HTMLTextAreaElement> which has only a getter`.
+The original offline test transformation removed ES-module strict behavior and
+silently ignored that write, so its passing result did not prove this path worked
+in production. The transformation is corrected in this release.
+
+`browser_profile.py` additionally imports native ES modules via Blob URLs and
+uses the actual ProfileView edit button, editor, form elements and CSS. Module
+and asset URLs are mapped for the empty-document test origin. Repository/social
+services are test doubles. It verifies opening, values, close/Escape/reopen,
+rejection with preserved edits, Enter submission, URL validation, no duplicate
+saves, pending-state controls and mobile scrolling. No external HTTP request
+or relay publication occurred. These checks do not validate a real extension.
 
 ## Measured in the offline fixture scenario
 

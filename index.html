@@ -4,7 +4,6 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#1d9bf0">
-  <meta name="description" content="mikeryan — a lightweight Nostr client. Your timeline and profile, in one place.">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' https: data:; connect-src 'self' https: wss: ws://localhost:* ws://127.0.0.1:*; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
   <title>mikeryan</title>
   <link rel="icon" type="image/svg+xml" href="./assets/icons/logo.svg">
@@ -24,15 +23,14 @@
       <a class="docs-link" href="./docs/">使い方と設計</a>
     </aside>
     <main class="main-column" id="main-content" tabindex="-1">
-      <header class="main-header"><button class="icon-button" id="back-button" type="button" aria-label="戻る"></button><div><h1 id="page-title">mikeryan</h1><span class="header-subtitle">会話を、ひとつの場所に。</span></div><button id="mobile-search-button" type="button" class="icon-button mobile-search" aria-label="ユーザー・投稿を検索"></button></header>
+      <header class="main-header"><button class="icon-button" id="back-button" type="button" aria-label="戻る"></button><div><h1 id="page-title">mikeryan</h1></div><button id="mobile-search-button" type="button" class="icon-button mobile-search" aria-label="ユーザー・投稿を検索"></button></header>
       <div id="view"><div class="empty-state"><h2>読み込み中…</h2><p>JavaScriptを有効にしてください。</p></div></div>
       <noscript><p class="empty-state">このクライアントにはJavaScriptが必要です。</p></noscript>
     </main>
     <aside class="right-column" aria-label="検索と通信情報">
       <form id="search-form" class="search-box"><label for="search-input" class="sr-only">公開鍵またはNIP-05を検索</label><input id="search-input" placeholder="npub / hex / NIP-05" autocomplete="off" spellcheck="false"><button type="submit" class="icon-button" aria-label="検索" id="search-button"></button></form>
-      <section class="side-card"><h2>あなたのペースで</h2><p>新着はボタンで確認。<br>読み終えたら、通信もひと休み。</p><div class="network-pill"><span class="status-dot"></span>オンデマンド通信</div></section>
-      <section class="side-card network-card"><h2>通信をコンパクトに</h2><div id="network-summary"><p>必要なデータだけを取得します。</p></div><a href="#/settings">リレーと通信状況を見る →</a></section>
-      <footer class="right-footer">mikeryan · Nostr<br>プロフィールも、タイムラインも。<br><a href="./docs/">ドキュメント</a> · <a href="./LICENSE">MIT License</a></footer>
+      <section class="side-card network-card"><h2>通信状況</h2><div id="network-summary"></div><a href="#/settings">リレー設定</a></section>
+      <footer class="right-footer"><a href="./docs/">ドキュメント</a> · <a href="./LICENSE">MIT License</a></footer>
     </aside>
   </div>
   <div id="toasts" class="toasts" aria-live="polite"></div>

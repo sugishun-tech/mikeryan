@@ -49,7 +49,9 @@ python tests/browser_offline.py
 ```
 
 This harness uses Chromium's empty document and injects source modules into
-isolated test closures. It supplies test-only transport, localStorage,
+isolated strict-mode test closures. Strict mode is required: native ES modules
+throw on writes to read-only DOM properties, whereas a non-strict closure may
+silently ignore the same bug. It supplies test-only transport, localStorage,
 navigation and SHA-256 adapters. It does not navigate or make network requests.
 The source transformation is only test infrastructure, not the deployment
 build. It leaves the production files and their CSP unchanged.
@@ -64,6 +66,25 @@ A passing offline harness does not validate native browser IndexedDB,
 SharedWorker, Web Crypto, origin/CSP loading, extension interoperability or
 hosting. Node's independent cryptographic tests use actual Web Crypto SHA-256.
 These distinctions are intentional and recorded in TEST_RESULTS.md.
+
+## Native-module profile regression tests
+
+```sh
+python tests/browser_profile.py
+```
+
+This test imports the actual modules through Blob URLs in Chromium. Relative
+imports and asset/import.meta URLs are mapped for the empty-document origin;
+JavaScript runs as native ES modules, not as flattened non-strict script.
+No browser policy is changed and the deployed CSP remains unchanged. The page
+uses the actual profile edit button, dialog, form elements and CSS. Repository
+and social services are test doubles, so it does not publish a real event.
+
+It checks the original read-only textarea property error, populated fields,
+no service reads on opening, close/Escape/reopen, rejection with retained input,
+Enter submission, URL validation, duplicate-submit prevention, pending-save
+controls, narrow-screen scrolling and the removal of promotional headings.
+Results are written to `tests/output/profile-editor-results.json`.
 
 ## Normal-browser release checklist
 

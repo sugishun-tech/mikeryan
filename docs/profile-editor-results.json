@@ -1,0 +1,24 @@
+{
+  "checks": [
+    "Native ES-module strict mode rejects writes to textarea.type",
+    "Actual profile button opens a populated native modal",
+    "Opening the editor does not call read/save services",
+    "Repeated opening reuses one modal",
+    "Close discards unsaved edits and reopening works",
+    "Escape closes without saving",
+    "Rejected save displays an error inside the open modal and retains edits",
+    "Enter submits once and redraws the saved profile",
+    "Invalid URL blocks saving without dismissing the form",
+    "Pending save blocks duplicate submits, edits and accidental dismissal",
+    "Saved values are populated again after a successful retry",
+    "Mobile editor fits the viewport and can scroll to Save",
+    "UI and documentation omit promotional headings",
+    "No unexpected browser errors or HTTP requests"
+  ],
+  "passed": 14,
+  "errors": [],
+  "http_requests": [],
+  "browser": "144.0.7559.96",
+  "module_execution": "native ES modules via Blob URLs",
+  "services": "repository/social test doubles; no account or relay writes"
+}

@@ -1,5 +1,5 @@
 """DOM/browser tests for environments that prohibit even localhost URL access.
-The real app modules run unchanged in isolated closures, with transport, storage,
+The real app modules run unchanged in isolated strict-mode closures, with transport, storage,
 SHA-256 and navigation adapters. No request is made to any URL.
 This does NOT replace browser_smoke.py's actual WebSocket / SharedWorker test.
 """
@@ -27,7 +27,7 @@ def bundle(entry):
         if key=='js/core/config.js':text=re.sub(r"export const FALLBACK_ICON.*",'',text) if False else re.sub(r"const FALLBACK_ICON = [^;]+;",'const FALLBACK_ICON = '+json.dumps('data:image/svg+xml;base64,'+base64.b64encode((ROOT/'assets/icons/avatar.svg').read_bytes()).decode())+';',text)
         parts.append('__modules['+json.dumps(key)+']=(()=>{\n'+'\n'.join(imports)+'\n'+text+'\nreturn {'+','.join(exports)+'};})();')
     visit(ROOT/entry)
-    return "(()=>{const __modules={};const location=window.__testLocation,history=window.__testHistory;const fetch=window.__testFetch;const SharedWorker=undefined;const crypto={subtle:{digest:async(alg,bytes)=>Uint8Array.from(await window.testDigest(Array.from(new Uint8Array(bytes)))).buffer}};"+'\n'.join(parts)+";window.__testModules=__modules;})()"
+    return "(()=>{\"use strict\";const __modules={};const location=window.__testLocation,history=window.__testHistory;const fetch=window.__testFetch;const SharedWorker=undefined;const crypto={subtle:{digest:async(alg,bytes)=>Uint8Array.from(await window.testDigest(Array.from(new Uint8Array(bytes)))).buffer}};"+'\n'.join(parts)+";window.__testModules=__modules;})()"
 
 def html():
     text=(ROOT/'index.html').read_text()
@@ -131,7 +131,7 @@ async def main():
         await page.locator('[data-view="settings"]').click();await page.wait_for_selector('.settings-form');await page.get_by_label('テーマ',exact=True).select_option('light');await page.get_by_role('button',name='設定を保存',exact=True).click();await page.locator('[data-view="global"]').click();await page.wait_for_selector('.post')
         await page.set_viewport_size({'width':1440,'height':1050});await page.evaluate('document.querySelector("#toasts").replaceChildren()');await page.evaluate('scrollTo(0,0)');await page.screenshot(path=str(OUT/'desktop.png'))
         ok('No unexpected renderer errors',not errors)
-        result={'mode':'offline DOM with transport/storage/navigation/SHA adapters; no real WebSocket or SharedWorker','passed':len(checks),'checks':checks,'errors':errors,'browser':browser.version}
+        result={'mode':'strict-mode offline DOM with transport/storage/navigation/SHA adapters; no real WebSocket or SharedWorker','passed':len(checks),'checks':checks,'errors':errors,'browser':browser.version}
         (OUT/'offline-browser-results.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
         await browser.close()
     print('RESULT:',len(checks),'offline DOM checks passed',flush=True)

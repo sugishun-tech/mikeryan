@@ -80,7 +80,7 @@ class App {
     for(const a of document.querySelectorAll('.nav-item'))a.classList.toggle('active',a.dataset.view===route.view||(route.view==='profile'&&route.pubkey===this.session.pubkey&&a.dataset.view==='me'));
     try{
       if(route.view==='settings'){host.replaceChildren();await settingsView(this,host);return;}
-      if(['home','notifications','me'].includes(route.view)&&!this.session.pubkey){host.replaceChildren(empty('ログインしてはじめましょう','一度ログインすると、次回から同じ公開鍵を自動で復元します。'));const login=button('NIP-07でログイン',()=>busy(login,()=>this.login()),'button primary');host.append(el('div',{class:'centered'},login));return;}
+      if(['home','notifications','me'].includes(route.view)&&!this.session.pubkey){host.replaceChildren(empty('ログインが必要です','NIP-07対応の拡張機能でログインしてください。'));const login=button('NIP-07でログイン',()=>busy(login,()=>this.login()),'button primary');host.append(el('div',{class:'centered'},login));return;}
       await this.ensureAccount();if(token!==this.routeToken)return;
       if(route.view==='me'){this.router.go(profileHref(this.session.pubkey));return;}
       host.replaceChildren();

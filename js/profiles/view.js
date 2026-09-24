@@ -1,8 +1,10 @@
+import { editProfileDialog } from './editor.js';
+export { editProfileDialog };
 import { TTL } from '../core/config.js';
 import { EventPager } from '../feed/pagination.js';
 import { FeedView } from '../feed/view.js';
 import { pubkeys } from '../social/service.js';
-import { el, avatar, button, busy, empty, field, loading, richText, copy, toast } from '../ui/dom.js';
+import { el, avatar, button, busy, empty, loading, richText, copy } from '../ui/dom.js';
 import { profileHref } from '../core/router.js';
 import { encodeKey } from '../core/nip19.js';
 import { safeURL, unique, stableJSON } from '../core/utils.js';
@@ -13,7 +15,10 @@ export class ProfileView {
     const profile=await app.repo.profile(owner);if(!this.host.isConnected)return;
     const cover=el('div',{class:'profile-banner'}),url=safeURL(profile.banner,{image:true});if(url&&app.settings.value.loadImages)cover.append(el('img',{src:url,alt:'',referrerPolicy:'no-referrer',loading:'lazy'}));
     const actions=el('div',{class:'profile-actions'});
-    if(owner===app.session.pubkey)actions.append(button('プロフィールを編集',()=>editProfileDialog(app,profile),'button secondary'));
+    if(owner===app.session.pubkey){
+      const edit=button('プロフィールを編集',()=>busy(edit,()=>editProfileDialog(app,profile)),'button secondary');
+      actions.append(edit);
+    }
     else if(app.session.pubkey)actions.append(app.identity.followButton(owner));
     const about=el('div',{class:'profile-about collapsed'},richText(String(profile.about??'')));
     const expand=button('さらに表示',()=>{about.classList.toggle('collapsed');expand.textContent=about.classList.contains('collapsed')?'さらに表示':'閉じる';},'text-button');
@@ -78,12 +83,4 @@ export class ProfileView {
     if(!relays.length)this.list.append(empty('公開リレー情報がありません'));
     for(const r of relays)this.list.append(el('div',{class:'relay-row'},el('code',{},String(r.url)),el('span',{class:'pill'},r.mode)));
   }
-}
-export function editProfileDialog(app,profile){
-  const dialog=el('dialog',{class:'edit-dialog'}),form=el('form',{method:'dialog'}),inputs={};
-  form.append(el('div',{class:'dialog-header'},el('h2',{},'プロフィールを編集'),button('閉じる',()=>dialog.close(),'text-button')));
-  for(const [key,label]of Object.entries({display_name:'表示名',name:'ユーザー名',about:'自己紹介',picture:'プロフィール画像URL',banner:'カバー画像URL',nip05:'NIP-05',website:'ウェブサイト',lud16:'Lightning Address'})){
-    const input=el(key==='about'?'textarea':'input',{value:String(profile[key]??''),type:['picture','banner','website'].includes(key)?'url':'text',rows:key==='about'?5:undefined,maxLength:key==='about'?8000:1024});inputs[key]=input;form.append(field(label,input));
-  }
-  const save=button('保存する',()=>busy(save,async()=>{const fields=Object.fromEntries(Object.entries(inputs).map(([k,v])=>[k,v.value]));await app.social.editProfile(fields);dialog.close();toast('プロフィールを更新しました');await app.render(app.router.route);}),'button primary');form.append(save);dialog.append(form);document.body.append(dialog);dialog.addEventListener('close',()=>dialog.remove());dialog.showModal();
 }

@@ -1,5 +1,5 @@
 {
-  "mode": "offline DOM with transport/storage/navigation/SHA adapters; no real WebSocket or SharedWorker",
+  "mode": "strict-mode offline DOM with transport/storage/navigation/SHA adapters; no real WebSocket or SharedWorker",
   "passed": 24,
   "checks": [
     "Renderer boots with signed Nostr events, no automatic signing",
