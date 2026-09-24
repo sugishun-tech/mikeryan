@@ -1,6 +1,6 @@
-import { DEFAULTS, LIMITS } from '../core/config.js';
-import { local } from '../core/storage.js';
-import { Emitter, lines, normalizeRelay, parseJSON, unique, isHex } from '../core/utils.js';
+import { DEFAULTS, LIMITS } from '../core/config.js?v=1.1.0';
+import { local } from '../core/storage.js?v=1.1.0';
+import { Emitter, lines, normalizeRelay, parseJSON, unique, isHex } from '../core/utils.js?v=1.1.0';
 const array = (v, fallback = []) => Array.isArray(v) ? v : fallback;
 export function validateSettings(input) {
   const merged = { ...DEFAULTS, ...input };
@@ -8,7 +8,7 @@ export function validateSettings(input) {
   if (!relays.length || relays.length > LIMITS.relays) throw new Error(`有効なリレーを1〜${LIMITS.relays}件指定してください（通常は2件で十分です）`);
   const result = {
     relays,
-    batchSize: Math.max(10, Math.min(LIMITS.page, Math.floor(Number(merged.batchSize) || 30))),
+    batchSize: 30,
     readRelayCount: Math.max(1, Math.min(relays.length, Math.floor(Number(merged.readRelayCount) || 2))),
     requestGapMs: Math.max(800, Math.min(10000, Math.floor(Number(merged.requestGapMs) || 1200))),
     muteDisplayNamePatterns: array(merged.muteDisplayNamePatterns).map(String),

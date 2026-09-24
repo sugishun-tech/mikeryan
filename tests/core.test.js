@@ -50,46 +50,38 @@ test('Restored session refuses signing with another extension account',async()=>
 test('Signature cancellation is not retried automatically',async()=>{
  let calls=0;globalThis.window={nostr:{getPublicKey:async()=>alice,signEvent:async()=>{calls++;throw Error('Denied by user');}}};const a=new Session();await a.login();await assert.rejects(a.sign({kind:1,tags:[],content:'x'}),/Denied/);assert.equal(calls,1);
 });
-test('Storage expiry does not turn errors into positive cache hits',async()=>{
- const s=new Storage();await s.set('x',null,2);assert.equal(await s.get('x'),null);await sleep(5);assert.equal(await s.get('x'),undefined);assert.equal(await s.get('x',true),null);await s.clear();assert.equal(await s.get('x',true),undefined);
+test('Only relay cooldowns and pending user-authored sends can be persisted',async()=>{
+ const s=new Storage();for(const key of ['query:x','event:x','latest:0:x','page:x','likes:x','nip05doc:x'])await assert.rejects(s.set(key,{}),/保存しません/);
+ await s.set('health:x',{until:1},2);assert.deepEqual(await s.get('health:x'),{until:1});await sleep(5);assert.equal(await s.get('health:x'),undefined);
+ await s.set('outbox:x',[{id:'pending'}]);assert.equal((await s.get('outbox:x')).length,1);await s.delete('outbox:x');assert.equal(await s.get('outbox:x'),undefined);
 });
 function repoHarness(){let calls=[];const storage=new Storage();const network={query:async q=>{calls.push(q);return {events:sortEvents(fixture.events.filter(e=>q.filters.some(f=>matchesFilter(e,f)))),complete:true,errors:[]};}};return {repo:new Repository(storage,network,{value:{...DEFAULTS}}),calls,storage};}
-test('Profile lookups batch per-author filters and reuse persistent metadata',async()=>{
- const {repo,calls,storage}=repoHarness();await Promise.all([repo.profile(alice),repo.profile(bob),repo.profile(alice)]);assert.equal(calls.length,1);assert.equal(calls[0].filters.length,2);assert.ok(calls[0].filters.every(f=>f.limit===1));await repo.profile(alice);assert.equal(calls.length,1);
- const next=new Repository(storage,{query:()=>{throw Error('should be cached');}},{value:{...DEFAULTS}});assert.equal((await next.profile(alice)).name,'alice');
+test('Concurrent profiles batch; every subsequent explicit read reaches the network',async()=>{
+ const {repo,calls}=repoHarness();await Promise.all([repo.profile(alice),repo.profile(bob),repo.profile(alice)]);
+ assert.equal(calls.length,1);assert.equal(calls[0].filters.length,2);assert.ok(calls[0].filters.every(f=>f.limit===1));
+ await repo.profile(alice);assert.equal(calls.length,2);
+ await repo.profile('0'.repeat(64));await repo.profile('0'.repeat(64));assert.equal(calls.length,4);
 });
-test('Missing profiles are negatively cached only after a completed fetch',async()=>{
- const {repo,calls}=repoHarness();await repo.profile('0'.repeat(64));await repo.profile('0'.repeat(64));assert.equal(calls.length,1);
- const s=new Storage();let count=0;const r=new Repository(s,{query:async()=>{count++;return {events:[],complete:false,errors:[]};}},{value:{...DEFAULTS}});await r.profile('0'.repeat(64));await r.profile('0'.repeat(64));assert.equal(count,2);
+test('Re-entering a view does not restore posts or other users from storage',async()=>{
+ const {repo,calls}=repoHarness();await repo.profile(bob);repo.beginView(alice);assert.deepEqual(repo.peekProfile(bob),{});assert.equal(repo.events.size,0);
+ await repo.profile(bob);assert.equal(calls.length,2);
 });
-test('Old replaceable events cannot overwrite newest cached profile',async()=>{
+test('Old replaceable events cannot overwrite newer current-screen metadata',async()=>{
  const {repo}=repoHarness();const old=fixture.events[0],fresh={...old,id:'0'.repeat(64),created_at:old.created_at+1,content:'{"name":"new"}'};
  await repo.accept(fresh);await repo.published(old);assert.equal(repo.peekProfile(alice).name,'new');
 });
 test('Read-modify-write refuses incomplete latest list reads',async()=>{
  const r=new Repository(new Storage(),{query:async()=>({events:[],complete:false,errors:[]})},{value:{...DEFAULTS}});await assert.rejects(r.replacement(3,alice,{all:true,fresh:true,required:true}),/全リレー/);
 });
-const makeEvent=(id,time)=>({id:id.toString(16).padStart(64,'0'),created_at:time});
-test('Inclusive timestamp cursor retrieves many same-second events without gaps',async()=>{
- const events=sortEvents([...Array.from({length:27},(_,i)=>makeEvent(i+1,100)),...Array.from({length:12},(_,i)=>makeEvent(i+100,99-i))]);let calls=0;
- const pager=new EventPager(async([f])=>{calls++;return{complete:true,events:events.filter(e=>f.until===undefined||e.created_at<=f.until).slice(0,f.limit)};},[{kinds:[1]}],10);
- for(let i=0;i<16&&!pager.exhausted;i++)await pager.older();assert.equal(pager.events.size,events.length);assert.ok(calls<=16);assert.equal(pager.exhausted,true);
-});
-test('Partial relay failure does not advance cursor or mark end-of-history',async()=>{
- const pager=new EventPager(async()=>({complete:false,events:[makeEvent(1,50)]}),[{}],10);pager.until=100;await pager.older();assert.equal(pager.until,100);assert.equal(pager.exhausted,false);assert.equal(pager.events.size,1);
-});
-test('Full delta restart allows bridging a gap instead of skipping it',async()=>{
- const pager=new EventPager(async()=>({complete:true,events:Array.from({length:10},(_,i)=>makeEvent(i+1,200-i))}),[{}],10,{events:[makeEvent(100,100)],until:90});await pager.refresh();assert.equal(pager.until,191);assert.equal(pager.exhausted,false);
-});
-test('NIP-05 validates identifier, pubkey equality, and cross-user cached identity',async()=>{
+test('NIP-05 validates identifier and pubkey equality without response storage',async()=>{
  let calls=0,options;const n=new Nip05(new Storage(),{fetcher:async(u,o)=>{calls++;options=o;return new Response(JSON.stringify({names:{alice,bob}}));}});
- assert.equal((await n.verify('alice@example.com',alice)).state,'valid');assert.equal((await n.verify('alice@example.com',bob)).state,'invalid');assert.equal((await n.verify('bob@example.com',bob)).state,'valid');assert.equal(calls,1);assert.equal(options.redirect,'error');assert.equal(options.credentials,'omit');
+ assert.equal((await n.verify('alice@example.com',alice)).state,'valid');assert.equal((await n.verify('alice@example.com',bob)).state,'invalid');assert.equal((await n.verify('bob@example.com',bob)).state,'valid');assert.equal(calls,3);assert.equal(options.cache,'no-store');assert.equal(options.redirect,'error');assert.equal(options.credentials,'omit');
  for(const id of ['@example.com','a@localhost','a@127.0.0.1','a@foo.local','a@-bad.com'])assert.equal(parseIdentifier(id),null);
 });
 test('NIP-05 singleflight and semaphore never exceed two concurrent requests',async()=>{
  let active=0,peak=0,calls=0;const n=new Nip05(new Storage(),{fetcher:async()=>{active++;calls++;peak=Math.max(peak,active);await sleep(10);active--;return new Response(JSON.stringify({names:{a:alice}}));}});
  await Promise.all([...Array.from({length:9},(_,i)=>n.verify(`a@domain${i}.com`,alice)),n.verify('a@domain0.com',bob)]);assert.equal(peak,2);assert.equal(calls,9);assert.equal(n.active,0);
 });
-test('NIP-05 CORS / HTTP failure remains unknown, with bounded negative cache',async()=>{
- let calls=0;const n=new Nip05(new Storage(),{fetcher:async()=>{calls++;throw Error('CORS');}});assert.equal((await n.verify('a@example.com',alice)).state,'unknown');await n.verify('a@example.com',alice);assert.equal(calls,1);
+test('NIP-05 CORS / HTTP failure remains unknown and does not suppress a subsequent request',async()=>{
+ let calls=0;const n=new Nip05(new Storage(),{fetcher:async()=>{calls++;throw Error('CORS');}});assert.equal((await n.verify('a@example.com',alice)).state,'unknown');await n.verify('a@example.com',alice);assert.equal(calls,2);
 });

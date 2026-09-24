@@ -1,5 +1,5 @@
-import { profileKey, decodeKey } from './nip19.js';
-import { isHex } from './utils.js';
+import { profileKey, decodeKey } from './nip19.js?v=1.1.0';
+import { isHex } from './utils.js?v=1.1.0';
 const tabs=new Set(['posts','following','followers','mutes','relays']);
 export const profileHref=(key,tab='posts')=>`#/profile/${key}/${tab}`;
 export const threadHref=id=>`#/thread/${id}`;

@@ -10,13 +10,13 @@ for(const file of files.filter(p=>/\.(js|mjs)$/.test(p))){
  execFileSync(process.execPath,['--check',file],{stdio:'pipe'});
  const text=fs.readFileSync(file,'utf8');
  for(const match of text.matchAll(/(?:from\s+|new URL\()['"]([^'"]+)['"]/g)){
-  const rel=match[1];if(!rel.startsWith('.'))continue;
+  const rel=match[1].split(/[?#]/)[0];if(!rel.startsWith('.'))continue;
   if(!fs.existsSync(path.resolve(path.dirname(file),rel)))throw Error(`Missing local import/resource: ${file}: ${rel}`);
  }
  if(/https?:\/\/(?:cdn|unpkg|esm\.sh)/.test(text))throw Error(`Unexpected remote dependency in ${file}`);
 }
 const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
-for(const m of html.matchAll(/(?:src|href)="(\.\/[^"#]+)"/g))if(!fs.existsSync(path.join(root,m[1])))throw Error(`Missing entry asset: ${m[1]}`);
+for(const m of html.matchAll(/(?:src|href)="(\.\/[^"#]+)"/g))if(!fs.existsSync(path.join(root,m[1].split(/[?#]/)[0])))throw Error(`Missing entry asset: ${m[1]}`);
 if(!html.includes('Content-Security-Policy'))throw Error('Missing CSP');
 for(const name of ['README.md','LICENSE','default.json','.nojekyll','docs/index.html'])if(!fs.existsSync(path.join(root,name)))throw Error(`Missing ${name}`);
 JSON.parse(fs.readFileSync(path.join(root,'default.json'),'utf8'));

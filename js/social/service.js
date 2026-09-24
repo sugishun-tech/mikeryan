@@ -1,5 +1,5 @@
-import { APP_NAME, TTL, storagePrefix } from '../core/config.js';
-import { Emitter, isHex, nowSeconds, parseJSON, replyTags, unique } from '../core/utils.js';
+import { APP_NAME, OUTBOX_RETENTION, storagePrefix } from '../core/config.js?v=1.1.0';
+import { Emitter, isHex, nowSeconds, parseJSON, replyTags, unique } from '../core/utils.js?v=1.1.0';
 const pubkeys = event => unique((event?.tags ?? []).filter(t=>t[0]==='p' && isHex(t[1])).map(t=>t[1]));
 export { pubkeys };
 export class Social extends Emitter {
@@ -11,27 +11,35 @@ export class Social extends Emitter {
   async loadAccount() {
     const key=this.session.pubkey;this.following=new Set();this.likes=new Set();
     if(!key)return;
-    const [contacts,,liked] = await Promise.all([this.repo.replacement(3,key),this.repo.replacement(10000,key),this.storage.get(`likes:${key}`),this.repo.profile(key)]);
+    const [contacts] = await Promise.all([this.repo.replacement(3,key),this.repo.replacement(10000,key),this.repo.profile(key)]);
     if(this.session.pubkey!==key)return;
-    this.following=new Set(pubkeys(contacts));this.likes=new Set(liked??[]);this.emit('following',this.following);
+    this.following=new Set(pubkeys(contacts));this.likes=new Set();this.emit('following',this.following);
   }
   async publish(template) {
     const event=await this.session.sign({...template,tags:[...(template.tags??[]).filter(t=>t[0]!=='client'),['client',APP_NAME]]});
     return this.sendSigned(event);
   }
-  async sendSigned(event) {
-    const result=await this.network.publish({event,relays:this.settings.value.relays,gap:this.settings.value.requestGapMs});
+  async sendSigned(event, relays = this.settings.value.relays, acceptedResults = []) {
+    let result=await this.network.publish({event,relays,gap:this.settings.value.requestGapMs});
+    if (acceptedResults.length) { const results=[...acceptedResults,...result.results]; result={results,accepted:results.filter(r=>r.accepted).length,total:results.length}; }
     const outbox=await this.storage.get(`outbox:${event.pubkey}`)??[];
     const remaining=outbox.filter(x=>x.event.id!==event.id);
     if(result.accepted<result.total) remaining.push({event,results:result.results,time:Date.now()});
-    await this.storage.set(`outbox:${event.pubkey}`,remaining.slice(-30),TTL.event);
+    await this.storage.set(`outbox:${event.pubkey}`,remaining.slice(-30),OUTBOX_RETENTION);
     this.emit('delivery',result);
     if(!result.accepted)throw new Error('どのリレーにも受理されませんでした。署名済みイベントを設定の「未完了の送信」に保存しました。新しく投稿し直す前に、そちらから再送してください');
     await this.repo.published(event);
     if(result.accepted<result.total)this.emit('notice',`${result.accepted}/${result.total}リレーに保存しました。未達分は設定画面から再送できます`);
     return event;
   }
-  async retry(event) { if(event.pubkey!==this.session.pubkey)throw new Error('別アカウントの送信は再実行できません');return this.sendSigned(event); }
+  async retry(event) {
+    if(event.pubkey!==this.session.pubkey)throw new Error('別アカウントの送信は再実行できません');
+    const item=(await this.storage.get(`outbox:${event.pubkey}`)??[]).find(item=>item.event.id===event.id);
+    if(!item)return event;
+    const failed=item.results.filter(r=>!r.accepted).map(r=>r.relay);
+    if(!failed.length)return event;
+    return this.sendSigned(event,failed,item.results.filter(r=>r.accepted));
+  }
   post(content, parent=null) {
     const text=String(content).trim();if(!text)throw new Error('本文を入力してください');
     return this.publish({kind:1,content:text,tags:parent?replyTags(parent,this.session.pubkey):[]});
@@ -41,17 +49,18 @@ export class Social extends Emitter {
     this.pending.add(`like:${id}`);
     try{
       const signed=await this.publish({kind:7,content:'+',tags:[['e',event.id],['p',event.pubkey],['k',String(event.kind)]]});
-      this.likes.add(id);await this.storage.set(`likes:${signed.pubkey}`,[...this.likes].slice(-3000),TTL.event);this.emit('like',id);
+      this.likes.add(id);this.emit('like',id);
     }finally{this.pending.delete(`like:${id}`);}
   }
-  async loadLikes(events) {
-    // Only reactions to the visible page; never the account's complete reaction history.
-    const key=this.session.pubkey;if(!key||!events.length)return;
-    const ids=unique(events.filter(e=>e.kind===1).map(e=>e.id)).slice(0,200);if(!ids.length)return;
-    const result=await this.repo.query([{kinds:[7],authors:[key],'#e':ids,limit:Math.min(200,ids.length*2)}]);
-    if(this.session.pubkey!==key)return;
-    for(const e of result.events){const id=e.tags.filter(t=>t[0]==='e').at(-1)?.[1];if(id && ['+','❤','❤️','🤙'].includes(e.content))this.likes.add(id);}
-    await this.storage.set(`likes:${key}`,[...this.likes].slice(-3000),TTL.event);this.emit('likes',this.likes);
+  applyLikes(reactions, page, key = this.session.pubkey) {
+    if (!key || this.session.pubkey !== key) return;
+    // Only update this batch. Do not erase other on-screen or locally published likes.
+    for (const e of reactions) {
+      if (e.kind !== 7 || e.pubkey !== key) continue;
+      const id = e.tags.filter(t => t[0] === 'e').at(-1)?.[1];
+      if (id && ['+', '❤', '❤️', '🤙'].includes(e.content)) this.likes.add(id);
+    }
+    this.emit('likes', this.likes);
   }
   exclusive(kind,task) {
     const pubkey=this.session.pubkey;if(!pubkey)return Promise.reject(new Error('ログインしてください'));

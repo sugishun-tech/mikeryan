@@ -1,13 +1,12 @@
-import { editProfileDialog } from './editor.js';
+import { editProfileDialog } from './editor.js?v=1.1.0';
 export { editProfileDialog };
-import { TTL } from '../core/config.js';
-import { EventPager } from '../feed/pagination.js';
-import { FeedView } from '../feed/view.js';
-import { pubkeys } from '../social/service.js';
-import { el, avatar, button, busy, empty, loading, richText, copy } from '../ui/dom.js';
-import { profileHref } from '../core/router.js';
-import { encodeKey } from '../core/nip19.js';
-import { safeURL, unique, stableJSON } from '../core/utils.js';
+import { EventPager } from '../feed/pagination.js?v=1.1.0';
+import { FeedView } from '../feed/view.js?v=1.1.0';
+import { pubkeys } from '../social/service.js?v=1.1.0';
+import { el, avatar, button, busy, empty, loading, richText, copy } from '../ui/dom.js?v=1.1.0';
+import { profileHref } from '../core/router.js?v=1.1.0';
+import { encodeKey } from '../core/nip19.js?v=1.1.0';
+import { safeURL, unique, stableJSON } from '../core/utils.js?v=1.1.0';
 export class ProfileView {
   constructor(app,route,host){this.app=app;this.route=route;this.host=host;this.owner=route.pubkey;this.offset=0;this.loadedUsers=new Set();this.list=el('div',{class:'profile-tab-content'});}
   async init(){
@@ -27,7 +26,7 @@ export class ProfileView {
     if(profile.nip05)info.append(el('div',{class:'profile-identifier'},String(profile.nip05)));
     const website=safeURL(profile.website);if(website)info.append(el('a',{href:website,target:'_blank',rel:'noopener noreferrer',class:'profile-website'},website));
     if(profile.lud16)info.append(el('div',{class:'muted-text'},'⚡ '+String(profile.lud16)));
-    const refreshProfile=button('プロフィール更新',()=>busy(refreshProfile,async()=>{await app.repo.replacement(0,owner,{fresh:true});await app.render(this.route);}), 'text-button');
+    const refreshProfile=button('プロフィール更新',()=>busy(refreshProfile,async()=>{await app.render(this.route);}), 'text-button');
     info.append(el('div',{class:'key-actions'},refreshProfile,button('npubをコピー',()=>copy(encodeKey('npub',owner)),'text-button'),button('hexをコピー',()=>copy(owner),'text-button')));
     const tabs=el('nav',{class:'profile-tabs','aria-label':'プロフィールの項目'});
     for(const [id,label]of Object.entries({posts:'投稿',following:'フォロー',followers:'フォロワー',mutes:'ミュート',relays:'リレー'}))tabs.append(el('a',{href:profileHref(owner,id),class:this.route.tab===id?'active':'','aria-current':this.route.tab===id?'page':null},label));
@@ -43,8 +42,8 @@ export class ProfileView {
     const source=await app.repo.replacement(type==='following'?3:10000,this.owner);if(!this.list.isConnected)return;
     this.items=pubkeys(source);this.list.replaceChildren();
     if(type==='mutes')this.list.append(el('p',{class:'list-note'},'公開されているpタグのみ表示します。暗号化された非公開ミュートは取得・復号しません。'));
-    const refresh=button('一覧を更新',()=>busy(refresh,async()=>{await app.repo.replacement(type==='following'?3:10000,this.owner,{fresh:true});this.offset=0;await this.localList(type);}),'text-button');this.list.append(refresh);
-    this.rows=el('div',{});this.more=button('さらに読み込む',()=>busy(this.more,()=>this.appendLocal(type)),'button load-more');this.list.append(this.rows,this.more);
+    const refresh=button('一覧を更新',()=>busy(refresh,async()=>{this.offset=0;this.list.replaceChildren();await this.localList(type);}),'text-button');this.list.append(refresh);
+    this.rows=el('div',{});this.more=button('次の30人を表示',()=>busy(this.more,()=>this.appendLocal(type)),'button load-more');this.list.append(this.rows,this.more);
     if(!this.items.length){this.rows.append(empty('公開リストは空です'));this.more.hidden=true;return;}
     await this.appendLocal(type);
   }
@@ -55,15 +54,12 @@ export class ProfileView {
   }
   async followers(){
     const app=this.app;this.list.append(el('p',{class:'list-note'},'設定中のリレーで見つかったフォロワーです。全Nostrの総数ではありません。候補の最新フォローリストを確認してから表示します。'));
-    const key=`followers:${this.owner}:${stableJSON(app.repo.readRelays())}`;this.followersKey=key;
-    const saved=await app.storage.get(key);if(!this.list.isConnected)return;
-    this.followerPager=new EventPager((filters,options)=>app.repo.query(filters,options),[{kinds:[3],'#p':[this.owner]}],app.settings.value.batchSize,saved?.pager);
-    this.loadedUsers=new Set(saved?.users??[]);this.rows=el('div',{});
-    this.more=button('さらに読み込む',()=>busy(this.more,()=>this.appendFollowers()),'button load-more');
-    const refresh=button('フォロワーを更新',()=>busy(refresh,async()=>{await app.storage.delete(key);this.list.replaceChildren();await this.followers();}),'text-button');
+    this.followerPager=new EventPager(filters=>app.repo.query(filters),[{kinds:[3],'#p':[this.owner]}],30);
+    this.loadedUsers=new Set();this.rows=el('div',{});
+    this.more=button('次の30人を表示',()=>busy(this.more,()=>this.appendFollowers()),'button load-more');
+    const refresh=button('フォロワーを更新',()=>busy(refresh,async()=>{this.list.replaceChildren();await this.followers();}),'text-button');
     this.list.append(refresh,this.rows,this.more);
-    if(this.loadedUsers.size){const users=[...this.loadedUsers];await app.repo.profiles(users);const own=new Set(pubkeys(await app.repo.replacement(3,this.owner)));if(this.rows.isConnected)this.rows.append(...users.map(p=>app.identity.userRow(p,{mutual:own.has(p),owner:this.owner})));this.more.hidden=this.followerPager.exhausted;}
-    else await this.appendFollowers();
+    await this.appendFollowers();
   }
   async appendFollowers(){
     const app=this.app,page=await this.followerPager.older();if(!this.rows.isConnected)return;
@@ -73,9 +69,8 @@ export class ProfileView {
     const users=candidates.filter(p=>current.has(p));await app.repo.profiles(users);
     const own=new Set(pubkeys(await app.repo.replacement(3,this.owner)));if(!this.rows.isConnected)return;
     this.rows.querySelector('.empty-state')?.remove();for(const p of users){this.rows.append(app.identity.userRow(p,{mutual:own.has(p),owner:this.owner}));this.loadedUsers.add(p);}
-    if(!this.loadedUsers.size)this.rows.append(empty('このページではフォロワーが見つかりません','さらに読み込むと別の期間を確認できます。'));
+    if(!this.loadedUsers.size)this.rows.append(empty('このページではフォロワーが見つかりません','次の30人を表示すると別の期間を確認できます。'));
     this.more.hidden=this.followerPager.exhausted;
-    await app.storage.set(this.followersKey,{pager:this.followerPager.snapshot(),users:[...this.loadedUsers]},TTL.list);
   }
   async relays(){
     this.list.append(loading());const relays=await this.app.social.relays(this.owner);if(!this.list.isConnected)return;

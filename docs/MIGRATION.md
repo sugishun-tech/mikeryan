@@ -1,48 +1,24 @@
-# Integration and migration map
+# 移行 · 1.1.0
 
-| Original area | New modules / behavior |
-| --- | --- |
-| mynostr `auth.js` | `auth/session.js`: public-key restore and NIP-07 queue |
-| mynostr `network.js`, profile `nostr.js` | `network/*` + `core/repository.js`: one network service |
-| mynostr `feed.js` | `feed/view.js`, `feed/pagination.js`, `feed/moderation.js` |
-| mynostr `actions.js` | `social/service.js`: publish, replies, reactions, outbox |
-| mynostr `ui_render.js` | `ui/posts.js`, `ui/identity.js`, `ui/dom.js` |
-| mynostr `ui_nav.js` | `core/router.js` + `app.js`: hash routes in one site |
-| mynostr `profile.js`, mynostr_profile UI | `profiles/view.js`: header, editor and five tabs |
-| profile NIP-05 | `profiles/nip05.js`: shared checks on all author names |
-| profile follow/unfollow and mutual | `social/service.js` + `ui/identity.js`: in-place updates |
-| profile relay dictionary | kind:10002 preferred; kind:3 content fallback |
-| mynostr settings | `settings/store.js`, `settings/view.js`: full settings and import/export |
-| old client name | New events consistently use `['client','mikeryan']` |
-| independent login buttons | One restored account across all views |
+## 1.0.1から
 
-## Retained old localStorage keys
+`mikeryan/` 内のファイルをリポジトリの同じ位置に上書きします。差分ZIPだけを新規サイトとして公開することはできません。独自に編集した `default.json` は保管してください。JS全依存モジュール、CSS、SharedWorkerに同じリリース番号を付けています。混在させずまとめて配置します。
 
-The importer reads, without deleting:
+ログイン公開鍵、設定、下書きのlocalStorageキーは引き継ぎます。保存済みのページ件数設定が10や200でも、投稿は最大30件に固定します。秘密鍵を要求したりログイン状態を削除したりしません。
 
-```text
-nostr_relays
-nostr_batch_size
-nostr_mute_display_name_patterns
-nostr_mute_content_patterns
-nostr_muted_pubkeys
-nostr_profile_viewer_relays
-nostr_profile_viewer_last_login_pubkey
-```
+投稿・プロフィール・問い合わせ・NIP-05・いいねの永続キャッシュを廃止しました。古いIndexedDBは読み書きしませんが自動削除もしません。1.0系の未完了送信も古いDBに入っているため、残っている場合は旧版の設定画面で処理してから更新してください。今回の版で発生する未完了送信はlocalStorageに保存します。データ消去が必要な場合はブラウザーのサイトデータ機能を使えますが、ログイン・設定・下書きも消える点に注意してください。
 
-The old timeline relay list is newline separated; the profile app's list is
-JSON. A migrated relay list is a deduplicated union. Settings are then written
-in the new path-scoped namespace. If the old values are absent, `default.json`
-is used. Malformed legacy settings fall back to safe defaults rather than
-silently treating an invalid regex as a valid filter.
+右側の通信状況カードとタイムラインの旧操作ボタンはありません。読み込みは「下に読み込む」「上に読み込む」「最新を読み込む」に統一しました。エラー理由、リレー認証、未達送信の再試行は設定内に残しています。
 
-The default old `nostr\:` regex uses JavaScript's non-Unicode `i` semantics,
-like the original. In particular the identity escape `\:` would be invalid
-with the `u` flag, so the migration does not add that flag.
+## 元の2プロジェクトから
 
-## URLs
+タイムラインとプロフィールを同じサイト・同じ公開鍵で扱います。`nostr_relays`、`nostr_mute_display_name_patterns`、`nostr_mute_content_patterns`、`nostr_muted_pubkeys`、`nostr_profile_viewer_relays`、`nostr_profile_viewer_last_login_pubkey` を同じオリジンで参照できる場合は引き継ぎます。旧ページ件数は30件へ正規化します。
 
-New paths do not require server rewrites:
+GitHub Pagesのオリジンが変わる移転では旧サイトのlocalStorageへアクセスできません。リレー・ミュート条件を新サイトで設定し、NIP-07で一度ログインしてください。
+
+## URL
+
+同じ `index.html` で以下を処理します。サーバーのURL書き換え設定は不要です。
 
 ```text
 #/global
@@ -50,7 +26,7 @@ New paths do not require server rewrites:
 #/notifications
 #/settings
 #/me
-#/profile/<64-character-lowercase-hex>/posts
+#/profile/<hex>/posts
 #/profile/<hex>/following
 #/profile/<hex>/followers
 #/profile/<hex>/mutes
@@ -58,28 +34,4 @@ New paths do not require server rewrites:
 #/thread/<event-id>
 ```
 
-Legacy `?hex=...`, `?npub=...`, `?view=me`, `?me=1`, `?settings=1`,
-`?view=home`, `?view=notifications`, and `?view=thread&event=...` are parsed on
-the new site when no hash route is present. The thread ID also accepts the
-old `id`, `eventId` and `event_id` parameter names. Old URLs on a different,
-removed Pages repository still need a redirect hosted there.
-
-## Deliberate behavior changes
-
-No new subscriptions begin merely because another inactive profile tab
-exists. Fetching a page does not silently download many extra pages to fill
-space after filtering. Infinite follower crawling, background reactions
-history retrieval and automatic reconnection are replaced with bounded,
-explicit actions. "いいね同期" queries the signed-in user's reactions to the
-currently rendered post set, up to 200 IDs, rather than the complete history.
-
-Unverified/mismatched NIP-05 claims never get the verified mark. A network
-error is unknown rather than a false accusation. Public-key mutes apply to
-notifications; ordinary name/body/profile-completeness filters do not.
-Deliberately opened profile posts are shown independently of timeline mutes,
-as in the separate original profile app.
-
-Profile/contact-list writes will fail closed if the latest list cannot be
-checked on every configured relay. This is preferable to erasing contacts
-or unknown metadata due to an unavailable source. The editor preserves
-fields it does not understand and the follow writer preserves unrelated tags.
+同じサイトに届く旧形式の公開鍵・viewクエリパラメーターも解釈します。削除した別リポジトリへのURLは自動的に移転されません。

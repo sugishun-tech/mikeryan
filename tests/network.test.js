@@ -50,22 +50,23 @@ test('Rate limit creates durable cooldown without reconnects or blind retry',asy
 test('Timeout always sends CLOSE and is not a successful empty result',async t=>{
  const h=harness(t,{mode:'timeout'}),p=h.pool();const r=await p.query({relays:['wss://example.com'],filters:[{kinds:[1],limit:10}],gap:0});
  assert.equal(r.complete,false);assert.equal(r.events.length,0);assert.equal(r.errors.length,1);assert.equal(h.messages.filter(x=>x.message[0]==='CLOSE').length,1);
- const r2=await p.query({relays:['wss://example.com'],filters:[{kinds:[1],limit:10}],gap:0});assert.equal(r2.cached,false);assert.equal(r2.complete,false);
+ const r2=await p.query({relays:['wss://example.com'],filters:[{kinds:[1],limit:10}],gap:0});assert.equal('cached' in r2,false);assert.equal(r2.complete,false);
 });
-test('Identical in-flight and completed queries are reused across consumers',async t=>{
+test('Only in-flight queries coalesce; the same completed query is sent again',async t=>{
  const h=harness(t),p=h.pool(),query={relays:['wss://example.com'],filters:[{kinds:[1],limit:10}],gap:0};
  const [a,b]=await Promise.all([p.query(query),p.query(query)]);assert.deepEqual(a.events,b.events);
- const cached=await p.query(query);assert.equal(cached.cached,true);assert.equal(p.coalesced,1);assert.equal(p.queryHits,1);assert.equal(h.messages.filter(m=>m.message[0]==='REQ').length,1);
- const [stillCached,fresh]=await Promise.all([p.query(query),p.query({...query,fresh:true})]);assert.equal(stillCached.cached,true);assert.equal(fresh.cached,false);assert.equal(h.messages.filter(m=>m.message[0]==='REQ').length,2);
+ assert.equal(p.coalesced,1);assert.equal(h.messages.filter(m=>m.message[0]==='REQ').length,1);
+ await p.query(query);assert.equal(h.messages.filter(m=>m.message[0]==='REQ').length,2);
+ assert.equal(p.inflight.size,0);assert.equal(h.storage.memory.size,0);
 });
 test('Fast EOSE does not truncate slower relay completion',async t=>{
  const h=harness(t),p=h.pool();const result=await p.query({relays:['wss://fast.example.com','wss://slow.example.com'],filters:[{kinds:[1],limit:10}],gap:0});
  assert.equal(result.complete,true);assert.equal(result.events.length,1);assert.equal(h.sockets.length,2);assert.equal(h.messages.filter(m=>m.message[0]==='CLOSE').length,2);
 });
-test('Successful publication ACK is reused without a second EVENT',async t=>{
+test('Publication is re-sent when explicitly requested; no stored ACK response',async t=>{
  const h=harness(t),p=h.pool(),args={relays:['wss://example.com'],event:note,gap:0};
  assert.equal((await p.publish(args)).accepted,1);assert.equal((await p.publish(args)).accepted,1);
- assert.equal(h.messages.filter(m=>m.message[0]==='EVENT').length,1);
+ assert.equal(h.messages.filter(m=>m.message[0]==='EVENT').length,2);
  await assert.rejects(p.publish({...args,event:{...note,content:'tampered'}}),/署名/);
 });
 test('Relay rejected publish remains failure, does not report saved',async t=>{

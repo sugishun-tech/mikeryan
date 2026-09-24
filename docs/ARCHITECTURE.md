@@ -1,133 +1,44 @@
-# Architecture
+# Architecture · 1.1.0
 
-## Boundaries
+## Read lifecycle
 
-`app.js` owns only composition, route transitions, account-dependent UI and
-service references. Domain behavior belongs to feature directories. `ui/`
-creates DOM nodes, never trusts profile or event content as markup.
+`FeedView` measures actual visible post rectangles below the sticky controls and above the mobile navigation. It passes the lower visible post for older reads or the upper visible post for newer reads to `EventPager`. The latest operation uses current epoch seconds, not the old loaded window. All entry points fix the displayed batch limit at 30.
 
-```text
-Feature view → Repository → NetworkClient → SharedWorker → RelayPool
-                          ↘ fallback RelayPool (per tab)
-RelayPool → one queued RelayConnection per configured relay → WebSocket
-Repository / RelayPool → IndexedDB (memory fallback)
-Social → Session → window.nostr (NIP-07) → verified signed event → RelayPool
-Identity → Nip05 → HTTPS fetch (visible identities only)
-```
+`EventPager` owns only the currently mounted timeline and scalar continuation cursors. It never serializes a page or consults an old read response. `Repository.query()` always calls the transport. Searches use `retain:false` so discarded search results do not populate the current-screen repository. Only the chosen page is accepted for rendering; identity/reaction queries then decorate that page. Existing DOM nodes remain mounted on directional additions. A visible post's screen coordinate is restored after insertion, using actual layout heights rather than content-visibility placeholders.
 
-Everything is static. The worker is a browser SharedWorker, not a server and
-not a ServiceWorker. The worker URL is resolved relative to the module and
-therefore to the deployed project subpath. Same-URL tabs use a named worker.
-The fallback does not claim cross-tab connection sharing.
+Old and new pages may overlap when the user is midway through the already displayed timeline. A new relay query is still sent. Duplicate event IDs are not rendered twice. Latest replaces the list after a successful response; a failed empty response does not clear the existing screen.
 
-## Query lifecycle
+## NIP-01 constraints
 
-1. Normalize relay URLs and filter order; combine identical in-flight queries.
-2. Reuse a successful short-lived result unless the caller explicitly asks for
-   fresh data. Failed/partial reads never become authoritative empty caches.
-3. Each relay runs its own queue, with a minimum interval and at most one
-   active finite task. Requests split at 20 filters. Read fan-out is configurable.
-4. Inspect event structure, response budget, requested filter match and time.
-   Hash and Schnorr verification precede acceptance. Known IDs return the
-   previously verified object, never an unverified replacement with the same ID.
-5. Each relay's EOSE closes only its subscription. Wait for that relay's queued
-   signature work before returning. A fast relay cannot end another relay.
-6. Merge verified IDs. A partial error carries any already verified results,
-   sets `complete: false`, and establishes a relay-specific cooldown.
-7. Idle sockets close after two minutes; no timer starts another REQ. No
-   background polling, application ping, relay-discovery crawl or automatic retry.
+`since` and `until` are inclusive; a request has no exclusive event-ID cursor and no ascending-order flag. Relays return the newest matches first. Merely using `since: anchor` with `limit:30` would jump to the newest posts, not the nearest newer posts.
 
-The communication counters count JSON message payloads, not TCP/TLS overhead,
-WebSocket framing, HTML/CSS, profile images, or NIP-05 HTTPS traffic. Actual bytes
-on the network will differ. This release does not claim a measured percentage
-reduction relative to the original apps.
+Older reads include the anchor second, request space for its known same-second prefix, then select at most 30 strictly older items under `(created_at DESC, id ASC)` ordering. A saturated boundary is expanded only up to a fixed limit; the timestamp is not blindly decremented and unreturned same-second events are not silently skipped.
 
-## Metadata and lists
+Newer reads initially cover ten minutes from the anchor and narrow saturated intervals. Completed empty intervals can be advanced and widened. At most six range queries are attempted per click. A continuation stores only anchor/range/limit numbers, not response data. A failed relay prevents declaring a range exhausted. Up to 1600 events per filter may be requested for a heavily saturated same-second boundary. Combined responses are deduplicated; at most 30 posts are reflected in the timeline per operation. A relay can impose smaller internal limits or omit events: exhaustive recovery is not guaranteed.
 
-Repository-level 80ms batching groups pending profile and list reads. Each
-filter has one author, one kind and `limit: 1`; this is deliberately different
-from a single multi-author filter with a shared low limit. The latter can
-exclude less-active authors. Batches contain at most 20 such filters.
+## Reducing communication without caches
 
-Latest replaceable events are selected by newest timestamp, then lowest
-lexical event ID. A stale outbox retry cannot overwrite a newer local profile.
-Fresh writes query all configured relays, including write-only-in-practice
-ones. If a relay is unavailable, the edit is refused rather than replacing an
-unknown contact list or profile with incomplete data. Remove an unreachable
-relay from settings only after deciding that its extra data is not needed.
+Each relay has one connection per transport pool. SharedWorker-capable browsers share the pool across tabs for this application version; fallback is one pool per tab. The worker holds connection/queue state, not a response cache. Identical concurrent requests coalesce only while their Promise is unresolved. A later identical query is sent again.
 
-The follower discovery filter is `kind:3 + #p:owner`. Each candidate's latest,
-unfiltered kind:3 is then checked. Finding an old `#p` mention alone is not
-proof of a current follow. This adds a bounded lookup to avoid incorrect
-followers; cached latest lists are reused. No claim of global completeness is
-possible when only selected relays are queried.
+Profiles use one kind-0 filter per author with limit 1; filters are grouped, at most 20 per REQ. The signed-in user's kind-7 reactions are constrained to the selected page IDs and are included with those filters. Authors are not fetched once per post. Large following lists are split into bounded author filters. No complete reactions history or unopened profile list is downloaded.
 
-## Pagination
+Each selected relay is awaited independently. A fast relay's EOSE cannot truncate a slower relay. EOSE finishes that finite query and sends CLOSE; timeout and cancellation paths also close subscriptions. No polling or scrolling-triggered post REQ is used. Queue gaps, bounded timeouts, idle close, and rate-limit cooldowns remain. No proxy rotation or restriction evasion is implemented.
 
-Older pages use inclusive `until` plus an ID set. When a boundary second is
-full, the next user click expands the limit, up to 1,600. There is at most one
-page query per click; there is no invisible loop to fill a filtered page.
-Partial relay failures do not advance the historical cursor or mark the feed
-exhausted. A full new-message delta restarts a descending cursor to allow a
-subsequent older-page operation to bridge a potentially missing interval.
+NIP-05 is a separate HTTPS request. Only unresolved identical checks coalesce. Completed verification results are not stored or reused. Fetch uses no-store, no credentials/referrer, rejects redirects, and has time/size/concurrency limits. Existing cards retain their displayed verification state until remounted or rechecked.
 
-NIP-01 has no stable offset cursor inside one timestamp. A relay may also cap
-results below a requested limit. At extreme same-second saturation the UI
-warns that some events may remain unavailable and advances past that second.
-This is not a guarantee of complete archive enumeration. Query visibility,
-relay retention and eventual propagation also limit completeness.
+## Persisted state, not fetched data
 
-## NIP-05
+localStorage retains the public key, settings, drafts, authored failed/partial sends, and relay cooldowns. `Storage` accepts only `outbox:` and `health:` operational keys; other keys are rejected. Outbox retry carries forward prior relay acceptance and contacts only undelivered relays. There is no IndexedDB access, Service Worker, persisted read response, saved timeline, or negative profile cache.
 
-One identity component is used throughout the app. An IntersectionObserver
-starts verification only for nearby rendered names. Metadata can be fetched
-in batches for the loaded page, but HTTPS identity checks are viewport-driven.
+Current-screen maps are discarded on navigation (except the active account's UI/list state). Reads do not return those maps instead of making a request. A reply preview can display another post already on the screen; otherwise it fetches the named event only on a user click. Protocol synchronization that relies on a local archive, such as set reconciliation, is not enabled.
 
-The cache stores `identifier → returned public key`, and the final badge
-compares that key with EACH displayed author's key. A valid lookup for Alice
-cannot validate Bob merely because Bob claims Alice's identifier. Explicit
-extra names returned by the same domain document are cached too. Unknown
-names are not inferred absent from a partial multi-name response.
+## Protocol references
 
-Requests use HTTPS, no credentials, no referrer, a six-second timeout, a
-256KiB response limit and `redirect: error`. At most two run concurrently.
-Transport/CORS failure is unknown, not proof of impersonation. A badge is a
-DNS-based identifier match, not a real-world identity or content endorsement.
+- NIP-01: https://github.com/nostr-protocol/nips/blob/master/01.md
+- NIP-05: https://github.com/nostr-protocol/nips/blob/master/05.md
+- NIP-07: https://github.com/nostr-protocol/nips/blob/master/07.md
+- NIP-10: https://github.com/nostr-protocol/nips/blob/master/10.md
+- NIP-42: https://github.com/nostr-protocol/nips/blob/master/42.md
+- NIP-65: https://github.com/nostr-protocol/nips/blob/master/65.md
 
-## Account, updates and publication
-
-Only a public key is restored on startup. No extension call is needed for
-restored read-only UI. At the first write, the extension's public key must
-match. Every returned signed event is checked against the requested body,
-tags, kind, timestamp and account and then cryptographically verified.
-Queued signing refuses an account change while waiting.
-
-Contact/profile writes serialize within a tab and use the Web Locks API when
-available for cross-tab read-modify-write serialization. Unsupported browsers
-still have the per-tab queue; concurrent external clients can always race.
-The app preserves unknown profile fields, non-p contact tags and contact-list
-content. Timestamps advance monotonically for these replaceable writes.
-
-Publishing uses OK acknowledgements, not merely `WebSocket.send()`. Partial
-or failed sends store the already-signed public event. Manual retries keep its
-ID and signature and skip acknowledged relays. Retention is seven days, with
-a cap of 30 outbox events per account. There is no autonomous publishing.
-
-## Storage and UI lifetime
-
-localStorage: path-namespaced settings, public key, logout marker and drafts.
-IndexedDB: public events, replaceables, query results, page snapshots, NIP-05,
-relay health, ACKs, local liked IDs and signed outbox records. Memory fallback
-allows reading when IndexedDB is unavailable; its cache is not durable.
-
-Storage pruning runs on worker startup and every 500 writes. It removes
-expired records and retains about 6,000 recent records. Individual page
-snapshots can contain multiple loaded pages; the app is not an archive tool.
-Path namespacing avoids collisions, not same-origin access by other scripts.
-
-Route generations and connected-node checks prevent a late view result from
-replacing the current screen. A started finite request is allowed to finish
-and populate shared caches; route changes do not cancel other consumers'
-shared work. Subsequent hidden-tab requests are not started. Profile posts
-can be deliberately viewed without timeline mute filters; globally filtered
-feeds and direct-reply filtering keep their own policies.
+The statements above describe the implementation, not guarantees that all relays implement every convention identically.

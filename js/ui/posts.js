@@ -1,7 +1,7 @@
-import { el, avatar, button, busy, icon, richText, copy } from './dom.js';
-import { cleanClient, parentId, shortKey } from '../core/utils.js';
-import { profileHref, threadHref } from '../core/router.js';
-import { encodeKey } from '../core/nip19.js';
+import { el, avatar, button, busy, icon, richText, copy } from './dom.js?v=1.1.0';
+import { cleanClient, parentId, shortKey } from '../core/utils.js?v=1.1.0';
+import { profileHref, threadHref } from '../core/router.js?v=1.1.0';
+import { encodeKey } from '../core/nip19.js?v=1.1.0';
 export class Posts {
   constructor(app){this.app=app;}
   render(event,{thread=false,notification=false}={}){

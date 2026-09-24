@@ -1,7 +1,7 @@
-import { DEFAULTS } from '../core/config.js';
-import { el, button, busy, field, toast, empty } from '../ui/dom.js';
-import { lines, normalizeRelay } from '../core/utils.js';
-import { local } from '../core/storage.js';
+import { DEFAULTS } from '../core/config.js?v=1.1.0';
+import { el, button, busy, field, toast, empty } from '../ui/dom.js?v=1.1.0';
+import { lines, normalizeRelay } from '../core/utils.js?v=1.1.0';
+import { local } from '../core/storage.js?v=1.1.0';
 export async function settingsView(app,host){
   const s=app.settings.value,form=el('form',{class:'settings-form'}),inputs={};
   const add=(key,label,tag='input',attrs={})=>{const input=el(tag,{...attrs,value:Array.isArray(s[key])?s[key].join('\n'):s[key]});inputs[key]=input;form.append(field(label,input));return input;};
@@ -13,7 +13,7 @@ export async function settingsView(app,host){
   form.append(el('p',{class:'help'},'読み取りは指定した台数だけ、書き込みは全リレーへ1回ずつ送信します。未使用タブの取得・定期ポーリング・無制限の再接続は行いません。リレーの利用条件による拒否は防げません。'));
   add('readRelayCount','読み取りリレー数','input',{type:'number',min:1,max:12});
   add('requestGapMs','同じリレーへの要求間隔（ミリ秒）','input',{type:'number',min:800,max:10000,step:100});
-  add('batchSize','1ページの取得件数','input',{type:'number',min:10,max:200});
+  form.append(el('p',{class:'help'},'投稿の読み込みは1回につき最大30件です。'));
   form.append(el('h2',{},'表示・ミュート'));
   const select=el('select',{},...Object.entries({light:'ライト',dark:'ダーク',auto:'システム設定'}).map(([value,label])=>el('option',{value,selected:s.theme===value},label)));inputs.theme=select;form.append(field('テーマ',select));
   for(const [key,label]of Object.entries({loadImages:'プロフィール画像を読み込む',verifyNip05:'NIP-05を検証して認証マークを表示',hideIncompleteProfiles:'name / display_name が揃わない投稿者を非表示にする'})){
@@ -34,16 +34,13 @@ export async function settingsView(app,host){
   form.append(el('div',{class:'setting-actions'},save,exportButton,button('JSONインポート',()=>importInput.click(),'button secondary'),importInput));
   form.append(button('初期設定に戻す',()=>{if(confirm('リレーと表示設定を初期値へ戻しますか？')){app.settings.reset();void app.render(app.router.route);}},'text-button'));
   form.addEventListener('submit',e=>e.preventDefault());host.append(form);
-  const diagnostics=el('section',{class:'settings-section'},el('h2',{},'通信状況'));
-  const output=el('div',{});const inspect=async()=>{const stats=await app.network.stats();if(!output.isConnected)return;output.replaceChildren(el('p',{class:'help'},`${stats.mode==='shared-worker'?'タブ間でリレー接続を共有':'このブラウザーではタブごとの接続'} · キャッシュ再利用 ${stats.queryHits}回 · 同時要求の統合 ${stats.coalesced}回 · ${stats.persistent?'IndexedDB保存':'メモリーのみ'}`));
+  const diagnostics=el('section',{class:'settings-section'},el('h2',{},'リレー接続・エラー'));
+  const output=el('div',{});const inspect=async()=>{const stats=await app.network.stats();if(!output.isConnected)return;output.replaceChildren(el('p',{class:'help'},`${stats.mode==='shared-worker'?'タブ間でリレー接続を共有':'このブラウザーではタブごとの接続'} · 同時要求の統合 ${stats.coalesced}回`));
     for(const r of stats.relays){const row=el('div',{class:'relay-status'},el('strong',{},r.relay),el('p',{},`${r.connected?'接続中':'未接続'} · REQ ${r.requests} · CLOSE ${r.closes} · EVENT送信 ${r.publishes} · 受信 ${Math.ceil(r.receivedBytes/1024)} KiB`));if(r.reason)row.append(el('p',{class:'warning'},r.reason+(r.until>Date.now()?` · ${new Date(r.until).toLocaleTimeString()}まで休止`:'')));
       if(r.authRequired){const auth=button('このリレーを認証',()=>busy(auth,async()=>{const info=await app.network.authInfo({relay:r.relay});if(!info.challenge)throw new Error('認証チャレンジがまだ届いていません');if(!confirm(`${r.relay} に公開鍵を提示して認証しますか？`))return;const event=await app.session.sign({kind:22242,tags:[['relay',r.relay],['challenge',info.challenge]],content:''});await app.network.authenticate({relay:r.relay,event});toast('リレー認証を完了しました');await inspect();}),'button secondary');row.append(auth);}output.append(row);}
   };
   const refresh=button('状況を更新',()=>busy(refresh,inspect),'button secondary');diagnostics.append(refresh,output);host.append(diagnostics);await inspect();
   if(!host.isConnected)return;
-  const cache=el('section',{class:'settings-section'},el('h2',{},'キャッシュ'));
-  cache.append(el('p',{class:'help'},'キャッシュを消すと次の閲覧時の通信が増えます。設定と保存済み公開鍵は残ります。'));
-  cache.append(button('キャッシュを削除',async()=>{if(confirm('キャッシュを削除して再読み込みしますか？未完了の署名済み送信も削除されます。')){await app.storage.clear();location.reload();}},'button secondary'));host.append(cache);
   const outbox=el('section',{class:'settings-section'},el('h2',{},'未完了の送信'));host.append(outbox);
   if(app.session.pubkey){const rows=await app.storage.get(`outbox:${app.session.pubkey}`)??[];if(!rows.length)outbox.append(el('p',{class:'help'},'未完了の送信はありません。'));
     for(const item of rows){const row=el('div',{class:'outbox-item'},el('p',{},`kind:${item.event.kind} · ${new Date(item.time).toLocaleString()}`),el('p',{},item.event.content.slice(0,180)),el('p',{class:'help'},item.results.filter(r=>!r.accepted).map(r=>r.relay+': '+r.reason).join('\n')));

@@ -1,75 +1,43 @@
-# Test results: 1.0.1 (2026-09-24)
+# Test results · mikeryan 1.1.0
 
-## Executed
+実行日: 2026-09-24。ここにある件数は今回実行した結果です。公開リレーや実アカウントの試験結果ではありません。
 
-| Check | Result |
+| 検証 | 結果 |
 | --- | --- |
-| Node.js `node --test tests/*.test.js` | 52 passed, 0 failed |
-| Official BIP-340 vectors | All 19 included in the 52 tests passed |
-| Independent Python/OpenSSL signed Nostr fixtures | All included events verified |
-| Corrupted signatures, IDs, tags, timestamps, content, keys | Rejected by tests |
-| Relay queue, dedupe, query cache, cooldown, timeout/CLOSE, ACK reuse | Passed mock-socket tests |
-| Pagination inclusive boundary, partial-failure cursor, full-delta gap | Passed |
-| Metadata batching, persistent-cache abstraction, stale replaceables | Passed |
-| Public-key restore, changed account, denied signature | Passed |
-| NIP-05 cross-user mismatch, cache, 2-request concurrency, HTTP failures | Passed |
-| Strict-mode offline Chromium DOM test | 24 checks passed; no uncaught renderer exceptions |
-| Native ES-module profile regression | 14 checks passed; no uncaught exceptions or HTTP requests |
-| Offline viewport | 1440×1050 desktop; 390×844 mobile; no horizontal overflow |
+| Node 単体テスト | 59件通過、失敗・スキップ0 |
+| ネイティブESモジュールの読み込み・位置・無キャッシュ画面テスト | 26項目通過 |
+| プロフィール編集のネイティブDOM回帰テスト | 14項目通過 |
+| その他機能のオフライン画面回帰テスト | 24項目通過 |
+| JS構文・相対参照・公開入口 | 27モジュールを確認 |
+| 静的サイトのコピー生成 | npm run buildで確認 |
 
-Environment: Node.js v22.16.0; Chromium 144.0.7559.96; Python 3.13.
+画面検証はChromiumです。1440px、390px、320pxの幅を確認しました。画面検証は合計64項目です。失敗を修正してから再実行した最終結果を添付しています。
 
-The offline browser harness now retains strict-mode semantics. It uses
-deterministic fixture accounts and adapters.
-It exercised the actual feature modules and the relay/pool logic with mock
-messages, not a live socket or the actual SharedWorker. The SHA-256 adapter
-used Python hashlib; the separate Node signature tests used Web Crypto.
+## 今回の重点検証
 
-## Profile-editor regression
+3ボタンの表示、スクロールへの追従、実際の画面内の上下端を基準にした要求、1回最大30件、最新取得の現在時刻基準、同じ取得の再実行時に新しいREQが出ること、画面へ戻ると再取得すること、右側通信カードと旧操作ボタンの非表示を確認しました。
 
-The 1.0.0 failure was reproduced in Chromium with strict-mode execution:
-`TypeError: Cannot set property type of #<HTMLTextAreaElement> which has only a getter`.
-The original offline test transformation removed ES-module strict behavior and
-silently ignored that write, so its passing result did not prove this path worked
-in production. The transformation is corrected in this release.
+上方向については途中の投稿の直上に新しい署名済みテスト投稿を挿入し、受信・挿入後も読んでいる投稿の画面座標を維持することを確認しました。単体テストでは同秒集中、疎な期間、6回までの範囲探索、複数フィルター、通信失敗、重複クリックを扱います。
 
-`browser_profile.py` additionally imports native ES modules via Blob URLs and
-uses the actual ProfileView edit button, editor, form elements and CSS. Module
-and asset URLs are mapped for the empty-document test origin. Repository/social
-services are test doubles. It verifies opening, values, close/Escape/reopen,
-rejection with preserved edits, Enter submission, URL validation, no duplicate
-saves, pending-state controls and mobile scrolling. No external HTTP request
-or relay publication occurred. These checks do not validate a real extension.
+保存先に投稿・ページ・問い合わせ・プロフィール・いいね・NIP-05文書が書き込まれないこと、完了済み要求や検証結果をキャッシュから返さないことを確認しました。公開鍵、設定、下書き、未達送信などの操作情報は別扱いです。
 
-## Measured in the offline fixture scenario
+## 模擬通信の計数
 
-A guest opens 10 chronological posts from **one** configured mock relay, with
-four distinct authors and initially empty caches:
+匿名・リレー1台・少数の投稿者というテスト条件では、初回は投稿1REQとまとめたプロフィール1REQです。グローバル画面へ戻る際も新たに2REQです。ログイン時はアカウント取得が追加され、ページに対する自分のいいねはプロフィールと同じまとめ取得に含まれます。プロフィールタブはプロフィール・投稿・投稿者情報を新規取得し、未選択の一覧タブは取得しません。
 
-| Action | Additional REQ messages |
-| --- | ---: |
-| Initial posts + one batched profile fetch | 2 |
-| Open one already-known author's posts tab | 1 |
-| Return to the previously viewed global timeline | 0 |
+スクロールのみでは投稿REQは0でした。完了した各REQに対応するCLOSEを確認しました。NIP-05のHTTP通信、画像、WebSocketハンドシェイク、署名イベント送信はこのREQ件数に含めません。投稿者数、リレー数、同秒投稿数、上方向の探索によって件数は変わります。
 
-The first two finite subscriptions each sent CLOSE at EOSE. No unopened
-followers/mutes/relay tab was queried. Counts exclude HTTP identity checks,
-profile images, WebSocket framing and TCP/TLS. They are test-case measurements,
-not public-network benchmarks or comparisons with the old clients. Different
-relay counts, pages, missing metadata and caches change the result.
+## 検証の境界
 
-## Not executed successfully here
+ネイティブモジュールの読み込みテストはBlob URLを使い、通信・保存・URL遷移・ハッシュ計算の境界をテスト用に置き換えています。広い機能回帰ではモジュールをstrictなクロージャへ変換し、待機時間もテスト内だけ短縮しています。要求間隔の動作は別のNode通信テストで扱います。プロフィール編集試験は実DOMと実ボタンを使い、データサービスを置き換えています。
 
-The localhost HTTP/WebSocket end-to-end harness could not pass initial browser
-navigation because the managed Chromium environment blocked URLs with
-`ERR_BLOCKED_BY_ADMINISTRATOR`. No browser policy was changed. Consequently:
+この環境ではlocalhostへの実ブラウザーナビゲーションがポリシーにより拒否されました。実URLのHTTP/WebSocket・SharedWorkerを通すbrowser_smoke.pyは完了していません。Firefox、実NIP-07拡張機能、実ブラウザー保存領域、SharedWorkerのタブ間共有、公開リレー受け入れ、GitHub Pages本番配置は未検証です。これらを確認済みとは扱っていません。
 
-- Actual browser SharedWorker connection sharing and IndexedDB persistence are not verified here.
-- Public relay connectivity/acceptance and NIP-05 server interoperability are not verified here.
-- Real extension permission UI and key-store behavior are not verified here.
-- GitHub Pages deployment and GitHub Actions execution are not verified here.
-- Firefox, Safari and mobile-device execution are not verified here.
+## 結果ファイル
 
-No real Nostr event was published during testing. The normal-browser local
-harness and deployment checklist are supplied for these integration checks.
-No third-party security audit was performed.
+- unit-tests.tap
+- navigation-results.json
+- profile-editor-results.json
+- offline-browser-results.json
+
+実行方法はTESTING.mdを参照してください。

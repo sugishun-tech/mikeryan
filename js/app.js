@@ -1,20 +1,20 @@
-import { Storage } from './core/storage.js';
-import { Settings } from './settings/store.js';
-import { NetworkClient } from './network/client.js';
-import { Session } from './auth/session.js';
-import { Repository } from './core/repository.js';
-import { Nip05 } from './profiles/nip05.js';
-import { Social } from './social/service.js';
-import { Moderation } from './feed/moderation.js';
-import { Identity } from './ui/identity.js';
-import { Posts } from './ui/posts.js';
-import { Router, profileHref, threadHref } from './core/router.js';
-import { FeedView, feedFilters, composer } from './feed/view.js';
-import { ProfileView } from './profiles/view.js';
-import { settingsView } from './settings/view.js';
-import { el, button, busy, icon, avatar, loading, empty, toast } from './ui/dom.js';
-import { parentId, stableJSON, matchesFilter } from './core/utils.js';
-import { decodeKey } from './core/nip19.js';
+import { Storage } from './core/storage.js?v=1.1.0';
+import { Settings } from './settings/store.js?v=1.1.0';
+import { NetworkClient } from './network/client.js?v=1.1.0';
+import { Session } from './auth/session.js?v=1.1.0';
+import { Repository } from './core/repository.js?v=1.1.0';
+import { Nip05 } from './profiles/nip05.js?v=1.1.0';
+import { Social } from './social/service.js?v=1.1.0';
+import { Moderation } from './feed/moderation.js?v=1.1.0';
+import { Identity } from './ui/identity.js?v=1.1.0';
+import { Posts } from './ui/posts.js?v=1.1.0';
+import { Router, profileHref, threadHref } from './core/router.js?v=1.1.0';
+import { FeedView, feedFilters, composer } from './feed/view.js?v=1.1.0';
+import { ProfileView } from './profiles/view.js?v=1.1.0';
+import { settingsView } from './settings/view.js?v=1.1.0';
+import { el, button, busy, icon, avatar, loading, empty, toast } from './ui/dom.js?v=1.1.0';
+import { parentId, stableJSON, matchesFilter } from './core/utils.js?v=1.1.0';
+import { decodeKey } from './core/nip19.js?v=1.1.0';
 class App {
   async start(){
     this.settings=new Settings();await this.settings.load();this.storage=new Storage();
@@ -40,12 +40,12 @@ class App {
     this.session.on('change',()=>{this.accountKey=null;this.updateAccount();void this.render(this.router.route??{view:'global'});});
     this.social.on('following',()=>this.identity.updateFollows());this.social.on('followBusy',()=>this.identity.updateFollows());
     this.social.on('like',()=>this.posts.updateLikes());this.social.on('likes',()=>this.posts.updateLikes());
-    this.social.on('notice',message=>toast(message));this.social.on('delivery',()=>void this.updateNetwork());
+    this.social.on('notice',message=>toast(message));
     this.settings.on('change',()=>{this.moderation.rebuild();this.applyTheme();this.accountKey=null;});
-    this.repo.on('warning',message=>{if(message!==this.lastWarning){this.lastWarning=message;toast('一部のリレーとの通信を休止しました。設定画面に理由を表示します。',true);}void this.updateNetwork();});
+    this.repo.on('warning',message=>{if(message!==this.lastWarning){this.lastWarning=message;toast('一部のリレーとの通信を休止しました。設定画面に理由を表示します。',true);}});
     this.repo.on('replace',({event})=>{if(event.kind===0&&event.pubkey===this.session.pubkey)this.updateAccount();});
-    window.addEventListener('online',()=>toast('接続が戻りました。新着確認ボタンで取得を再開できます'));
-    window.addEventListener('offline',()=>toast('オフラインです。保存済みの投稿は閲覧できます。',true));
+    window.addEventListener('online',()=>toast('接続が戻りました。読み込みボタンで取得できます'));
+    window.addEventListener('offline',()=>toast('オフラインです。新しい投稿は取得できません。',true));
     window.addEventListener('unhandledrejection',event=>{console.error(event.reason);toast(event.reason?.message??'処理に失敗しました',true);});
   }
   async search(raw){
@@ -70,11 +70,8 @@ class App {
     if(!key){const login=button('NIP-07でログイン',()=>busy(login,()=>this.login()),'button primary');account.replaceChildren(login);return;}
     const profile=this.repo.peekProfile(key);account.replaceChildren(el('a',{href:profileHref(key),class:'account-link'},avatar(profile,'avatar small',this.settings.value.loadImages),el('div',{},el('strong',{},profile.display_name||profile.name||'アカウント'),el('span',{class:'user-handle'},profile.name?'@'+profile.name:key.slice(0,10)+'…'))));
   }
-  async updateNetwork(){
-    try{const s=await this.network.stats(),req=s.relays.reduce((n,r)=>n+r.requests,0),rx=s.relays.reduce((n,r)=>n+r.receivedBytes,0);document.getElementById('network-summary').replaceChildren(el('div',{class:'network-numbers'},el('strong',{},String(req)),el('span',{},'リレーへの取得要求')),el('p',{},`受信 ${Math.ceil(rx/1024)} KiB · キャッシュ再利用 ${s.queryHits}回`),el('p',{class:'help'},s.mode==='shared-worker'?'このサイトのタブ間で接続を共有中':'接続はこのタブ内で共有'));}catch{}
-  }
   async render(route){
-    const token=++this.routeToken;window.scrollTo(0,0);this.onPosted=null;this.identity.reset();const outer=document.getElementById('view'),host=el('section',{class:'view-section'});outer.replaceChildren(host);host.append(loading());
+    const token=++this.routeToken;window.scrollTo(0,0);this.onPosted=null;this.activeFeed?.dispose();this.activeFeed=null;this.identity.reset();this.repo.beginView(this.session.pubkey);const outer=document.getElementById('view'),host=el('section',{class:'view-section'});outer.replaceChildren(host);host.append(loading());
     document.title=`${({global:'グローバル',home:'ホーム',notifications:'通知',profile:'プロフィール',me:'プロフィール',settings:'設定',thread:'スレッド'})[route.view]} / mikeryan`;
     document.getElementById('page-title').textContent=({global:'グローバル',home:'ホーム',notifications:'通知',profile:'プロフィール',me:'プロフィール',settings:'設定',thread:'スレッド'})[route.view]??'mikeryan';
     for(const a of document.querySelectorAll('.nav-item'))a.classList.toggle('active',a.dataset.view===route.view||(route.view==='profile'&&route.pubkey===this.session.pubkey&&a.dataset.view==='me'));
@@ -95,7 +92,6 @@ class App {
         this.onPosted=event=>{if(filters.some(f=>matchesFilter(event,f)))return feed.insert(event);};
       }
     }catch(e){if(token===this.routeToken){host.replaceChildren(empty('読み込みに失敗しました',e.message));host.append(button('もう一度試す',()=>void this.render(route),'button secondary'));}}
-    finally{void this.updateNetwork();}
   }
   async thread(id,host,token){
     const event=await this.repo.event(id);if(token!==this.routeToken)return;

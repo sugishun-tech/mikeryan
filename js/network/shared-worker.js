@@ -1,8 +1,7 @@
-import { Storage } from '../core/storage.js';
-import { RelayPool } from './pool.js';
+import { Storage } from '../core/storage.js?v=1.1.0';
+import { RelayPool } from './pool.js?v=1.1.0';
 const storage = new Storage();
 const pool = new RelayPool(storage);
-void storage.prune();
 const allowed = new Set(['query', 'publish', 'stats', 'authInfo', 'authenticate']);
 self.onconnect = event => {
   const port = event.ports[0];

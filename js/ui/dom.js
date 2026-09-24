@@ -1,5 +1,5 @@
-import { safeURL } from '../core/utils.js';
-import { FALLBACK_ICON } from '../core/config.js';
+import { safeURL } from '../core/utils.js?v=1.1.0';
+import { FALLBACK_ICON } from '../core/config.js?v=1.1.0';
 export function el(tag,attributes={},...children){
   const node=document.createElement(tag);
   for(const [key,value]of Object.entries(attributes)){

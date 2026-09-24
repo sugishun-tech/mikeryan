@@ -2,321 +2,363 @@ TAP version 13
 # Subtest: npub and note roundtrip with checksum / uppercase validation
 ok 1 - npub and note roundtrip with checksum / uppercase validation
   ---
-  duration_ms: 5.531674
+  duration_ms: 3.81748
   type: 'test'
   ...
 # Subtest: Hash / legacy routing supports a single project subpath
 ok 2 - Hash / legacy routing supports a single project subpath
   ---
-  duration_ms: 0.671161
+  duration_ms: 0.818244
   type: 'test'
   ...
 # Subtest: Safe URLs reject insecure remote WebSocket and credentials
 ok 3 - Safe URLs reject insecure remote WebSocket and credentials
   ---
-  duration_ms: 0.304999
+  duration_ms: 0.40821
   type: 'test'
   ...
 # Subtest: NIP-10 direct and nested reply tags preserve root but exclude self
 ok 4 - NIP-10 direct and nested reply tags preserve root but exclude self
   ---
-  duration_ms: 0.403218
+  duration_ms: 0.621089
   type: 'test'
   ...
 # Subtest: Settings validation, old-schema compatibility, and regular expression errors
 ok 5 - Settings validation, old-schema compatibility, and regular expression errors
   ---
-  duration_ms: 0.680315
+  duration_ms: 0.618445
   type: 'test'
   ...
 # Subtest: Persisted public key restores without asking extension again; logout stays out
 ok 6 - Persisted public key restores without asking extension again; logout stays out
   ---
-  duration_ms: 0.667906
+  duration_ms: 0.43434
   type: 'test'
   ...
 # Subtest: Restored session refuses signing with another extension account
 ok 7 - Restored session refuses signing with another extension account
   ---
-  duration_ms: 0.835679
+  duration_ms: 0.483754
   type: 'test'
   ...
 # Subtest: Signature cancellation is not retried automatically
 ok 8 - Signature cancellation is not retried automatically
   ---
-  duration_ms: 0.476318
+  duration_ms: 0.383544
   type: 'test'
   ...
-# Subtest: Storage expiry does not turn errors into positive cache hits
-ok 9 - Storage expiry does not turn errors into positive cache hits
+# Subtest: Only relay cooldowns and pending user-authored sends can be persisted
+ok 9 - Only relay cooldowns and pending user-authored sends can be persisted
   ---
-  duration_ms: 7.391416
+  duration_ms: 7.143275
   type: 'test'
   ...
-# Subtest: Profile lookups batch per-author filters and reuse persistent metadata
-ok 10 - Profile lookups batch per-author filters and reuse persistent metadata
+# Subtest: Concurrent profiles batch; every subsequent explicit read reaches the network
+ok 10 - Concurrent profiles batch; every subsequent explicit read reaches the network
   ---
-  duration_ms: 90.910036
+  duration_ms: 253.425191
   type: 'test'
   ...
-# Subtest: Missing profiles are negatively cached only after a completed fetch
-ok 11 - Missing profiles are negatively cached only after a completed fetch
+# Subtest: Re-entering a view does not restore posts or other users from storage
+ok 11 - Re-entering a view does not restore posts or other users from storage
   ---
-  duration_ms: 243.174768
+  duration_ms: 121.811688
   type: 'test'
   ...
-# Subtest: Old replaceable events cannot overwrite newest cached profile
-ok 12 - Old replaceable events cannot overwrite newest cached profile
+# Subtest: Old replaceable events cannot overwrite newer current-screen metadata
+ok 12 - Old replaceable events cannot overwrite newer current-screen metadata
   ---
-  duration_ms: 0.624771
+  duration_ms: 0.404625
   type: 'test'
   ...
 # Subtest: Read-modify-write refuses incomplete latest list reads
 ok 13 - Read-modify-write refuses incomplete latest list reads
   ---
-  duration_ms: 80.659403
+  duration_ms: 60.227954
   type: 'test'
   ...
-# Subtest: Inclusive timestamp cursor retrieves many same-second events without gaps
-ok 14 - Inclusive timestamp cursor retrieves many same-second events without gaps
+# Subtest: NIP-05 validates identifier and pubkey equality without response storage
+ok 14 - NIP-05 validates identifier and pubkey equality without response storage
   ---
-  duration_ms: 1.390665
-  type: 'test'
-  ...
-# Subtest: Partial relay failure does not advance cursor or mark end-of-history
-ok 15 - Partial relay failure does not advance cursor or mark end-of-history
-  ---
-  duration_ms: 0.175975
-  type: 'test'
-  ...
-# Subtest: Full delta restart allows bridging a gap instead of skipping it
-ok 16 - Full delta restart allows bridging a gap instead of skipping it
-  ---
-  duration_ms: 0.473323
-  type: 'test'
-  ...
-# Subtest: NIP-05 validates identifier, pubkey equality, and cross-user cached identity
-ok 17 - NIP-05 validates identifier, pubkey equality, and cross-user cached identity
-  ---
-  duration_ms: 19.236342
+  duration_ms: 23.063165
   type: 'test'
   ...
 # Subtest: NIP-05 singleflight and semaphore never exceed two concurrent requests
-ok 18 - NIP-05 singleflight and semaphore never exceed two concurrent requests
+ok 15 - NIP-05 singleflight and semaphore never exceed two concurrent requests
   ---
-  duration_ms: 51.889038
+  duration_ms: 53.202381
   type: 'test'
   ...
-# Subtest: NIP-05 CORS / HTTP failure remains unknown, with bounded negative cache
-ok 19 - NIP-05 CORS / HTTP failure remains unknown, with bounded negative cache
+# Subtest: NIP-05 CORS / HTTP failure remains unknown and does not suppress a subsequent request
+ok 16 - NIP-05 CORS / HTTP failure remains unknown and does not suppress a subsequent request
   ---
-  duration_ms: 0.759645
+  duration_ms: 0.465557
   type: 'test'
   ...
 # Subtest: BIP-340 official verification vector 0
-ok 20 - BIP-340 official verification vector 0
+ok 17 - BIP-340 official verification vector 0
   ---
-  duration_ms: 18.016334
+  duration_ms: 12.999123
   type: 'test'
   ...
 # Subtest: BIP-340 official verification vector 1
-ok 21 - BIP-340 official verification vector 1
+ok 18 - BIP-340 official verification vector 1
   ---
-  duration_ms: 7.607411
+  duration_ms: 5.289041
   type: 'test'
   ...
 # Subtest: BIP-340 official verification vector 2
-ok 22 - BIP-340 official verification vector 2
+ok 19 - BIP-340 official verification vector 2
   ---
-  duration_ms: 6.163877
+  duration_ms: 4.231269
   type: 'test'
   ...
 # Subtest: BIP-340 official verification vector 3
-ok 23 - BIP-340 official verification vector 3
+ok 20 - BIP-340 official verification vector 3
   ---
-  duration_ms: 4.087178
+  duration_ms: 3.685623
   type: 'test'
   ...
 # Subtest: BIP-340 official verification vector 4
-ok 24 - BIP-340 official verification vector 4
+ok 21 - BIP-340 official verification vector 4
   ---
-  duration_ms: 3.819274
+  duration_ms: 3.61654
   type: 'test'
   ...
 # Subtest: BIP-340 official verification vector 5
-ok 25 - BIP-340 official verification vector 5
+ok 22 - BIP-340 official verification vector 5
   ---
-  duration_ms: 0.274533
+  duration_ms: 0.265427
   type: 'test'
   ...
 # Subtest: BIP-340 official verification vector 6
-ok 26 - BIP-340 official verification vector 6
+ok 23 - BIP-340 official verification vector 6
   ---
-  duration_ms: 3.989291
+  duration_ms: 3.777851
   type: 'test'
   ...
 # Subtest: BIP-340 official verification vector 7
-ok 27 - BIP-340 official verification vector 7
+ok 24 - BIP-340 official verification vector 7
   ---
-  duration_ms: 3.788808
+  duration_ms: 3.560135
   type: 'test'
   ...
 # Subtest: BIP-340 official verification vector 8
-ok 28 - BIP-340 official verification vector 8
+ok 25 - BIP-340 official verification vector 8
   ---
-  duration_ms: 3.820496
+  duration_ms: 3.71042
   type: 'test'
   ...
 # Subtest: BIP-340 official verification vector 9
-ok 29 - BIP-340 official verification vector 9
+ok 26 - BIP-340 official verification vector 9
   ---
-  duration_ms: 4.3741
+  duration_ms: 3.872432
   type: 'test'
   ...
 # Subtest: BIP-340 official verification vector 10
-ok 30 - BIP-340 official verification vector 10
+ok 27 - BIP-340 official verification vector 10
   ---
-  duration_ms: 3.462877
+  duration_ms: 3.344432
   type: 'test'
   ...
 # Subtest: BIP-340 official verification vector 11
-ok 31 - BIP-340 official verification vector 11
+ok 28 - BIP-340 official verification vector 11
   ---
-  duration_ms: 3.530709
+  duration_ms: 3.771181
   type: 'test'
   ...
 # Subtest: BIP-340 official verification vector 12
-ok 32 - BIP-340 official verification vector 12
+ok 29 - BIP-340 official verification vector 12
   ---
-  duration_ms: 0.102414
+  duration_ms: 0.101472
   type: 'test'
   ...
 # Subtest: BIP-340 official verification vector 13
-ok 33 - BIP-340 official verification vector 13
+ok 30 - BIP-340 official verification vector 13
   ---
-  duration_ms: 0.048854
+  duration_ms: 0.049665
   type: 'test'
   ...
 # Subtest: BIP-340 official verification vector 14
-ok 34 - BIP-340 official verification vector 14
+ok 31 - BIP-340 official verification vector 14
   ---
-  duration_ms: 0.043946
+  duration_ms: 0.040881
   type: 'test'
   ...
 # Subtest: BIP-340 official verification vector 15
-ok 35 - BIP-340 official verification vector 15
+ok 32 - BIP-340 official verification vector 15
   ---
-  duration_ms: 3.94941
+  duration_ms: 3.940304
   type: 'test'
   ...
 # Subtest: BIP-340 official verification vector 16
-ok 36 - BIP-340 official verification vector 16
+ok 33 - BIP-340 official verification vector 16
   ---
-  duration_ms: 4.040647
+  duration_ms: 3.506194
   type: 'test'
   ...
 # Subtest: BIP-340 official verification vector 17
-ok 37 - BIP-340 official verification vector 17
+ok 34 - BIP-340 official verification vector 17
   ---
-  duration_ms: 3.278609
+  duration_ms: 3.3496
   type: 'test'
   ...
 # Subtest: BIP-340 official verification vector 18
-ok 38 - BIP-340 official verification vector 18
+ok 35 - BIP-340 official verification vector 18
   ---
-  duration_ms: 3.122043
+  duration_ms: 3.213326
   type: 'test'
   ...
 # Subtest: Independent OpenSSL/Python fixture: all signed Nostr kinds verify
-ok 39 - Independent OpenSSL/Python fixture: all signed Nostr kinds verify
+ok 36 - Independent OpenSSL/Python fixture: all signed Nostr kinds verify
   ---
-  duration_ms: 228.250883
+  duration_ms: 220.435341
   type: 'test'
   ...
 # Subtest: Reject modified content, id, signature, author, tags and timestamp
-ok 40 - Reject modified content, id, signature, author, tags and timestamp
+ok 37 - Reject modified content, id, signature, author, tags and timestamp
   ---
-  duration_ms: 2.561299
+  duration_ms: 2.590244
   type: 'test'
   ...
 # Subtest: Strict event format rejects invalid scalar types and large bodies
-ok 41 - Strict event format rejects invalid scalar types and large bodies
+ok 38 - Strict event format rejects invalid scalar types and large bodies
   ---
-  duration_ms: 1.341531
+  duration_ms: 1.316839
   type: 'test'
   ...
 # Subtest: Malformed signatures and non-curve public keys never throw
-ok 42 - Malformed signatures and non-curve public keys never throw
+ok 39 - Malformed signatures and non-curve public keys never throw
   ---
-  duration_ms: 0.346753
+  duration_ms: 0.335963
   type: 'test'
   ...
 # Subtest: One relay connection, finite REQ/CLOSE per page and verified deduplication
-ok 43 - One relay connection, finite REQ/CLOSE per page and verified deduplication
+ok 40 - One relay connection, finite REQ/CLOSE per page and verified deduplication
   ---
-  duration_ms: 25.527956
+  duration_ms: 37.421953
   type: 'test'
   ...
 # Subtest: Bad event IDs and signatures are discarded before UI/cache
-ok 44 - Bad event IDs and signatures are discarded before UI/cache
+ok 41 - Bad event IDs and signatures are discarded before UI/cache
   ---
-  duration_ms: 8.309329
+  duration_ms: 8.15666
   type: 'test'
   ...
 # Subtest: Rate limit creates durable cooldown without reconnects or blind retry
-ok 45 - Rate limit creates durable cooldown without reconnects or blind retry
+ok 42 - Rate limit creates durable cooldown without reconnects or blind retry
   ---
-  duration_ms: 5.247687
+  duration_ms: 4.212251
   type: 'test'
   ...
 # Subtest: Timeout always sends CLOSE and is not a successful empty result
-ok 46 - Timeout always sends CLOSE and is not a successful empty result
+ok 43 - Timeout always sends CLOSE and is not a successful empty result
   ---
-  duration_ms: 43.794877
+  duration_ms: 44.509925
   type: 'test'
   ...
-# Subtest: Identical in-flight and completed queries are reused across consumers
-ok 47 - Identical in-flight and completed queries are reused across consumers
+# Subtest: Only in-flight queries coalesce; the same completed query is sent again
+ok 44 - Only in-flight queries coalesce; the same completed query is sent again
   ---
-  duration_ms: 12.322339
+  duration_ms: 12.705044
   type: 'test'
   ...
 # Subtest: Fast EOSE does not truncate slower relay completion
-ok 48 - Fast EOSE does not truncate slower relay completion
+ok 45 - Fast EOSE does not truncate slower relay completion
   ---
-  duration_ms: 36.251651
+  duration_ms: 32.034675
   type: 'test'
   ...
-# Subtest: Successful publication ACK is reused without a second EVENT
-ok 49 - Successful publication ACK is reused without a second EVENT
+# Subtest: Publication is re-sent when explicitly requested; no stored ACK response
+ok 46 - Publication is re-sent when explicitly requested; no stored ACK response
   ---
-  duration_ms: 11.230029
+  duration_ms: 11.797966
   type: 'test'
   ...
 # Subtest: Relay rejected publish remains failure, does not report saved
-ok 50 - Relay rejected publish remains failure, does not report saved
+ok 47 - Relay rejected publish remains failure, does not report saved
   ---
-  duration_ms: 8.934681
+  duration_ms: 7.035062
   type: 'test'
   ...
 # Subtest: Backoff is exponential, rate limits longer than generic errors
-ok 51 - Backoff is exponential, rate limits longer than generic errors
+ok 48 - Backoff is exponential, rate limits longer than generic errors
   ---
-  duration_ms: 0.229436
+  duration_ms: 0.299848
   type: 'test'
   ...
 # Subtest: Filter limits and unsafe relay addresses are rejected without connection
-ok 52 - Filter limits and unsafe relay addresses are rejected without connection
+ok 49 - Filter limits and unsafe relay addresses are rejected without connection
   ---
-  duration_ms: 2.240756
+  duration_ms: 2.539449
   type: 'test'
   ...
-1..52
-# tests 52
+# Subtest: Latest means now-down, at most 30 combined unique rows, replacing the old window
+ok 50 - Latest means now-down, at most 30 combined unique rows, replacing the old window
+  ---
+  duration_ms: 2.180622
+  type: 'test'
+  ...
+# Subtest: Down reads below the supplied viewport anchor, not the oldest loaded row
+ok 51 - Down reads below the supplied viewport anchor, not the oldest loaded row
+  ---
+  duration_ms: 6.368175
+  type: 'test'
+  ...
+# Subtest: Up finds the nearest newer rows instead of jumping to the newest 30
+ok 52 - Up finds the nearest newer rows instead of jumping to the newest 30
+  ---
+  duration_ms: 4.622644
+  type: 'test'
+  ...
+# Subtest: At most six bounded time searches per upward click, with a resumable cursor only
+ok 53 - At most six bounded time searches per upward click, with a resumable cursor only
+  ---
+  duration_ms: 0.545166
+  type: 'test'
+  ...
+# Subtest: Same-second down boundaries are inclusive and do not blindly subtract a second
+ok 54 - Same-second down boundaries are inclusive and do not blindly subtract a second
+  ---
+  duration_ms: 1.178863
+  type: 'test'
+  ...
+# Subtest: Same-second upward page is the nearest lexicographic predecessors
+ok 55 - Same-second upward page is the nearest lexicographic predecessors
+  ---
+  duration_ms: 0.62128
+  type: 'test'
+  ...
+# Subtest: A failed latest read preserves the current timeline and a failed up does not jump
+ok 56 - A failed latest read preserves the current timeline and a failed up does not jump
+  ---
+  duration_ms: 0.343774
+  type: 'test'
+  ...
+# Subtest: Repeated rapid clicks share one operation only, not a completed result
+ok 57 - Repeated rapid clicks share one operation only, not a completed result
+  ---
+  duration_ms: 0.202283
+  type: 'test'
+  ...
+# Subtest: Multiple author filters still add at most thirty total posts
+ok 58 - Multiple author filters still add at most thirty total posts
+  ---
+  duration_ms: 0.850703
+  type: 'test'
+  ...
+# Subtest: Old saved page sizes cannot expand the thirty-row limit
+ok 59 - Old saved page sizes cannot expand the thirty-row limit
+  ---
+  duration_ms: 0.628831
+  type: 'test'
+  ...
+1..59
+# tests 59
 # suites 0
-# pass 52
+# pass 59
 # fail 0
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 582.211949
+# duration_ms 590.960678

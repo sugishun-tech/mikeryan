@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.1.0 (2026-09-24)
+
+- Restore the three manual controls: 下に読み込む, 上に読み込む, 最新を読み込む.
+- Use actual visible post anchors; reflect at most 30 posts per action.
+- Keep controls sticky on desktop/mobile and preserve reading position on insertion.
+- Bound nearest-newer searches and retain only scalar continuation cursors.
+- Remove fetched-data/response caches, IndexedDB access, old timeline controls, and the right-side network card.
+- Fetch only the selected page, batch names and own reactions, share active connections and concurrent identical requests, and close finite subscriptions at EOSE.
+- Keep public-key login, settings, drafts, and authored pending sends.
+- Remove duplicate refresh requests and version all JS imports/CSS/SharedWorker.
+- Add viewport/no-cache browser regressions. See docs/TEST_RESULTS.md for executed tests and limitations.
+
+Earlier entries below describe their historical releases, not the current cache/UI behavior.
+
 ## 1.0.1 (2026-09-24)
 
 ### Profile editor

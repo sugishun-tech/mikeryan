@@ -1,7 +1,7 @@
-import { el, avatar, icon, button, busy } from './dom.js';
-import { profileHref } from '../core/router.js';
-import { shortKey } from '../core/utils.js';
-import { pubkeys } from '../social/service.js';
+import { el, avatar, icon, button, busy } from './dom.js?v=1.1.0';
+import { profileHref } from '../core/router.js?v=1.1.0';
+import { shortKey } from '../core/utils.js?v=1.1.0';
+import { pubkeys } from '../social/service.js?v=1.1.0';
 /** The same identity renderer is used by posts, notifications and profile lists. */
 export class Identity {
   constructor(app){this.app=app;this.observer=new IntersectionObserver(entries=>{for(const entry of entries)if(entry.isIntersecting){const node=entry.target;this.observer.unobserve(node);node._hydrate?.();}},{rootMargin:'120px'});}
@@ -13,7 +13,7 @@ export class Identity {
     wrap.append(el('span',{class:'name-line'},name,badge));if(handle)wrap.append(identifier);
     const paint=profile=>{name.textContent=String(profile.display_name||profile.name||shortKey(pubkey));identifier.textContent=profile.name?'@'+profile.name:shortKey(pubkey);};paint(repo.peekProfile(pubkey));
     wrap._hydrate=async()=>{
-      const profile=await repo.profile(pubkey);if(!wrap.isConnected)return;paint(profile);
+      const profile=repo.peekProfile(pubkey);if(!wrap.isConnected)return;paint(profile);
       if(settings.value.verifyNip05 && typeof profile.nip05==='string'&&profile.nip05){
         badge.textContent='';badge.title=`${profile.nip05} · 検証中`;badge.className='nip05-badge pending';
         const status=await nip05.verify(profile.nip05,pubkey);if(!wrap.isConnected)return;

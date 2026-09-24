@@ -1,6 +1,6 @@
-import { LIMITS } from '../core/config.js';
-import { matchesFilter, nowSeconds, sleep } from '../core/utils.js';
-import { verifyEvent, validEventShape } from '../core/crypto.js';
+import { LIMITS } from '../core/config.js?v=1.1.0';
+import { matchesFilter, nowSeconds, sleep } from '../core/utils.js?v=1.1.0';
+import { verifyEvent, validEventShape } from '../core/crypto.js?v=1.1.0';
 
 export class RelayError extends Error {
   constructor(message, relay, partial = []) { super(message); this.name = 'RelayError'; this.relay = relay; this.partial = partial; }
@@ -17,7 +17,7 @@ export class RelayConnection {
     this.url = url; this.storage = storage; this.socketFactory = socketFactory; this.verify = verify;
     this.gap = gap; this.timeout = timeout; this.socket = null; this.connecting = null;
     this.queue = Promise.resolve(); this.queued = 0; this.lastSent = 0; this.sequence = 0;
-    this.pending = new Map(); this.known = new Map(); this.idleTimer = null; this.challenge = null;
+    this.pending = new Map(); this.idleTimer = null; this.challenge = null;
     this.health = { until: 0, failures: 0, reason: '' };
     this.stats = { connections: 0, requests: 0, closes: 0, publishes: 0, events: 0, invalid: 0, sentBytes: 0, receivedBytes: 0 };
     this.ready = storage.get(`health:${url}`).then(h => { if (h) this.health = h; });
@@ -107,12 +107,8 @@ export class RelayConnection {
             if (closed) return;
             if (++received > maximum) { void finish('restricted: 応答件数の上限を超えました'); return; }
             if (!validEventShape(event) || event.created_at > nowSeconds() + 600 || !filters.some(f => matchesFilter(event, f))) { this.stats.invalid++; return; }
-            // A known id always resolves to the previously verified object, never to an unverified replacement.
-            const known = this.known.get(event.id);
-            if (known) { if (filters.some(f => matchesFilter(known, f))) found.set(known.id, known); return; }
             verification = verification.then(async () => {
               if (await this.verify(event)) {
-                this.known.set(event.id, event); if (this.known.size > 4000) this.known.delete(this.known.keys().next().value);
                 found.set(event.id, event); this.stats.events++;
               } else this.stats.invalid++;
             });

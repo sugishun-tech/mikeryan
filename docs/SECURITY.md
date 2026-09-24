@@ -10,7 +10,7 @@ checked; signed template data and event signatures are checked every time.
 
 The application does not suppress extension approval prompts. Grant signing
 permission only to a deployment you trust. Log out and clear browser site
-data on shared devices when local drafts or cached account data matter.
+data on shared devices when local drafts or saved account settings matter.
 
 ## Cryptography boundary
 
@@ -50,23 +50,15 @@ counts are bounded per request. Custom local regular expressions can still
 be expensive; use simple patterns. Refusing excessive/invalid relay data may
 omit events rather than freeze the UI indefinitely.
 
-## Privacy and caches
+## Privacy and retained state
 
-Profile images and NIP-05 requests reveal your IP and the requested identity
-to their hosts. Both can be disabled in settings. Your relays see queries and
-writes, and manual NIP-42 AUTH discloses the signing public key to that relay.
-The application does not send telemetry or analytics.
+Profile images and NIP-05 requests reveal your IP and requested identity to their hosts; both can be disabled. Relays see queries and writes. Manual NIP-42 authentication discloses the signing public key to that relay. There is no telemetry.
 
-Public events, queried public lists and the public key remain in local caches.
-Draft text is saved in localStorage; failed or partially delivered signed
-public events can remain for seven days. Logout does not delete all these
-records. Settings' cache clear removes IndexedDB records and the outbox but
-not drafts or settings. Full cleanup is the browser's site-data removal.
+Fetched events, profiles, pages, lists, reactions and verification documents are not persisted. Current-screen maps are held only to operate the UI, and a repeated completed read sends a new request. Public login keys, settings, drafts, authored pending/partial writes and relay cooldowns remain in localStorage. Logout does not erase every local record. Pending writes expire after seven days. Browser site-data removal is the full cleanup method; it also removes settings and login state.
 
-GitHub Pages projects under the same owner may share an origin. A path-based
-storage prefix prevents accidental key collisions, not malicious scripts
-from another project on that origin. Only deploy trusted code on a shared
-origin; a separate custom domain provides a separate origin.
+Older 1.0.x IndexedDB databases are no longer used or automatically removed. Complete pending sends in the old version before upgrading. There is no service worker. Static asset HTTP caching is browser-managed and distinct from fetched-content storage.
+
+GitHub Pages projects under the same owner may share an origin. A path prefix prevents accidental collisions, not access by malicious same-origin code. Use trusted deployments and separate origins when required.
 
 ## Availability and known limits
 
@@ -77,6 +69,6 @@ retention or universal propagation. Paid/authenticated relays and other
 restrictions may require user action. No restriction-evasion mechanism exists.
 
 The current execution environment blocks browser URL navigation. Unit tests
-and offline-adapted DOM tests ran; real browser SharedWorker, IndexedDB,
+and native-module/offline-adapted DOM tests ran; real browser SharedWorker,
 extension interoperability, GitHub deployment and public-relay acceptance
 remain integration checks for a normal browser environment.

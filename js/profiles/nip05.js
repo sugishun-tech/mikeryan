@@ -1,5 +1,4 @@
-import { TTL } from '../core/config.js';
-import { isHex, Emitter } from '../core/utils.js';
+import { isHex, Emitter } from '../core/utils.js?v=1.1.0';
 export function parseIdentifier(value) {
   if (typeof value !== 'string' || value.length > 320) return null;
   const match = value.trim().match(/^([a-z0-9._-]+)@([a-z0-9.-]+)$/i);
@@ -10,7 +9,7 @@ export function parseIdentifier(value) {
   return { name, domain, normalized: `${name}@${domain}`, url: `https://${domain}/.well-known/nostr.json?name=${encodeURIComponent(name)}` };
 }
 export class Nip05 extends Emitter {
-  constructor(storage, { fetcher = (...args) => fetch(...args) } = {}) { super(); this.storage = storage; this.fetcher = fetcher; this.inflight = new Map(); this.status = new Map(); this.active = 0; this.waiters = []; this.requests = 0; }
+  constructor(storage, { fetcher = (...args) => fetch(...args) } = {}) { super(); this.fetcher = fetcher; this.inflight = new Map(); this.active = 0; this.waiters = []; this.requests = 0; }
   async slot() { if (this.active < 2) { this.active++; return; } await new Promise(resolve => this.waiters.push(resolve)); }
   release() { const next = this.waiters.shift(); if(next)next(); else this.active--; }
   async document(identifier) {
@@ -18,11 +17,10 @@ export class Nip05 extends Emitter {
     const key = `nip05doc:${parsed.normalized}`;
     if (this.inflight.has(key)) return this.inflight.get(key);
     const task = (async () => {
-      const cached = await this.storage.get(key); if (cached) return cached;
       await this.slot(); const controller = new AbortController(); const timer = setTimeout(() => controller.abort(), 6000);
       try {
         this.requests++;
-        const response = await this.fetcher(parsed.url, { credentials: 'omit', redirect: 'error', referrerPolicy: 'no-referrer', signal: controller.signal });
+        const response = await this.fetcher(parsed.url, { cache: 'no-store', credentials: 'omit', redirect: 'error', referrerPolicy: 'no-referrer', signal: controller.signal });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         if (Number(response.headers?.get('content-length')) > 262144) throw new Error('応答が大きすぎます');
         let text = '';
@@ -33,13 +31,8 @@ export class Nip05 extends Emitter {
         if (text.length > 262144) throw new Error('応答が大きすぎます');
         const data = JSON.parse(text), keyValue = data?.names?.[parsed.name];
         const result = isHex(keyValue) ? { state: 'found', pubkey: keyValue, checked: Date.now() } : { state: 'invalid', reason: '公開鍵の登録が見つかりません', checked: Date.now() };
-        // A domain may return multiple names in one response. Reuse only explicitly
-        // returned, valid mappings; absence in this response proves nothing about other names.
-        const mappings=Object.entries(data?.names??{}).filter(([name,pubkey])=>parseIdentifier(`${name}@${parsed.domain}`)&&isHex(pubkey)).slice(0,100);
-        await Promise.all(mappings.map(([name,pubkey])=>this.storage.set(`nip05doc:${name}@${parsed.domain}`,{state:'found',pubkey,checked:Date.now()},TTL.nip05)));
-        await this.storage.set(key, result, result.state === 'found' ? TTL.nip05 : TTL.nip05Failure);
         return result;
-      } catch { const result = { state: 'unknown', reason: '検証できません（通信・CORS・リダイレクトなど）', checked: Date.now() }; await this.storage.set(key,result,TTL.nip05Failure); return result; }
+      } catch { const result = { state: 'unknown', reason: '検証できません（通信・CORS・リダイレクトなど）', checked: Date.now() }; return result; }
       finally { clearTimeout(timer); this.release(); }
     })();
     this.inflight.set(key,task); try { return await task; } finally { this.inflight.delete(key); }
@@ -48,7 +41,7 @@ export class Nip05 extends Emitter {
     const key = `${identifier}|${pubkey}`;
     const result = await this.document(identifier);
     const status = result.state === 'found' ? { ...result, state: result.pubkey === pubkey ? 'valid' : 'invalid', reason: result.pubkey === pubkey ? 'NIP-05と公開鍵が一致しています（実在の本人であることの保証ではありません）' : 'NIP-05の公開鍵が一致しません' } : result;
-    this.status.set(key,status); this.emit('status',{key,status}); return status;
+    this.emit('status',{key,status}); return status;
   }
   async resolve(identifier) { const result = await this.document(identifier); if(result.state !== 'found')throw new Error(result.reason);return result.pubkey; }
 }

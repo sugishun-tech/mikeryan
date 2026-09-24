@@ -1,13 +1,13 @@
 {
-  "mode": "strict-mode offline DOM with transport/storage/navigation/SHA adapters; no real WebSocket or SharedWorker",
+  "mode": "strict-mode offline DOM with transport/storage/queue-delay/navigation/SHA adapters; no real WebSocket or SharedWorker",
   "passed": 24,
   "checks": [
     "Renderer boots with signed Nostr events, no automatic signing",
     "Cold one-relay timeline uses two REQs: posts + batched metadata",
     "EOSE closes both finite subscriptions",
     "NIP-05 mismatch cannot reuse another author blue badge",
-    "Profile reuses identity; unopened list tabs make no request",
-    "Returning to cached global timeline adds zero REQs",
+    "Profile fetches its metadata and posts; unopened list tabs make no request",
+    "Returning to global performs a fresh posts + metadata read",
     "One NIP-07 login enables account UI",
     "Saved public key restores UI without extension login",
     "Posting sends exactly one verified signed event with mikeryan tag",

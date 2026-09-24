@@ -1,9 +1,7 @@
-import { EventPager } from './pagination.js';
-import { TTL } from '../core/config.js';
-import { chunks, stableJSON, sortEvents } from '../core/utils.js';
-import { el, button, busy, empty, loading, avatar, toast } from '../ui/dom.js';
-import { profileHref } from '../core/router.js';
-import { local } from '../core/storage.js';
+import { EventPager } from './pagination.js?v=1.1.0';
+import { chunks, sortEvents } from '../core/utils.js?v=1.1.0';
+import { el, button, busy, empty, avatar, toast } from '../ui/dom.js?v=1.1.0';
+import { local } from '../core/storage.js?v=1.1.0';
 export function composer(app,parent=null){
   const area=el('textarea',{rows:3,placeholder:parent?'返信を投稿':'いまどうしてる？',maxLength:16000,'aria-label':parent?'返信本文':'投稿本文'});
   const draftKey=`draft:${app.session.pubkey}:${parent?.id??'post'}`;area.value=local.get(draftKey)??'';
@@ -13,47 +11,127 @@ export function composer(app,parent=null){
     if(!area.value.trim())return;const event=await app.social.post(area.value,parent);area.value='';local.remove(draftKey);toast('投稿しました');app.onPosted?.(event);
   }),'button primary');
   const row=el('section',{class:'composer'},avatar(app.repo.peekProfile(app.session.pubkey),'avatar',app.settings.value.loadImages),el('div',{class:'composer-content'},area,el('div',{class:'composer-bottom'},el('span',{class:'muted-text'},'Nostr · テキスト投稿'),send)));
-  if(!app.session.pubkey){area.disabled=true;area.placeholder='ログインして会話に参加しましょう';send.textContent='ログイン';}
+  if(!app.session.pubkey){area.disabled=true;area.placeholder='ログインすると投稿できます';send.textContent='ログイン';}
   return row;
 }
+/** Controls never subscribe on scroll. Scroll is used only to select the anchor. */
 export class FeedView {
-  constructor(app,host,{key,filters,notification=false,threadId=null,composerEnabled=false,moderate=true}){
-    this.app=app;this.host=host;this.key=`page:${stableJSON(app.repo.readRelays())}:${key}:${app.settings.value.batchSize}`;this.filters=filters;this.moderate=moderate;this.notification=notification;this.threadId=threadId;this.pager=null;
-    this.list=el('div',{class:'timeline'});this.status=el('div',{class:'feed-status',role:'status'});
-    const latest=button('最新',()=>busy(latest,()=>this.refresh(true)),'text-button',{title:'最新ページを取得'}),newer=button('新着を確認',()=>busy(newer,()=>this.refresh(false)),'text-button');
-    this.more=button('さらに読み込む',()=>busy(this.more,()=>this.loadOlder()),'button load-more');
-    const sync=button('いいね同期',()=>busy(sync,()=>app.social.loadLikes(this.visibleEvents??[])),'text-button',{title:'表示中の投稿への自分のいいねをリレーから確認（最大200件）'});
-    host.append(el('div',{class:'feed-toolbar'},el('span',{class:'muted-text'},'時系列 · 自動通信なし'),el('div',{},app.session.pubkey?sync:null,newer,latest)));
+  constructor(app, host, {key, filters, notification=false, threadId=null, composerEnabled=false, moderate=true}) {
+    this.app=app; this.host=host; this.key=key; this.filters=filters;
+    this.notification=notification; this.threadId=threadId; this.moderate=moderate;
+    this.dead=false; this.operation=null; this.hiddenCursors={}; this.visibleEvents=[]; this.nodes=new Map();
+    this.pager=new EventPager(filters=>this.alive()?app.repo.query(filters,{retain:false}):Promise.reject(new Error('画面が変更されました')),filters,30);
+    this.list=el('div',{class:'timeline'});
+    this.status=el('div',{class:'feed-status',role:'status'});
+    this.toolbar=el('nav',{class:'feed-toolbar','aria-label':'投稿の読み込み'});
+    this.buttons={};
+    for (const [direction, label, title] of [
+      ['older','下に読み込む','画面内の一番下の投稿から、古い側へ最大30件'],
+      ['newer','上に読み込む','画面内の一番上の投稿から、新しい側へ最大30件'],
+      ['latest','最新を読み込む','現在時刻から、古い側へ最大30件']
+    ]) {
+      const b=button(label,()=>this.read(direction).catch(e=>toast(e.message,true)),
+        'button feed-read-button',{title,'aria-label':label,dataset:{direction}});
+      this.buttons[direction]=b; this.toolbar.append(b);
+    }
+    this.start=el('div',{class:'feed-start','aria-hidden':'true'});
+    host.append(this.start,this.toolbar);
     if(composerEnabled)host.append(composer(app));
-    host.append(this.status,this.list,this.more);this.list.append(loading());
+    host.append(this.status,this.list);
+    app.activeFeed=this;
   }
-  async init(){
-    const saved=await this.app.storage.get(this.key,true);
-    this.pager=new EventPager((filters,options)=>this.app.repo.query(filters,options),this.filters,this.app.settings.value.batchSize,saved?.pager);
-    if(saved?.pager?.events?.length){for(const e of saved.pager.events)await this.app.repo.accept(e);await this.render();return;}
-    if(this.host.isConnected)await this.loadOlder();
+  alive(){return !this.dead && this.host.isConnected;}
+  dispose(){this.dead=true;}
+  init(){return this.read('latest',{initial:true});}
+  viewport() {
+    const top=Math.max(56,this.toolbar.getBoundingClientRect().bottom);
+    const nav=document.querySelector('.sidebar');
+    const bottom=nav && getComputedStyle(nav).position==='fixed' ? nav.getBoundingClientRect().top : window.innerHeight;
+    return {top,bottom};
   }
-  async save(){await this.app.storage.set(this.key,{pager:this.pager.snapshot(),savedAt:Date.now()},TTL.event);}
-  async loadOlder(){if(!this.pager)return;await this.pager.older();await this.save();if(this.host.isConnected)await this.render();}
-  async refresh(latest=false){if(!this.pager)return;await this.pager.refresh({latest});await this.save();if(this.host.isConnected)await this.render();}
-  async insert(event){if(!this.pager)return;this.pager.events.set(event.id,event);await this.save();if(this.host.isConnected)await this.render();}
-  async render(){
-    if(!this.host.isConnected)return;
-    const app=this.app;const events=sortEvents([...this.pager.events.values()]);
-    // Filter cheap content/key rules before asking relays for metadata.
-    const candidates=events.filter(e=>!this.moderate||(!app.moderation.pubkeyMuted(e.pubkey)&&(this.notification||!app.moderation.content.some(r=>r.test(e.content)))));
-    await app.repo.profiles(candidates.map(e=>e.pubkey));if(!this.host.isConnected)return;
-    const visible=candidates.filter(e=>(!this.threadId||app.parentId(e)===this.threadId)&&(!this.moderate||!app.moderation.muted(e,app.repo.peekProfile(e.pubkey),{notification:this.notification})));
-    this.visibleEvents=visible;
-    this.list.replaceChildren(...visible.map(e=>app.posts.render(e,{notification:this.notification})));
-    if(!visible.length)this.list.append(empty(events.length?'表示できる投稿がありません':'投稿が見つかりません',events.length?'現在のミュート・プロフィール表示条件で非表示になっています。設定で変更できます。':'設定中のリレーの範囲です。新着確認または別のリレーでお試しください。'));
-    const hidden=events.length-visible.length;
-    this.status.textContent=[this.pager.warning,hidden?`${hidden}件を表示条件または返信階層により非表示`:null].filter(Boolean).join(' · ');
-    this.more.hidden=this.pager.exhausted;this.more.textContent=this.pager.exhausted?'取得済み':'さらに読み込む';
+  /** Directional screen edge, not the oldest/newest event retained off-screen. */
+  current(direction) {
+    const {top,bottom}=this.viewport();
+    const rows=[...this.list.querySelectorAll(':scope > .post')].map(node=>({node,rect:node.getBoundingClientRect()}));
+    const visible=rows.filter(({rect})=>rect.bottom>top+1 && rect.top<bottom-1);
+    const selected=direction==='older'?visible.at(-1):visible[0];
+    if(selected)return this.pager.events.get(selected.node.dataset.eventId);
+    if(rows.length){
+      const nearest=rows.reduce((a,b)=>Math.abs(b.rect.top-top)<Math.abs(a.rect.top-top)?b:a);
+      return this.pager.events.get(nearest.node.dataset.eventId);
+    }
+    const events=sortEvents([...this.pager.events.values()]);
+    return direction==='older'?events.at(-1):events[0];
+  }
+  scrollAnchor() {
+    const {top}=this.viewport();
+    const node=[...this.list.querySelectorAll(':scope > .post')].find(node=>node.getBoundingClientRect().bottom>top);
+    return node?{id:node.dataset.eventId,top:node.getBoundingClientRect().top}:null;
+  }
+  read(direction,{initial=false}={}) {
+    if(this.operation)return this.operation;
+    const screen=direction==='latest'?null:this.current(direction), continuation=this.hiddenCursors[direction];
+    const anchor=continuation && continuation.screen===screen?.id?continuation.cursor:screen, position=this.scrollAnchor();
+    this.operation=(async()=>{
+      Object.values(this.buttons).forEach(b=>{b.disabled=true;});
+      this.toolbar.setAttribute('aria-busy','true');this.status.textContent='読み込み中…';
+      try{
+        const page=await this.pager.load(direction,anchor);
+        if(!this.alive())return;
+        await Promise.all(page.map(e=>this.app.repo.accept(e)));
+        const candidates=page.filter(e=>this.candidate(e));
+        const key=this.app.session.pubkey;
+        const info=await this.app.repo.decorate(candidates,key);
+        if(!this.alive())return;
+        this.app.social.applyLikes(info.events,candidates,key);
+        const reset=direction==='latest'&&(this.pager.complete||page.length>0);
+        this.render({reset});
+        const hidden=page.filter(e=>!this.visible(e)).length;
+        if(direction==='latest')this.hiddenCursors={};
+        else if(page.length&&hidden===page.length)this.hiddenCursors[direction]={screen:screen?.id,cursor:direction==='older'?page.at(-1):page[0]};
+        else delete this.hiddenCursors[direction];
+        this.status.textContent=[this.pager.warning,
+          page.length?`${page.length}件を取得${hidden?`（${hidden}件は表示条件により非表示）`:''}`:'この範囲に投稿はありません',
+          !info.complete?'投稿者情報の一部を取得できませんでした':null].filter(Boolean).join(' · ');
+        if(direction==='latest'&&!initial) window.scrollTo({top:Math.max(0,window.scrollY+this.start.getBoundingClientRect().top-56),behavior:'instant'});
+        else if(position){
+          const node=this.nodes.get(position.id);
+          if(node)window.scrollBy({top:node.getBoundingClientRect().top-position.top,behavior:'instant'});
+        }
+      } catch(error){if(this.alive())this.status.textContent=error.message;throw error;}
+      finally{Object.values(this.buttons).forEach(b=>{b.disabled=false;});this.toolbar.removeAttribute('aria-busy');}
+    })().finally(()=>{this.operation=null;});
+    return this.operation;
+  }
+  candidate(event){return !this.moderate||(!this.app.moderation.pubkeyMuted(event.pubkey)&&(this.notification||!this.app.moderation.content.some(r=>r.test(event.content))));}
+  visible(event){return this.candidate(event)&&(!this.threadId||this.app.parentId(event)===this.threadId)&&(!this.moderate||!this.app.moderation.muted(event,this.app.repo.peekProfile(event.pubkey),{notification:this.notification}));}
+  render({reset=false}={}){
+    if(!this.alive())return;
+    if(reset){this.list.replaceChildren();this.nodes.clear();}
+    this.list.querySelector('.empty-state')?.remove();
+    const events=sortEvents([...this.pager.events.values()]);
+    this.visibleEvents=events.filter(e=>this.visible(e));
+    const ids=new Set(this.visibleEvents.map(e=>e.id));
+    for(const [id,node] of this.nodes)if(!ids.has(id)){node.remove();this.nodes.delete(id);}
+    // Existing cards stay mounted. Inserting above does not re-request their identities.
+    let cursor=this.list.firstElementChild;
+    for(const event of this.visibleEvents){
+      let node=this.nodes.get(event.id);
+      if(!node){node=this.app.posts.render(event,{notification:this.notification});this.nodes.set(event.id,node);}
+      if(node!==cursor)this.list.insertBefore(node,cursor);else cursor=cursor.nextElementSibling;
+    }
+    if(!this.visibleEvents.length)this.list.append(empty(events.length?'表示できる投稿がありません':'投稿が見つかりません',events.length?'現在の表示・ミュート条件で非表示になっています。':'設定中のリレーの範囲です。'));
+    this.app.posts.updateLikes();
+  }
+  async insert(event){
+    if(!this.alive())return;
+    this.pager.events.set(event.id,event);
+    this.render();
   }
 }
 export function feedFilters(app,view){
   if(view==='global')return [{kinds:[1]}];
   if(view==='notifications')return [{kinds:[1,7],'#p':[app.session.pubkey]}];
-  const authors=[...new Set([app.session.pubkey,...app.social.following])];return chunks(authors,100).map(group=>({kinds:[1],authors:group}));
+  const authors=[...new Set([app.session.pubkey,...app.social.following])];
+  return chunks(authors,100).map(group=>({kinds:[1],authors:group}));
 }
