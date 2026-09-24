@@ -1,0 +1,326 @@
+
+> mikeryan@1.0.0 test
+> node --test tests/*.test.js
+
+TAP version 13
+# Subtest: npub and note roundtrip with checksum / uppercase validation
+ok 1 - npub and note roundtrip with checksum / uppercase validation
+  ---
+  duration_ms: 15.04682
+  type: 'test'
+  ...
+# Subtest: Hash / legacy routing supports a single project subpath
+ok 2 - Hash / legacy routing supports a single project subpath
+  ---
+  duration_ms: 1.508628
+  type: 'test'
+  ...
+# Subtest: Safe URLs reject insecure remote WebSocket and credentials
+ok 3 - Safe URLs reject insecure remote WebSocket and credentials
+  ---
+  duration_ms: 0.608398
+  type: 'test'
+  ...
+# Subtest: NIP-10 direct and nested reply tags preserve root but exclude self
+ok 4 - NIP-10 direct and nested reply tags preserve root but exclude self
+  ---
+  duration_ms: 0.585881
+  type: 'test'
+  ...
+# Subtest: Settings validation, old-schema compatibility, and regular expression errors
+ok 5 - Settings validation, old-schema compatibility, and regular expression errors
+  ---
+  duration_ms: 1.376701
+  type: 'test'
+  ...
+# Subtest: Persisted public key restores without asking extension again; logout stays out
+ok 6 - Persisted public key restores without asking extension again; logout stays out
+  ---
+  duration_ms: 1.215216
+  type: 'test'
+  ...
+# Subtest: Restored session refuses signing with another extension account
+ok 7 - Restored session refuses signing with another extension account
+  ---
+  duration_ms: 1.218212
+  type: 'test'
+  ...
+# Subtest: Signature cancellation is not retried automatically
+ok 8 - Signature cancellation is not retried automatically
+  ---
+  duration_ms: 1.01271
+  type: 'test'
+  ...
+# Subtest: Storage expiry does not turn errors into positive cache hits
+ok 9 - Storage expiry does not turn errors into positive cache hits
+  ---
+  duration_ms: 13.260493
+  type: 'test'
+  ...
+# Subtest: Profile lookups batch per-author filters and reuse persistent metadata
+ok 10 - Profile lookups batch per-author filters and reuse persistent metadata
+  ---
+  duration_ms: 102.413096
+  type: 'test'
+  ...
+# Subtest: Missing profiles are negatively cached only after a completed fetch
+ok 11 - Missing profiles are negatively cached only after a completed fetch
+  ---
+  duration_ms: 243.51916
+  type: 'test'
+  ...
+# Subtest: Old replaceable events cannot overwrite newest cached profile
+ok 12 - Old replaceable events cannot overwrite newest cached profile
+  ---
+  duration_ms: 1.219513
+  type: 'test'
+  ...
+# Subtest: Read-modify-write refuses incomplete latest list reads
+ok 13 - Read-modify-write refuses incomplete latest list reads
+  ---
+  duration_ms: 80.814667
+  type: 'test'
+  ...
+# Subtest: Inclusive timestamp cursor retrieves many same-second events without gaps
+ok 14 - Inclusive timestamp cursor retrieves many same-second events without gaps
+  ---
+  duration_ms: 1.804071
+  type: 'test'
+  ...
+# Subtest: Partial relay failure does not advance cursor or mark end-of-history
+ok 15 - Partial relay failure does not advance cursor or mark end-of-history
+  ---
+  duration_ms: 0.316988
+  type: 'test'
+  ...
+# Subtest: Full delta restart allows bridging a gap instead of skipping it
+ok 16 - Full delta restart allows bridging a gap instead of skipping it
+  ---
+  duration_ms: 0.540251
+  type: 'test'
+  ...
+# Subtest: NIP-05 validates identifier, pubkey equality, and cross-user cached identity
+ok 17 - NIP-05 validates identifier, pubkey equality, and cross-user cached identity
+  ---
+  duration_ms: 49.228617
+  type: 'test'
+  ...
+# Subtest: NIP-05 singleflight and semaphore never exceed two concurrent requests
+ok 18 - NIP-05 singleflight and semaphore never exceed two concurrent requests
+  ---
+  duration_ms: 58.904302
+  type: 'test'
+  ...
+# Subtest: NIP-05 CORS / HTTP failure remains unknown, with bounded negative cache
+ok 19 - NIP-05 CORS / HTTP failure remains unknown, with bounded negative cache
+  ---
+  duration_ms: 0.791527
+  type: 'test'
+  ...
+# Subtest: BIP-340 official verification vector 0
+ok 20 - BIP-340 official verification vector 0
+  ---
+  duration_ms: 34.042011
+  type: 'test'
+  ...
+# Subtest: BIP-340 official verification vector 1
+ok 21 - BIP-340 official verification vector 1
+  ---
+  duration_ms: 19.424368
+  type: 'test'
+  ...
+# Subtest: BIP-340 official verification vector 2
+ok 22 - BIP-340 official verification vector 2
+  ---
+  duration_ms: 7.379363
+  type: 'test'
+  ...
+# Subtest: BIP-340 official verification vector 3
+ok 23 - BIP-340 official verification vector 3
+  ---
+  duration_ms: 8.316934
+  type: 'test'
+  ...
+# Subtest: BIP-340 official verification vector 4
+ok 24 - BIP-340 official verification vector 4
+  ---
+  duration_ms: 9.326942
+  type: 'test'
+  ...
+# Subtest: BIP-340 official verification vector 5
+ok 25 - BIP-340 official verification vector 5
+  ---
+  duration_ms: 0.466249
+  type: 'test'
+  ...
+# Subtest: BIP-340 official verification vector 6
+ok 26 - BIP-340 official verification vector 6
+  ---
+  duration_ms: 7.932713
+  type: 'test'
+  ...
+# Subtest: BIP-340 official verification vector 7
+ok 27 - BIP-340 official verification vector 7
+  ---
+  duration_ms: 11.826701
+  type: 'test'
+  ...
+# Subtest: BIP-340 official verification vector 8
+ok 28 - BIP-340 official verification vector 8
+  ---
+  duration_ms: 13.027235
+  type: 'test'
+  ...
+# Subtest: BIP-340 official verification vector 9
+ok 29 - BIP-340 official verification vector 9
+  ---
+  duration_ms: 12.433775
+  type: 'test'
+  ...
+# Subtest: BIP-340 official verification vector 10
+ok 30 - BIP-340 official verification vector 10
+  ---
+  duration_ms: 6.517714
+  type: 'test'
+  ...
+# Subtest: BIP-340 official verification vector 11
+ok 31 - BIP-340 official verification vector 11
+  ---
+  duration_ms: 6.87444
+  type: 'test'
+  ...
+# Subtest: BIP-340 official verification vector 12
+ok 32 - BIP-340 official verification vector 12
+  ---
+  duration_ms: 0.691321
+  type: 'test'
+  ...
+# Subtest: BIP-340 official verification vector 13
+ok 33 - BIP-340 official verification vector 13
+  ---
+  duration_ms: 0.10439
+  type: 'test'
+  ...
+# Subtest: BIP-340 official verification vector 14
+ok 34 - BIP-340 official verification vector 14
+  ---
+  duration_ms: 0.075552
+  type: 'test'
+  ...
+# Subtest: BIP-340 official verification vector 15
+ok 35 - BIP-340 official verification vector 15
+  ---
+  duration_ms: 6.845509
+  type: 'test'
+  ...
+# Subtest: BIP-340 official verification vector 16
+ok 36 - BIP-340 official verification vector 16
+  ---
+  duration_ms: 5.992072
+  type: 'test'
+  ...
+# Subtest: BIP-340 official verification vector 17
+ok 37 - BIP-340 official verification vector 17
+  ---
+  duration_ms: 8.593875
+  type: 'test'
+  ...
+# Subtest: BIP-340 official verification vector 18
+ok 38 - BIP-340 official verification vector 18
+  ---
+  duration_ms: 6.028197
+  type: 'test'
+  ...
+# Subtest: Independent OpenSSL/Python fixture: all signed Nostr kinds verify
+ok 39 - Independent OpenSSL/Python fixture: all signed Nostr kinds verify
+  ---
+  duration_ms: 427.428607
+  type: 'test'
+  ...
+# Subtest: Reject modified content, id, signature, author, tags and timestamp
+ok 40 - Reject modified content, id, signature, author, tags and timestamp
+  ---
+  duration_ms: 8.955457
+  type: 'test'
+  ...
+# Subtest: Strict event format rejects invalid scalar types and large bodies
+ok 41 - Strict event format rejects invalid scalar types and large bodies
+  ---
+  duration_ms: 7.15966
+  type: 'test'
+  ...
+# Subtest: Malformed signatures and non-curve public keys never throw
+ok 42 - Malformed signatures and non-curve public keys never throw
+  ---
+  duration_ms: 0.73658
+  type: 'test'
+  ...
+# Subtest: One relay connection, finite REQ/CLOSE per page and verified deduplication
+ok 43 - One relay connection, finite REQ/CLOSE per page and verified deduplication
+  ---
+  duration_ms: 61.874821
+  type: 'test'
+  ...
+# Subtest: Bad event IDs and signatures are discarded before UI/cache
+ok 44 - Bad event IDs and signatures are discarded before UI/cache
+  ---
+  duration_ms: 20.166996
+  type: 'test'
+  ...
+# Subtest: Rate limit creates durable cooldown without reconnects or blind retry
+ok 45 - Rate limit creates durable cooldown without reconnects or blind retry
+  ---
+  duration_ms: 7.323006
+  type: 'test'
+  ...
+# Subtest: Timeout always sends CLOSE and is not a successful empty result
+ok 46 - Timeout always sends CLOSE and is not a successful empty result
+  ---
+  duration_ms: 46.026629
+  type: 'test'
+  ...
+# Subtest: Identical in-flight and completed queries are reused across consumers
+ok 47 - Identical in-flight and completed queries are reused across consumers
+  ---
+  duration_ms: 15.884132
+  type: 'test'
+  ...
+# Subtest: Fast EOSE does not truncate slower relay completion
+ok 48 - Fast EOSE does not truncate slower relay completion
+  ---
+  duration_ms: 35.732726
+  type: 'test'
+  ...
+# Subtest: Successful publication ACK is reused without a second EVENT
+ok 49 - Successful publication ACK is reused without a second EVENT
+  ---
+  duration_ms: 17.673923
+  type: 'test'
+  ...
+# Subtest: Relay rejected publish remains failure, does not report saved
+ok 50 - Relay rejected publish remains failure, does not report saved
+  ---
+  duration_ms: 10.309947
+  type: 'test'
+  ...
+# Subtest: Backoff is exponential, rate limits longer than generic errors
+ok 51 - Backoff is exponential, rate limits longer than generic errors
+  ---
+  duration_ms: 0.429824
+  type: 'test'
+  ...
+# Subtest: Filter limits and unsafe relay addresses are rejected without connection
+ok 52 - Filter limits and unsafe relay addresses are rejected without connection
+  ---
+  duration_ms: 1.975098
+  type: 'test'
+  ...
+1..52
+# tests 52
+# suites 0
+# pass 52
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 895.105734
