@@ -54,9 +54,28 @@ omit events rather than freeze the UI indefinitely.
 
 Profile images and NIP-05 requests reveal your IP and requested identity to their hosts; both can be disabled. Relays see queries and writes. Manual NIP-42 authentication discloses the signing public key to that relay. There is no telemetry.
 
-Fetched events, profiles, pages, lists, reactions and verification documents are not persisted. Post maps operate the current UI, and repeated post/like reads send new requests. Successfully fetched profiles alone are reused in tab memory across views, with relay-scope checks and a bounded positive-profile index. Reload/logout/account change clears this reuse; manual profile refresh and write preflights bypass it. NIP-05 document results are still not cached. Public login keys, settings, drafts, authored pending/partial writes and relay cooldowns remain in localStorage. Logout does not erase every local record. Pending writes expire after seven days. Browser site-data removal is the full cleanup method; it also removes settings and login state.
+Fetched posts, lists, pages, relays and reactions are not persisted. Only public
+kind-0 profiles and dated NIP-05 verification are persisted in a dedicated store.
+There is no TTL or background refresh; stale data can remain until an explicit
+profile refresh. The badge identifies the result as checked at the saved date,
+not a guarantee of current identity ownership. Disk reads reverify the metadata
+signature, and verification is bound to event ID, pubkey and NIP-05 identifier.
 
-Older 1.0.x IndexedDB databases are no longer used or automatically removed. Complete pending sends in the old version before upgrading. There is no service worker. Static asset HTTP caching is browser-managed and distinct from fetched-content storage.
+IndexedDB is preferred, with a profile-only localStorage fallback. A blocked or
+full storage facility causes a visible warning; the current UI continues without
+claiming persistence. Public metadata remains on logout. Browser site-data removal
+also deletes this cache, account settings and drafts. Private/incognito browsing
+and browser eviction can prevent long-term persistence. Paths partition names,
+not security boundaries.
+
+Login keys, settings, drafts, authored pending/partial writes and relay cooldowns
+remain in localStorage. Pending writes expire after seven days. A signed relay-list
+write in the outbox is not a fetched relay-list cache. Public relay editing reads
+latest lists before applying a delta and never changes the app's connection settings.
+
+Older 1.0.x generic IndexedDB stores are not imported or automatically removed.
+Complete old pending sends before upgrading. There is no service worker.
+Static-asset and image HTTP caching is browser-managed and separate.
 
 GitHub Pages projects under the same owner may share an origin. A path prefix prevents accidental collisions, not access by malicious same-origin code. Use trusted deployments and separate origins when required.
 

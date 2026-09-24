@@ -1,0 +1,746 @@
+{
+  "conditions": {
+    "baseline": "Unmodified uploaded mikeryan 1.1.1, not original mynostr.",
+    "protocol": "Production Repository, RelayPool, RelayConnection and BIP-340 verification; simulated JSON WebSocket relay.",
+    "data": "Same signed fixture of 30 posts by 30 authors; two relays; own 30 likes for signed-in scenario; five explicit identical reads.",
+    "restart": "New Repository, ProfileCache and RelayPool, same disk-backed string storage. No real native IndexedDB/browser restart is claimed.",
+    "excluded": "Bootstrap/contact/mute reads, static files, images, HTTP response bytes, WebSocket framing, TCP/TLS, relay CPU/I/O, latency, upload costs. NIP-05 HTTP count is a separate 1-identity fixture.",
+    "limits": "Complete conforming metadata on both relays. Boundary searches or missing/capped relay results can require more requests."
+  },
+  "scenarios": [
+    {
+      "version": "1.1.1",
+      "scenario": "signed-in-one-session",
+      "steps": [
+        {
+          "operation": 1,
+          "requests": 4,
+          "closes": 4,
+          "sentJSONBytes": 8528,
+          "receivedJSONBytes": 84634,
+          "receivedEvents": 180,
+          "profileAuthorOccurrences": 60,
+          "filters": 6,
+          "connections": 2
+        },
+        {
+          "operation": 2,
+          "requests": 4,
+          "closes": 4,
+          "sentJSONBytes": 4434,
+          "receivedJSONBytes": 56074,
+          "receivedEvents": 120,
+          "profileAuthorOccurrences": 0,
+          "filters": 4,
+          "connections": 0
+        },
+        {
+          "operation": 3,
+          "requests": 4,
+          "closes": 4,
+          "sentJSONBytes": 4434,
+          "receivedJSONBytes": 56074,
+          "receivedEvents": 120,
+          "profileAuthorOccurrences": 0,
+          "filters": 4,
+          "connections": 0
+        },
+        {
+          "operation": 4,
+          "requests": 4,
+          "closes": 4,
+          "sentJSONBytes": 4434,
+          "receivedJSONBytes": 56074,
+          "receivedEvents": 120,
+          "profileAuthorOccurrences": 0,
+          "filters": 4,
+          "connections": 0
+        },
+        {
+          "operation": 5,
+          "requests": 4,
+          "closes": 4,
+          "sentJSONBytes": 4438,
+          "receivedJSONBytes": 56136,
+          "receivedEvents": 120,
+          "profileAuthorOccurrences": 0,
+          "filters": 4,
+          "connections": 0
+        }
+      ],
+      "total": {
+        "requests": 20,
+        "closes": 20,
+        "sentJSONBytes": 26268,
+        "receivedJSONBytes": 308992,
+        "receivedEvents": 660,
+        "profileAuthorOccurrences": 60,
+        "filters": 22,
+        "connections": 2
+      },
+      "persistedProfileCount": 0
+    },
+    {
+      "version": "1.1.1",
+      "scenario": "anonymous-one-session",
+      "steps": [
+        {
+          "operation": 1,
+          "requests": 4,
+          "closes": 4,
+          "sentJSONBytes": 4286,
+          "receivedJSONBytes": 54454,
+          "receivedEvents": 120,
+          "profileAuthorOccurrences": 60,
+          "filters": 4,
+          "connections": 2
+        },
+        {
+          "operation": 2,
+          "requests": 2,
+          "closes": 2,
+          "sentJSONBytes": 140,
+          "receivedJSONBytes": 25868,
+          "receivedEvents": 60,
+          "profileAuthorOccurrences": 0,
+          "filters": 2,
+          "connections": 0
+        },
+        {
+          "operation": 3,
+          "requests": 2,
+          "closes": 2,
+          "sentJSONBytes": 140,
+          "receivedJSONBytes": 25868,
+          "receivedEvents": 60,
+          "profileAuthorOccurrences": 0,
+          "filters": 2,
+          "connections": 0
+        },
+        {
+          "operation": 4,
+          "requests": 2,
+          "closes": 2,
+          "sentJSONBytes": 140,
+          "receivedJSONBytes": 25868,
+          "receivedEvents": 60,
+          "profileAuthorOccurrences": 0,
+          "filters": 2,
+          "connections": 0
+        },
+        {
+          "operation": 5,
+          "requests": 2,
+          "closes": 2,
+          "sentJSONBytes": 140,
+          "receivedJSONBytes": 25868,
+          "receivedEvents": 60,
+          "profileAuthorOccurrences": 0,
+          "filters": 2,
+          "connections": 0
+        }
+      ],
+      "total": {
+        "requests": 12,
+        "closes": 12,
+        "sentJSONBytes": 4846,
+        "receivedJSONBytes": 157926,
+        "receivedEvents": 360,
+        "profileAuthorOccurrences": 60,
+        "filters": 12,
+        "connections": 2
+      },
+      "persistedProfileCount": 0
+    },
+    {
+      "version": "1.1.1",
+      "scenario": "signed-in-five-restarts",
+      "steps": [
+        {
+          "operation": 1,
+          "requests": 4,
+          "closes": 4,
+          "sentJSONBytes": 8528,
+          "receivedJSONBytes": 84634,
+          "receivedEvents": 180,
+          "profileAuthorOccurrences": 60,
+          "filters": 6,
+          "connections": 2
+        },
+        {
+          "operation": 2,
+          "requests": 4,
+          "closes": 4,
+          "sentJSONBytes": 8528,
+          "receivedJSONBytes": 84634,
+          "receivedEvents": 180,
+          "profileAuthorOccurrences": 60,
+          "filters": 6,
+          "connections": 2
+        },
+        {
+          "operation": 3,
+          "requests": 4,
+          "closes": 4,
+          "sentJSONBytes": 8528,
+          "receivedJSONBytes": 84634,
+          "receivedEvents": 180,
+          "profileAuthorOccurrences": 60,
+          "filters": 6,
+          "connections": 2
+        },
+        {
+          "operation": 4,
+          "requests": 4,
+          "closes": 4,
+          "sentJSONBytes": 8528,
+          "receivedJSONBytes": 84634,
+          "receivedEvents": 180,
+          "profileAuthorOccurrences": 60,
+          "filters": 6,
+          "connections": 2
+        },
+        {
+          "operation": 5,
+          "requests": 4,
+          "closes": 4,
+          "sentJSONBytes": 8528,
+          "receivedJSONBytes": 84634,
+          "receivedEvents": 180,
+          "profileAuthorOccurrences": 60,
+          "filters": 6,
+          "connections": 2
+        }
+      ],
+      "total": {
+        "requests": 20,
+        "closes": 20,
+        "sentJSONBytes": 42640,
+        "receivedJSONBytes": 423170,
+        "receivedEvents": 900,
+        "profileAuthorOccurrences": 300,
+        "filters": 30,
+        "connections": 10
+      },
+      "persistedProfileCount": 0
+    },
+    {
+      "version": "1.1.1",
+      "scenario": "anonymous-five-restarts",
+      "steps": [
+        {
+          "operation": 1,
+          "requests": 4,
+          "closes": 4,
+          "sentJSONBytes": 4286,
+          "receivedJSONBytes": 54454,
+          "receivedEvents": 120,
+          "profileAuthorOccurrences": 60,
+          "filters": 4,
+          "connections": 2
+        },
+        {
+          "operation": 2,
+          "requests": 4,
+          "closes": 4,
+          "sentJSONBytes": 4286,
+          "receivedJSONBytes": 54454,
+          "receivedEvents": 120,
+          "profileAuthorOccurrences": 60,
+          "filters": 4,
+          "connections": 2
+        },
+        {
+          "operation": 3,
+          "requests": 4,
+          "closes": 4,
+          "sentJSONBytes": 4286,
+          "receivedJSONBytes": 54454,
+          "receivedEvents": 120,
+          "profileAuthorOccurrences": 60,
+          "filters": 4,
+          "connections": 2
+        },
+        {
+          "operation": 4,
+          "requests": 4,
+          "closes": 4,
+          "sentJSONBytes": 4286,
+          "receivedJSONBytes": 54454,
+          "receivedEvents": 120,
+          "profileAuthorOccurrences": 60,
+          "filters": 4,
+          "connections": 2
+        },
+        {
+          "operation": 5,
+          "requests": 4,
+          "closes": 4,
+          "sentJSONBytes": 4286,
+          "receivedJSONBytes": 54454,
+          "receivedEvents": 120,
+          "profileAuthorOccurrences": 60,
+          "filters": 4,
+          "connections": 2
+        }
+      ],
+      "total": {
+        "requests": 20,
+        "closes": 20,
+        "sentJSONBytes": 21430,
+        "receivedJSONBytes": 272270,
+        "receivedEvents": 600,
+        "profileAuthorOccurrences": 300,
+        "filters": 20,
+        "connections": 10
+      },
+      "persistedProfileCount": 0
+    },
+    {
+      "version": "1.2.0",
+      "scenario": "signed-in-one-session",
+      "steps": [
+        {
+          "operation": 1,
+          "requests": 4,
+          "closes": 4,
+          "sentJSONBytes": 8528,
+          "receivedJSONBytes": 84634,
+          "receivedEvents": 180,
+          "profileAuthorOccurrences": 60,
+          "filters": 6,
+          "connections": 2
+        },
+        {
+          "operation": 2,
+          "requests": 4,
+          "closes": 4,
+          "sentJSONBytes": 4434,
+          "receivedJSONBytes": 56074,
+          "receivedEvents": 120,
+          "profileAuthorOccurrences": 0,
+          "filters": 4,
+          "connections": 0
+        },
+        {
+          "operation": 3,
+          "requests": 4,
+          "closes": 4,
+          "sentJSONBytes": 4434,
+          "receivedJSONBytes": 56074,
+          "receivedEvents": 120,
+          "profileAuthorOccurrences": 0,
+          "filters": 4,
+          "connections": 0
+        },
+        {
+          "operation": 4,
+          "requests": 4,
+          "closes": 4,
+          "sentJSONBytes": 4434,
+          "receivedJSONBytes": 56074,
+          "receivedEvents": 120,
+          "profileAuthorOccurrences": 0,
+          "filters": 4,
+          "connections": 0
+        },
+        {
+          "operation": 5,
+          "requests": 4,
+          "closes": 4,
+          "sentJSONBytes": 4438,
+          "receivedJSONBytes": 56136,
+          "receivedEvents": 120,
+          "profileAuthorOccurrences": 0,
+          "filters": 4,
+          "connections": 0
+        }
+      ],
+      "total": {
+        "requests": 20,
+        "closes": 20,
+        "sentJSONBytes": 26268,
+        "receivedJSONBytes": 308992,
+        "receivedEvents": 660,
+        "profileAuthorOccurrences": 60,
+        "filters": 22,
+        "connections": 2
+      },
+      "persistedProfileCount": 30
+    },
+    {
+      "version": "1.2.0",
+      "scenario": "anonymous-one-session",
+      "steps": [
+        {
+          "operation": 1,
+          "requests": 4,
+          "closes": 4,
+          "sentJSONBytes": 4286,
+          "receivedJSONBytes": 54454,
+          "receivedEvents": 120,
+          "profileAuthorOccurrences": 60,
+          "filters": 4,
+          "connections": 2
+        },
+        {
+          "operation": 2,
+          "requests": 2,
+          "closes": 2,
+          "sentJSONBytes": 140,
+          "receivedJSONBytes": 25868,
+          "receivedEvents": 60,
+          "profileAuthorOccurrences": 0,
+          "filters": 2,
+          "connections": 0
+        },
+        {
+          "operation": 3,
+          "requests": 2,
+          "closes": 2,
+          "sentJSONBytes": 140,
+          "receivedJSONBytes": 25868,
+          "receivedEvents": 60,
+          "profileAuthorOccurrences": 0,
+          "filters": 2,
+          "connections": 0
+        },
+        {
+          "operation": 4,
+          "requests": 2,
+          "closes": 2,
+          "sentJSONBytes": 140,
+          "receivedJSONBytes": 25868,
+          "receivedEvents": 60,
+          "profileAuthorOccurrences": 0,
+          "filters": 2,
+          "connections": 0
+        },
+        {
+          "operation": 5,
+          "requests": 2,
+          "closes": 2,
+          "sentJSONBytes": 140,
+          "receivedJSONBytes": 25868,
+          "receivedEvents": 60,
+          "profileAuthorOccurrences": 0,
+          "filters": 2,
+          "connections": 0
+        }
+      ],
+      "total": {
+        "requests": 12,
+        "closes": 12,
+        "sentJSONBytes": 4846,
+        "receivedJSONBytes": 157926,
+        "receivedEvents": 360,
+        "profileAuthorOccurrences": 60,
+        "filters": 12,
+        "connections": 2
+      },
+      "persistedProfileCount": 30
+    },
+    {
+      "version": "1.2.0",
+      "scenario": "signed-in-five-restarts",
+      "steps": [
+        {
+          "operation": 1,
+          "requests": 4,
+          "closes": 4,
+          "sentJSONBytes": 8528,
+          "receivedJSONBytes": 84634,
+          "receivedEvents": 180,
+          "profileAuthorOccurrences": 60,
+          "filters": 6,
+          "connections": 2
+        },
+        {
+          "operation": 2,
+          "requests": 4,
+          "closes": 4,
+          "sentJSONBytes": 4434,
+          "receivedJSONBytes": 56074,
+          "receivedEvents": 120,
+          "profileAuthorOccurrences": 0,
+          "filters": 4,
+          "connections": 2
+        },
+        {
+          "operation": 3,
+          "requests": 4,
+          "closes": 4,
+          "sentJSONBytes": 4434,
+          "receivedJSONBytes": 56074,
+          "receivedEvents": 120,
+          "profileAuthorOccurrences": 0,
+          "filters": 4,
+          "connections": 2
+        },
+        {
+          "operation": 4,
+          "requests": 4,
+          "closes": 4,
+          "sentJSONBytes": 4434,
+          "receivedJSONBytes": 56074,
+          "receivedEvents": 120,
+          "profileAuthorOccurrences": 0,
+          "filters": 4,
+          "connections": 2
+        },
+        {
+          "operation": 5,
+          "requests": 4,
+          "closes": 4,
+          "sentJSONBytes": 4434,
+          "receivedJSONBytes": 56074,
+          "receivedEvents": 120,
+          "profileAuthorOccurrences": 0,
+          "filters": 4,
+          "connections": 2
+        }
+      ],
+      "total": {
+        "requests": 20,
+        "closes": 20,
+        "sentJSONBytes": 26264,
+        "receivedJSONBytes": 308930,
+        "receivedEvents": 660,
+        "profileAuthorOccurrences": 60,
+        "filters": 22,
+        "connections": 10
+      },
+      "persistedProfileCount": 30
+    },
+    {
+      "version": "1.2.0",
+      "scenario": "anonymous-five-restarts",
+      "steps": [
+        {
+          "operation": 1,
+          "requests": 4,
+          "closes": 4,
+          "sentJSONBytes": 4286,
+          "receivedJSONBytes": 54454,
+          "receivedEvents": 120,
+          "profileAuthorOccurrences": 60,
+          "filters": 4,
+          "connections": 2
+        },
+        {
+          "operation": 2,
+          "requests": 2,
+          "closes": 2,
+          "sentJSONBytes": 140,
+          "receivedJSONBytes": 25868,
+          "receivedEvents": 60,
+          "profileAuthorOccurrences": 0,
+          "filters": 2,
+          "connections": 2
+        },
+        {
+          "operation": 3,
+          "requests": 2,
+          "closes": 2,
+          "sentJSONBytes": 140,
+          "receivedJSONBytes": 25868,
+          "receivedEvents": 60,
+          "profileAuthorOccurrences": 0,
+          "filters": 2,
+          "connections": 2
+        },
+        {
+          "operation": 4,
+          "requests": 2,
+          "closes": 2,
+          "sentJSONBytes": 140,
+          "receivedJSONBytes": 25868,
+          "receivedEvents": 60,
+          "profileAuthorOccurrences": 0,
+          "filters": 2,
+          "connections": 2
+        },
+        {
+          "operation": 5,
+          "requests": 2,
+          "closes": 2,
+          "sentJSONBytes": 140,
+          "receivedJSONBytes": 25868,
+          "receivedEvents": 60,
+          "profileAuthorOccurrences": 0,
+          "filters": 2,
+          "connections": 2
+        }
+      ],
+      "total": {
+        "requests": 12,
+        "closes": 12,
+        "sentJSONBytes": 4846,
+        "receivedJSONBytes": 157926,
+        "receivedEvents": 360,
+        "profileAuthorOccurrences": 60,
+        "filters": 12,
+        "connections": 10
+      },
+      "persistedProfileCount": 30
+    }
+  ],
+  "comparison": [
+    {
+      "scenario": "signed-in-one-session",
+      "old": {
+        "requests": 20,
+        "closes": 20,
+        "sentJSONBytes": 26268,
+        "receivedJSONBytes": 308992,
+        "receivedEvents": 660,
+        "profileAuthorOccurrences": 60,
+        "filters": 22,
+        "connections": 2
+      },
+      "current": {
+        "requests": 20,
+        "closes": 20,
+        "sentJSONBytes": 26268,
+        "receivedJSONBytes": 308992,
+        "receivedEvents": 660,
+        "profileAuthorOccurrences": 60,
+        "filters": 22,
+        "connections": 2
+      },
+      "reductionPercent": {
+        "requests": 0,
+        "closes": 0,
+        "sentJSONBytes": 0,
+        "receivedJSONBytes": 0,
+        "receivedEvents": 0,
+        "profileAuthorOccurrences": 0,
+        "filters": 0,
+        "connections": 0
+      }
+    },
+    {
+      "scenario": "anonymous-one-session",
+      "old": {
+        "requests": 12,
+        "closes": 12,
+        "sentJSONBytes": 4846,
+        "receivedJSONBytes": 157926,
+        "receivedEvents": 360,
+        "profileAuthorOccurrences": 60,
+        "filters": 12,
+        "connections": 2
+      },
+      "current": {
+        "requests": 12,
+        "closes": 12,
+        "sentJSONBytes": 4846,
+        "receivedJSONBytes": 157926,
+        "receivedEvents": 360,
+        "profileAuthorOccurrences": 60,
+        "filters": 12,
+        "connections": 2
+      },
+      "reductionPercent": {
+        "requests": 0,
+        "closes": 0,
+        "sentJSONBytes": 0,
+        "receivedJSONBytes": 0,
+        "receivedEvents": 0,
+        "profileAuthorOccurrences": 0,
+        "filters": 0,
+        "connections": 0
+      }
+    },
+    {
+      "scenario": "signed-in-five-restarts",
+      "old": {
+        "requests": 20,
+        "closes": 20,
+        "sentJSONBytes": 42640,
+        "receivedJSONBytes": 423170,
+        "receivedEvents": 900,
+        "profileAuthorOccurrences": 300,
+        "filters": 30,
+        "connections": 10
+      },
+      "current": {
+        "requests": 20,
+        "closes": 20,
+        "sentJSONBytes": 26264,
+        "receivedJSONBytes": 308930,
+        "receivedEvents": 660,
+        "profileAuthorOccurrences": 60,
+        "filters": 22,
+        "connections": 10
+      },
+      "reductionPercent": {
+        "requests": 0,
+        "closes": 0,
+        "sentJSONBytes": 38.41,
+        "receivedJSONBytes": 27,
+        "receivedEvents": 26.67,
+        "profileAuthorOccurrences": 80,
+        "filters": 26.67,
+        "connections": 0
+      }
+    },
+    {
+      "scenario": "anonymous-five-restarts",
+      "old": {
+        "requests": 20,
+        "closes": 20,
+        "sentJSONBytes": 21430,
+        "receivedJSONBytes": 272270,
+        "receivedEvents": 600,
+        "profileAuthorOccurrences": 300,
+        "filters": 20,
+        "connections": 10
+      },
+      "current": {
+        "requests": 12,
+        "closes": 12,
+        "sentJSONBytes": 4846,
+        "receivedJSONBytes": 157926,
+        "receivedEvents": 360,
+        "profileAuthorOccurrences": 60,
+        "filters": 12,
+        "connections": 10
+      },
+      "reductionPercent": {
+        "requests": 40,
+        "closes": 40,
+        "sentJSONBytes": 77.39,
+        "receivedJSONBytes": 42,
+        "receivedEvents": 40,
+        "profileAuthorOccurrences": 80,
+        "filters": 40,
+        "connections": 0
+      }
+    }
+  ],
+  "nip05": [
+    {
+      "version": "1.1.1",
+      "checksPerRestart": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "totalHTTP": 5
+    },
+    {
+      "version": "1.2.0",
+      "checksPerRestart": [
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "totalHTTP": 1
+    }
+  ]
+}

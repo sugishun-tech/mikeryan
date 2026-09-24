@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import {ProfileCache} from '../js/profiles/cache.js';
 import {Repository} from '../js/core/repository.js';
 import {compactProfileFilters, missingProfileFilters} from '../js/network/profile-batch.js';
 import {canonicalFilters, stableJSON} from '../js/core/utils.js';
@@ -14,7 +15,10 @@ const individual = authors.map(author=>({kinds:[0],authors:[author],limit:1}));
 function setup(t, options={}) {
   const h=fakeRelay({events:[...data.profiles,...data.pages.flat(),...data.reactions],...options});
   const settings={value:{...DEFAULTS,relays:[relay],readRelayCount:1,requestGapMs:0}};
-  const repo=new Repository(h.storage,h.pool,settings);
+  const memory=new Map(),disk={getItem:k=>memory.get(k)??null,setItem:(k,v)=>memory.set(k,v)};
+  const profileCache=new ProfileCache({indexedDB:null,localStorage:disk});
+  const repo=new Repository(h.storage,h.pool,settings,{profileCache});
+  h.disk=disk;
   t.after(()=>h.close());return {...h,repo,settings};
 }
 const profileFilters = request => request.message.slice(2).filter(f=>f.kinds?.includes(0));
@@ -71,20 +75,20 @@ test('Write preflight bypasses known profiles and refuses partial all-relay resu
  await assert.rejects(h.repo.replacement(0,authors[0],{fresh:true,all:true,required:true}),/全リレー/);
  assert.equal(h.requests().length,3);assert.ok(h.requests().some(r=>r.url===second));
 });
-test('Changing read-relay coverage invalidates known-profile reuse',async t=>{
+test('Changing read-relay coverage does not refresh persistent profiles',async t=>{
  const h=setup(t);await h.repo.profile(authors[0]);h.settings.value.relays=[second];await h.repo.profile(authors[0]);
- assert.equal(h.requests().length,2);assert.equal(h.requests()[1].url,second);
+ assert.equal(h.requests().length,1);
 });
-test('Navigation keeps session profiles; a new repository/tab or logout does not',async t=>{
+test('Navigation, logout and a new repository all reuse persistent profiles',async t=>{
  const h=setup(t);await h.repo.profile(authors[0]);h.repo.beginView(data.user);await h.repo.profile(authors[0]);assert.equal(h.requests().length,1);
- h.repo.resetSession();await h.repo.profile(authors[0]);assert.equal(h.requests().length,2);
- const other=new Repository(h.storage,h.pool,h.settings);await other.profile(authors[0]);assert.equal(h.requests().length,3);
+ h.repo.resetSession();await h.repo.profile(authors[0]);assert.equal(h.requests().length,1);
+ const other=new Repository(h.storage,h.pool,h.settings,{profileCache:new ProfileCache({indexedDB:null,localStorage:h.disk})});await other.profile(authors[0]);assert.equal(h.requests().length,1);
 });
-test('Null, invalid or incomplete profile responses never become known profiles',async t=>{
+test('Absent and invalid results are not cached; verified positive partial profiles can be reused',async t=>{
  const absent=setup(t,{events:[]});await absent.repo.profile(authors[0]);await absent.repo.profile(authors[0]);assert.equal(absent.requests().length,2);
  const h=setup(t);h.settings.value.relays=[relay,second];h.settings.value.readRelayCount=2;h.fail[second]='rate-limited: test';
  await h.repo.profile(authors[0]);const before=h.requests().length;await h.repo.profile(authors[0]);
- assert.equal(h.requests().length,before+1);assert.equal(h.repo.profileReads.size,0);
+ assert.equal(h.requests().length,before);assert.equal(h.repo.profileReads.size,1);
 });
 test('Missing-author repair is per-relay, preserves newer metadata on a capped second relay',async t=>{
  const h=setup(t,{perRelay:{[second]:[...data.profiles.slice(0,29),data.cappedUpdate]},caps:{[second]:5}});
@@ -117,23 +121,23 @@ test('Repair never repeats own reactions, known authors, or starts after failed 
 });
 test('The first repair rejection stops all further repair chunks on that relay',async t=>{
  let count=0;const h=setup(t,{caps:{[relay]:5},fail:{[relay]:()=>++count===2?'rate-limited: stop':null}});
- const result=await h.repo.decorate(data.pages[0],data.user);assert.equal(result.complete,false);assert.equal(h.requests().length,2);assert.equal(h.repo.profileReads.size,0);
+ const result=await h.repo.decorate(data.pages[0],data.user);assert.equal(result.complete,false);assert.equal(h.requests().length,2);assert.equal(h.repo.profileReads.size,5);
 });
 test('A logout during a pending read cannot restore old session metadata',async t=>{
  const h=setup(t,{delay:80});const request=h.repo.profile(authors[0]);await new Promise(r=>setTimeout(r,90));h.repo.resetSession();await request;
  assert.equal(h.repo.profileReads.size,0);assert.equal(h.repo.replacements.size,0);
 });
-test('Session profile memory is bounded and does not evict the active account first',async t=>{
+test('Hot profile memory is bounded without evicting persistent records or the account',async t=>{
  const h=setup(t);h.repo.owner=authors[0];
  const profiles=Array.from({length:LIMITS.sessionProfiles+4},(_,i)=>({...data.profiles[0],pubkey:i===0?authors[0]:i.toString(16).padStart(64,'0')}));
- h.repo.rememberProfiles(profiles,[relay]);assert.equal(h.repo.profileReads.size,LIMITS.sessionProfiles);assert.ok(h.repo.profileReads.has(authors[0]));
+ await h.repo.rememberProfiles(profiles,[relay]);assert.equal(h.repo.profileReads.size,LIMITS.sessionProfiles);assert.ok(h.repo.profileReads.has(authors[0]));
 });
 
 test('Malformed latest metadata cannot become a successful reusable profile via an older valid version',async t=>{
  const h=setup(t,{events:[data.invalidProfile,data.profiles[1]]});
  await h.repo.profile(data.invalidProfile.pubkey);await h.repo.profile(data.invalidProfile.pubkey);
  assert.equal(h.requests().length,2);assert.equal(h.repo.profileReads.size,0);
- await h.repo.accept(data.profiles[1]);h.repo.rememberProfiles([data.profiles[1]],[relay]);
+ await h.repo.accept(data.profiles[1]);await h.repo.rememberProfiles([data.profiles[1]],[relay]);
  assert.equal(h.repo.knownProfile(data.invalidProfile.pubkey,[relay]),null);
 });
 test('Profile batching respects the 100-author ceiling without changing ordinary filter limits',()=>{

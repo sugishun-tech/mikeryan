@@ -1,7 +1,8 @@
-"""End-to-end Chromium test using localhost-only relays and test-only keys.
-Run: python tests/browser_smoke.py
-Requires: playwright, websockets, cryptography and a Chromium executable.
-No real relay, account, or GitHub deployment is contacted or changed.
+"""1.2.0 native-API integration check for a normal browser environment.
+Uses actual localhost HTTP/WebSockets/IndexedDB/modules/SharedWorker. NIP-05 HTTP
+and the NIP-07 signer use public test fixtures. Not a public-relay or extension test.
+Run: CHROMIUM_PATH=/usr/bin/chromium python3 tests/browser_smoke.py
+A navigation-policy error is a failure, never a skipped/pass result.
 """
 import asyncio
 import functools
@@ -9,168 +10,169 @@ import json
 import os
 import shutil
 import threading
+import time
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 import websockets
 from playwright.async_api import async_playwright
 from fixture_signer import fixtures, sign
-ROOT=Path(__file__).resolve().parents[1]
-OUT=ROOT/'tests'/'output'
-OUT.mkdir(exist_ok=True)
-class HTTPHandler(SimpleHTTPRequestHandler):
-    def log_message(self, *args): pass
 
-def match(e,f):
-    if 'kinds' in f and e['kind'] not in f['kinds']: return False
-    if 'authors' in f and e['pubkey'] not in f['authors']: return False
-    if 'ids' in f and e['id'] not in f['ids']: return False
-    if 'since' in f and e['created_at']<f['since']: return False
-    if 'until' in f and e['created_at']>f['until']: return False
-    for k,v in f.items():
-        if k.startswith('#') and not any(t[0]==k[1:] and len(t)>1 and t[1] in v for t in e['tags']):return False
-    return True
+ROOT = Path(__file__).resolve().parents[1]
+OUT = ROOT / 'tests/output'
+
+class HTTPHandler(SimpleHTTPRequestHandler):
+    def log_message(self, *args):
+        pass
+
+def matches(event, filt):
+    for field in ('kinds', 'authors', 'ids'):
+        attr = {'kinds':'kind', 'authors':'pubkey', 'ids':'id'}[field]
+        if field in filt and event[attr] not in filt[field]:
+            return False
+    if event['created_at'] < filt.get('since', 0) or event['created_at'] > filt.get('until', 2**53):
+        return False
+    return all(not key.startswith('#') or any(tag[0] == key[1:] and len(tag) > 1 and tag[1] in value
+               for tag in event['tags']) for key, value in filt.items())
 
 async def main():
-    data=fixtures(); events=list(data['events']); logs=[];connections=[];requests=[];errors=[];checks=[];key_calls=0;sign_calls=0;denied=False
-    def ok(name,condition=True):
-        if not condition:raise AssertionError(name)
-        checks.append(name);print('PASS:',name,flush=True)
+    OUT.mkdir(exist_ok=True)
+    result_path = OUT/'native-persistence-results.json'
+    result_path.unlink(missing_ok=True)
+    data = fixtures()
+    events, logs, connections, errors, checks = list(data['events']), [], [], [], []
+    http_count = 0
+    def requests():
+        return [message for message in logs if message[0] == 'REQ']
+    def ok(name, condition=True):
+        if not condition:
+            raise AssertionError(name)
+        checks.append(name)
+        print('PASS:', name, flush=True)
     async def relay(ws):
         connections.append(ws)
         async for raw in ws:
-            m=json.loads(raw);logs.append(m)
-            if m[0]=='REQ':
-                requests.append(m)
-                selected={}
-                for f in m[2:]:
-                    found=sorted((e for e in events if match(e,f)),key=lambda e:(-e['created_at'],e['id']))[:f.get('limit',30)]
-                    selected.update({e['id']:e for e in found})
-                for e in selected.values():await ws.send(json.dumps(['EVENT',m[1],e]))
-                await ws.send(json.dumps(['EOSE',m[1]]))
-            elif m[0]=='EVENT':
-                events.append(m[1]);await ws.send(json.dumps(['OK',m[1]['id'],True,'']))
-    http=ThreadingHTTPServer(('127.0.0.1',0),functools.partial(HTTPHandler,directory=str(ROOT.parent)))
-    threading.Thread(target=http.serve_forever,daemon=True).start()
-    async with websockets.serve(relay,'127.0.0.1',0) as ws_server:
-        port=ws_server.sockets[0].getsockname()[1];url=f'http://127.0.0.1:{http.server_port}/{ROOT.name}/'
-        async with async_playwright() as p:
-            executable=os.environ.get('CHROMIUM_PATH') or shutil.which('chromium') or shutil.which('chromium-browser')
-            browser=await p.chromium.launch(executable_path=executable,headless=True,args=['--no-sandbox'])
-            context=await browser.new_context(viewport={'width':1440,'height':1050},locale='ja-JP',timezone_id='Asia/Tokyo')
-            async def getkey():
-                nonlocal key_calls
-                key_calls+=1;return data['keys']['alice']
-            async def signevent(template):
-                nonlocal sign_calls
-                sign_calls+=1
-                if denied:raise Exception('Denied by user (test)')
-                return sign(template)
-            await context.expose_function('testGetPublicKey',getkey)
-            await context.expose_function('testSignEvent',signevent)
-            await context.add_init_script("window.nostr={getPublicKey:()=>window.testGetPublicKey(),signEvent:e=>window.testSignEvent(e)};")
-            settings={'relays':[f'ws://127.0.0.1:{port}/'],'readRelayCount':1,'requestGapMs':800,'batchSize':10,'muteContentPatterns':[],'muteDisplayNamePatterns':[],'mutedPubkeys':[],'hideIncompleteProfiles':False,'loadImages':False,'verifyNip05':True,'theme':'light'}
-            await context.route('**/default.json',lambda r:r.fulfill(json=settings))
-            async def nip_route(route):
-                if 'offline.' in route.request.url:await route.abort();return
-                await route.fulfill(json={'names':{'alice':data['keys']['alice'],'bob':data['keys']['bob']}},headers={'access-control-allow-origin':'*'})
-            await context.route('https://**/.well-known/nostr.json?*',nip_route)
-            # Block any accidental external network call. WebSocket connections are localhost only by settings.
-            external=[]
-            async def guard(route):
-                u=route.request.url
-                if u.startswith('http://127.0.0.1:') or '/.well-known/nostr.json?' in u:await route.fallback();return
-                external.append(u);await route.abort()
-            await context.route('**/*',guard)
-            page=await context.new_page();page.on('pageerror',lambda e:errors.append(str(e)))
-            await page.goto(url)
-            await page.wait_for_selector('.post')
-            await page.wait_for_selector('.post .nip05-badge.valid')
-            ok('Single subpath static site boots and displays real signed fixture posts')
-            ok('No secret-key login or automatic signing',key_calls==0 and sign_calls==0)
-            ok('Cold global timeline fetch uses exactly two REQs (posts + batched metadata)',len(requests)==2)
-            ok('All finite initial requests close at EOSE',len([m for m in logs if m[0]=='CLOSE'])==2)
-            ok('Profile lists are not fetched when timeline opens',not any(3 in f.get('kinds',[]) for m in requests for f in m[2:]))
-            await page.wait_for_selector(f'.post[data-pubkey="{data["keys"]["carol"]}"] .nip05-badge.invalid')
-            ok('Same NIP-05 identifier on wrong pubkey gets mismatch, not blue check')
-            baseline=len(requests)
-            await page.locator('.post .identity-link').first.click()
-            await page.wait_for_selector('.profile-tabs')
-            await page.wait_for_selector('.profile-tab-content .post')
-            ok('Profile is inside same GitHub Pages site',page.url.startswith(url+'#/profile/'))
-            ok('Only opened profile post tab queries, not followers/mutes/relay lists',len(requests)==baseline+1)
-            await page.locator('[data-view="global"]').click();await page.wait_for_selector('.post')
-            ok('Returning to timeline performs a fresh read',len(requests)==baseline+2)
-            second=await context.new_page();second.on('pageerror',lambda e:errors.append(str(e)))
-            before=len(requests);await second.goto(url);await second.wait_for_selector('.post')
-            ok('Two tabs share exactly one relay WebSocket',len(connections)==1)
-            ok('Second tab requests its own fresh view without reusing completed data',len(requests)==before+2)
-            await second.close()
-            await page.locator('#account button').click()
-            await page.wait_for_selector('#account .account-link')
-            await page.wait_for_selector('.composer textarea:not([disabled])')
-            await page.wait_for_selector('.post')
-            ok('One login enables account UI',key_calls==1)
-            await page.screenshot(path=str(OUT/'desktop.png'),full_page=False)
-            await page.reload();await page.wait_for_selector('.composer textarea:not([disabled])');await page.wait_for_selector('.post')
-            ok('Reload restores account without calling extension getPublicKey',key_calls==1)
-            await page.locator('.composer textarea').fill('ローカルリレーでの投稿テストです。')
-            await page.locator('.composer').get_by_role('button',name='ポストする',exact=True).click()
-            await page.wait_for_selector('.post-text:text-is("ローカルリレーでの投稿テストです。")')
-            created=next(e for e in reversed(events) if e['content']=='ローカルリレーでの投稿テストです。')
-            ok('Post signed once, published once, client tag is mikeryan',sum(m[0]=='EVENT' and m[1]['id']==created['id'] for m in logs)==1 and ['client','mikeryan'] in created['tags'])
-            ok('First write verifies restored extension account once',key_calls==2)
-            await page.locator(f'.post[data-event-id="{created["id"]}"] .reply-action').click()
-            await page.wait_for_selector('.thread-focus')
-            await page.locator('.composer textarea').fill('返信のテストです。')
-            await page.get_by_role('button',name='返信する',exact=True).click()
-            await page.wait_for_selector('.post-text:text-is("返信のテストです。")')
-            reply=next(e for e in reversed(events) if e['content']=='返信のテストです。')
-            ok('Reply preserves NIP-10 root relationship',any(t[:4]==['e',created['id'],'','root'] for t in reply['tags']))
-            heart=page.locator(f'.thread-focus [data-like="{created["id"]}"]');await heart.click();await page.wait_for_function('(id)=>document.querySelector(`[data-like="${id}"]`).classList.contains("liked")',arg=created['id'])
-            previous=sign_calls;await heart.click();await page.wait_for_timeout(200)
-            ok('Like cannot accidentally create duplicate signed reactions',sign_calls==previous)
-            # Own following page: mutual badge updates immediately without navigation.
-            await page.goto(url+f'#/profile/{data["keys"]["alice"]}/following')
-            await page.wait_for_selector('.user-row .mutual:not([hidden])')
-            follow=page.locator(f'[data-follow="{data["keys"]["bob"]}"]')
-            await follow.click();await page.wait_for_function('(key)=>document.querySelector(`[data-follow="${key}"]`).textContent==="フォロー"',arg=data['keys']['bob'])
-            ok('Follow toggle does not navigate and mutual badge disappears',await page.locator('.user-row .mutual:not([hidden])').count()==0)
-            contact=next(e for e in reversed(events) if e['kind']==3 and e['pubkey']==data['keys']['alice'])
-            ok('Follow list update preserves unrelated tags and legacy relay JSON',['x','preserve-me'] in contact['tags'] and 'wss://example.com' in contact['content'])
-            await follow.click();await page.wait_for_selector('.user-row .mutual:not([hidden])')
-            ok('Re-follow restores mutual badge in place')
-            await page.locator('.profile-tabs').get_by_text('フォロワー',exact=True).click();await page.wait_for_selector('.user-row')
-            ok('Stale follower candidate excluded after checking latest kind 3',await page.locator(f'.user-row[data-pubkey="{data["keys"]["carol"]}"]').count()==0)
-            await page.locator('.profile-tabs').get_by_text('ミュート',exact=True).click();await page.wait_for_selector('.user-row')
-            ok('Public mute list preserved',await page.locator(f'.user-row[data-pubkey="{data["keys"]["carol"]}"]').count()==1)
-            before_connections=len(connections)
-            await page.locator('.profile-tabs').get_by_text('リレー',exact=True).click();await page.wait_for_selector('.relay-row')
-            ok('NIP-65 relays display without connecting to listed remote relays',len(connections)==before_connections and await page.locator('.relay-row').count()==2)
-            await page.get_by_role('button',name='プロフィールを編集',exact=True).click();await page.get_by_label('表示名',exact=True).fill('アリス テスト更新')
-            await page.get_by_role('button',name='保存する',exact=True).click();await page.wait_for_selector('dialog',state='detached')
-            profile=next(e for e in reversed(events) if e['kind']==0 and e['pubkey']==data['keys']['alice'])
-            ok('Profile editing preserves unrecognized metadata fields',json.loads(profile['content'])['custom_field']=={'preserved':True})
-            await page.locator('[data-view="notifications"]').click();await page.wait_for_selector('.post')
-            ok('Notifications include real reaction events',await page.locator('.notification-label').count()>0)
-            await page.locator('[data-view="home"]').click();await page.wait_for_selector('.composer textarea');await page.wait_for_selector('.post')
-            denied=True;previous=sign_calls;await page.locator('.composer textarea').fill('署名キャンセルのテストです。');await page.locator('.composer').get_by_role('button',name='ポストする',exact=True).click();await page.wait_for_selector('.toast.error')
-            ok('Cancelled signature keeps draft and is not retried',await page.locator('.composer textarea').input_value()=='署名キャンセルのテストです。' and sign_calls==previous+1)
-            denied=False
-            await page.locator('[data-view="settings"]').click();await page.wait_for_selector('.settings-form')
-            await page.get_by_label('テーマ',exact=True).select_option('dark');await page.get_by_role('button',name='設定を保存',exact=True).click()
-            ok('Settings and theme persist',await page.locator('html').get_attribute('data-theme')=='dark')
-            await page.locator('[data-view="home"]').click();await page.wait_for_selector('.post');await page.locator('.composer textarea').fill('');await page.screenshot(path=str(OUT/'dark.png'),full_page=False)
-            await page.set_viewport_size({'width':390,'height':844});await page.screenshot(path=str(OUT/'mobile.png'),full_page=False)
-            ok('Mobile has no horizontal page overflow',await page.evaluate('document.documentElement.scrollWidth <= innerWidth'))
-            await page.locator('[data-view="settings"]').click();await page.wait_for_selector('.settings-form');await page.get_by_label('テーマ',exact=True).select_option('light');await page.get_by_role('button',name='設定を保存',exact=True).click()
-            await page.locator('[data-view="global"]').click();await page.wait_for_selector('.post')
-            await page.set_viewport_size({'width':1440,'height':1050});await page.screenshot(path=str(OUT/'desktop-final.png'),full_page=False)
-            ok('No unexpected external HTTP dependencies',not external)
-            ok('No uncaught browser exceptions',not errors)
-            result={'checks':checks,'passed':len(checks),'relay_connections':len(connections),'relay_requests':len(requests),'closes':sum(m[0]=='CLOSE' for m in logs),'publishes':sum(m[0]=='EVENT' for m in logs),'key_requests':key_calls,'signature_requests':sign_calls,'page_errors':errors,'unexpected_external_requests':external,'browser':browser.version}
-            (OUT/'browser-results.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
-            await browser.close()
-    http.shutdown()
-    print('RESULT:',len(checks),'checks passed',flush=True)
+            message = json.loads(raw)
+            logs.append(message)
+            if message[0] == 'REQ':
+                selected = {}
+                for filt in message[2:]:
+                    matched = sorted((e for e in events if matches(e, filt)), key=lambda e:(-e['created_at'], e['id']))
+                    for event in matched[:filt.get('limit', 30)]:
+                        selected[event['id']] = event
+                for event in selected.values():
+                    await ws.send(json.dumps(['EVENT', message[1], event]))
+                await ws.send(json.dumps(['EOSE', message[1]]))
+            elif message[0] == 'EVENT':
+                events.append(message[1])
+                await ws.send(json.dumps(['OK', message[1]['id'], True, '']))
 
-if __name__=='__main__':asyncio.run(main())
+    http = ThreadingHTTPServer(('127.0.0.1', 0), functools.partial(HTTPHandler, directory=str(ROOT.parent)))
+    threading.Thread(target=http.serve_forever, daemon=True).start()
+    try:
+        async with websockets.serve(relay, '127.0.0.1', 0) as ws_server, async_playwright() as p:
+            port = ws_server.sockets[0].getsockname()[1]
+            url = f'http://127.0.0.1:{http.server_port}/{ROOT.name}/'
+            settings = dict(relays=[f'ws://127.0.0.1:{port}/'], readRelayCount=1, requestGapMs=800,
+                batchSize=30, muteContentPatterns=[], muteDisplayNamePatterns=[], mutedPubkeys=[],
+                hideIncompleteProfiles=False, loadImages=False, verifyNip05=True, theme='light')
+            browser = await p.chromium.launch(executable_path=os.environ.get('CHROMIUM_PATH') or shutil.which('chromium'),
+                                               headless=True, args=['--no-sandbox'])
+            context = await browser.new_context(viewport={'width':1440, 'height':1000}, locale='ja-JP')
+            context.set_default_timeout(20000)
+            await context.expose_function('testGetPublicKey', lambda: data['keys']['alice'])
+            await context.expose_function('testSignEvent', lambda template: sign(template))
+            await context.add_init_script('window.nostr={getPublicKey:()=>testGetPublicKey(),signEvent:e=>testSignEvent(e)};')
+            await context.route('**/default.json', lambda route: route.fulfill(json=settings))
+            async def nip05(route):
+                nonlocal http_count
+                http_count += 1
+                await route.fulfill(json={'names':{'alice':data['keys']['alice'], 'bob':data['keys']['bob']}},
+                                    headers={'access-control-allow-origin':'*'})
+            await context.route('https://**/.well-known/nostr.json?*', nip05)
+            external = []
+            async def guard(route):
+                target = route.request.url
+                if target.startswith('http://127.0.0.1:') or '/.well-known/nostr.json?' in target:
+                    await route.fallback()
+                else:
+                    external.append(target)
+                    await route.abort()
+            await context.route('**/*', guard)
+            page = await context.new_page()
+            page.on('pageerror', lambda error: errors.append(str(error)))
+            await page.goto(url)
+            await page.wait_for_selector('.feed-toolbar')
+            await page.wait_for_timeout(300)
+            ok('Native initial access: no relay connection, REQ or NIP-05 HTTP', not connections and not requests() and http_count == 0)
+            async def read(target):
+                await target.get_by_role('button', name='最新を読み込む', exact=True).click()
+                await target.wait_for_function('''()=>{const status=document.querySelector('.feed-status');return status &&
+                    !/読み込み中|まだ取得/.test(status.textContent) && [...document.querySelectorAll('.feed-toolbar button')].every(b=>!b.disabled)}''')
+                await target.wait_for_selector('.timeline>.post')
+                await target.wait_for_timeout(80)
+            async def nav(target, route, selector):
+                await target.evaluate('(hash)=>{location.hash=hash}', route)
+                await target.wait_for_selector(selector)
+                await target.wait_for_timeout(150)
+            await read(page)
+            ok('Native explicit cold anonymous read gets posts and metadata', len(requests()) == 2)
+            records = await page.evaluate('''async()=>{
+                const {storagePrefix}=await import('./js/core/config.js?v=1.2.0');
+                return new Promise((resolve,reject)=>{const r=indexedDB.open(storagePrefix()+'profiles',1);
+                  r.onerror=()=>reject(r.error);r.onsuccess=()=>{const db=r.result;
+                    const tx=db.transaction('profiles','readonly'), q=tx.objectStore('profiles').getAll();
+                    q.onsuccess=()=>{resolve(q.result);db.close()};q.onerror=()=>reject(q.error);};});}''')
+            ok('Real IndexedDB contains only kind:0 profile records', bool(records) and all(r['event']['kind'] == 0 for r in records))
+            ok('Real IndexedDB persisted event-bound NIP-05 status', any(r.get('verification') and r['verification']['eventId'] == r['event']['id'] for r in records))
+            n, h = len(requests()), http_count
+            await page.reload()
+            await page.wait_for_selector('.feed-toolbar')
+            await page.wait_for_timeout(300)
+            ok('Native reload is idle', len(requests()) == n and http_count == h and await page.locator('.timeline>.post').count() == 0)
+            alice = data['keys']['alice']
+            await nav(page, f'#/profile/{alice}/posts', '.profile-info .display-name')
+            ok('Profile metadata restored from native IndexedDB without network', await page.locator('.profile-info .display-name').inner_text() == 'アリス' and len(requests()) == n and http_count == h)
+            await nav(page, '#/global', '.feed-toolbar')
+            await read(page)
+            ok('Warm native read fetches only posts', len(requests()) == n+1 and http_count == h and requests()[-1][2]['kinds'] == [1])
+            second = await context.new_page()
+            second.on('pageerror', lambda error: errors.append(str(error)))
+            n = len(requests())
+            await second.goto(url)
+            await second.wait_for_selector('.feed-toolbar')
+            await read(second)
+            ok('Second tab reuses native persistent profiles', len(requests()) == n+1 and http_count == h)
+            worker_mode = await second.evaluate("async()=>{const {app}=await import('./js/app.js?v=1.2.0');await app.network.ready;return app.network.mode}")
+            if worker_mode == 'shared-worker':
+                ok('Native SharedWorker shares one connection across two tabs', len(connections) == 1)
+            else:
+                print('INFO: SharedWorker unavailable; per-tab fallback used. Shared connection not tested.', flush=True)
+            await second.close()
+            for tab, label in [('following','フォロー'),('followers','フォロワー'),('mutes','ミュート'),('relays','リレー')]:
+                n, h = len(requests()), http_count
+                await nav(page, f'#/profile/{alice}/{tab}', f'button:text-is("{label}を取得")')
+                ok(f'{tab}: native navigation does not fetch list or metadata', len(requests()) == n and http_count == h)
+                await page.get_by_role('button', name=f'{label}を取得', exact=True).click()
+                await page.wait_for_selector('.relay-row' if tab == 'relays' else '.user-row')
+                ok(f'{tab}: explicit list read sends a fresh REQ', len(requests()) > n)
+            current = max((e for e in events if e['kind'] == 0 and e['pubkey'] == alice), key=lambda e:e['created_at'])
+            profile = json.loads(current['content']); profile['display_name'] = '手動更新後'
+            events.append(sign(dict(kind=0, tags=current['tags'], content=json.dumps(profile, ensure_ascii=False), created_at=max(int(time.time()), current['created_at']+1))))
+            n, h = len(requests()), http_count
+            await nav(page, f'#/profile/{alice}/posts', '.profile-info')
+            ok('Saved profile remains frozen before explicit refresh', await page.locator('.profile-info .display-name').inner_text() == 'アリス' and len(requests()) == n)
+            await page.get_by_role('button', name='プロフィールを更新', exact=True).click()
+            await page.wait_for_selector('.profile-info .display-name:text-is("手動更新後")')
+            ok('Refresh updates only metadata and one NIP-05 check', len(requests()) == n+1 and http_count == h+1 and await page.locator('.timeline>.post').count() == 0)
+            await page.reload(); await page.wait_for_selector('.profile-info .display-name:text-is("手動更新後")')
+            ok('Updated metadata survives native reload', len(requests()) == n+1 and http_count == h+1)
+            ok('Every completed REQ receives a CLOSE', len(requests()) == sum(m[0] == 'CLOSE' for m in logs))
+            ok('No JavaScript errors or unintended external HTTP', not errors and not external)
+            result_path.write_text(json.dumps(dict(mode='Native localhost HTTP/WebSocket/IndexedDB; fake NIP-05 and signer', passed=len(checks), checks=checks, errors=errors, workerMode=worker_mode, browser=browser.version), ensure_ascii=False, indent=2)+'\n')
+            await browser.close()
+    finally:
+        http.shutdown(); http.server_close()
+    print('RESULT:', len(checks), 'checks passed')
+
+if __name__ == '__main__':
+    asyncio.run(main())

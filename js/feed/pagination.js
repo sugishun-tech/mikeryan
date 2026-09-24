@@ -1,5 +1,5 @@
-import { LIMITS } from '../core/config.js?v=1.1.1';
-import { compareEvents, nowSeconds, sortEvents } from '../core/utils.js?v=1.1.1';
+import { LIMITS } from '../core/config.js?v=1.2.0';
+import { compareEvents, nowSeconds, sortEvents } from '../core/utils.js?v=1.2.0';
 
 /** Manual, viewport-anchored pages. `events` is the current rendered timeline only. */
 export class EventPager {

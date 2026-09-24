@@ -55,7 +55,7 @@ test('Only relay cooldowns and pending user-authored sends can be persisted',asy
  await s.set('health:x',{until:1},2);assert.deepEqual(await s.get('health:x'),{until:1});await sleep(5);assert.equal(await s.get('health:x'),undefined);
  await s.set('outbox:x',[{id:'pending'}]);assert.equal((await s.get('outbox:x')).length,1);await s.delete('outbox:x');assert.equal(await s.get('outbox:x'),undefined);
 });
-function repoHarness(){let calls=[];const storage=new Storage();const network={query:async q=>{calls.push(q);return {events:sortEvents(fixture.events.filter(e=>q.filters.some(f=>matchesFilter(e,f)))),complete:true,errors:[]};}};return {repo:new Repository(storage,network,{value:{...DEFAULTS}}),calls,storage};}
+function repoHarness(){store.clear();let calls=[];const storage=new Storage();const network={query:async q=>{calls.push(q);return {events:sortEvents(fixture.events.filter(e=>q.filters.some(f=>matchesFilter(e,f)))),complete:true,errors:[]};}};return {repo:new Repository(storage,network,{value:{...DEFAULTS}}),calls,storage};}
 test('Concurrent profiles use one author-list filter; only explicit refresh re-fetches known profiles',async()=>{
  const {repo,calls}=repoHarness();await Promise.all([repo.profile(alice),repo.profile(bob),repo.profile(alice)]);
  assert.equal(calls.length,1);assert.equal(calls[0].filters.length,1);assert.equal(calls[0].filters[0].limit,2);
@@ -64,10 +64,10 @@ test('Concurrent profiles use one author-list filter; only explicit refresh re-f
  await repo.profile(alice,{fresh:true});assert.equal(calls.length,2);
  await repo.profile('0'.repeat(64));await repo.profile('0'.repeat(64));assert.equal(calls.length,4);
 });
-test('Navigation discards posts but keeps positive session profiles without any storage writes',async()=>{
+test('Navigation discards posts but retains persistent public profiles through logout',async()=>{
  const {repo,calls,storage}=repoHarness();await repo.profile(bob);repo.beginView(alice);assert.equal(repo.peekProfile(bob).name,'bob');assert.equal(repo.events.size,0);
  await repo.profile(bob);assert.equal(calls.length,1);assert.equal(storage.memory.size,0);
- repo.resetSession();await repo.profile(bob);assert.equal(calls.length,2);
+ repo.resetSession();await repo.profile(bob);assert.equal(calls.length,1);
 });
 test('Old replaceable events cannot overwrite newer current-screen metadata',async()=>{
  const {repo}=repoHarness();const old=fixture.events[0],fresh={...old,id:'0'.repeat(64),created_at:old.created_at+1,content:'{"name":"new"}'};

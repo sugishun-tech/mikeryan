@@ -1,8 +1,8 @@
-import { RelayConnection } from './relay.js?v=1.1.1';
-import { LIMITS } from '../core/config.js?v=1.1.1';
-import { canonicalFilters, chunks, normalizeRelay, sortEvents, stableJSON, unique } from '../core/utils.js?v=1.1.1';
-import { missingProfileFilters } from './profile-batch.js?v=1.1.1';
-import { verifyEvent } from '../core/crypto.js?v=1.1.1';
+import { RelayConnection } from './relay.js?v=1.2.0';
+import { LIMITS } from '../core/config.js?v=1.2.0';
+import { canonicalFilters, chunks, normalizeRelay, sortEvents, stableJSON, unique } from '../core/utils.js?v=1.2.0';
+import { missingProfileFilters } from './profile-batch.js?v=1.2.0';
+import { verifyEvent } from '../core/crypto.js?v=1.2.0';
 
 export class RelayPool {
   constructor(storage, options = {}) { this.storage = storage; this.options = options; this.connections = new Map(); this.inflight = new Map(); this.coalesced = 0; }

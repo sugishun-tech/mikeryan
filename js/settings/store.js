@@ -1,6 +1,6 @@
-import { DEFAULTS, LIMITS } from '../core/config.js?v=1.1.1';
-import { local } from '../core/storage.js?v=1.1.1';
-import { Emitter, lines, normalizeRelay, parseJSON, unique, isHex } from '../core/utils.js?v=1.1.1';
+import { DEFAULTS, LIMITS } from '../core/config.js?v=1.2.0';
+import { local } from '../core/storage.js?v=1.2.0';
+import { Emitter, lines, normalizeRelay, parseJSON, unique, isHex } from '../core/utils.js?v=1.2.0';
 const array = (v, fallback = []) => Array.isArray(v) ? v : fallback;
 export function validateSettings(input) {
   const merged = { ...DEFAULTS, ...input };

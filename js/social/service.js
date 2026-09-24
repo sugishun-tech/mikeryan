@@ -1,19 +1,21 @@
-import { APP_NAME, OUTBOX_RETENTION, storagePrefix } from '../core/config.js?v=1.1.1';
-import { Emitter, isHex, nowSeconds, parseJSON, replyTags, unique } from '../core/utils.js?v=1.1.1';
+import { relayEntries, relayListTags, changeRelayTags } from '../profiles/relay-list.js?v=1.2.0';
+import { APP_NAME, OUTBOX_RETENTION, storagePrefix } from '../core/config.js?v=1.2.0';
+import { Emitter, isHex, nowSeconds, parseJSON, replyTags, unique } from '../core/utils.js?v=1.2.0';
 const pubkeys = event => unique((event?.tags ?? []).filter(t=>t[0]==='p' && isHex(t[1])).map(t=>t[1]));
 export { pubkeys };
 export class Social extends Emitter {
   constructor(repository, session, settings, storage, network) {
     super(); this.repo=repository;this.session=session;this.settings=settings;this.storage=storage;this.network=network;
-    this.following=new Set();this.likes=new Set();this.pending=new Set();this.writeQueue=Promise.resolve();
-    this.repo.on('replace',({event})=>{if(event.pubkey===this.session.pubkey && event.kind===3){this.following=new Set(pubkeys(event));this.emit('following',this.following);}});
+    this.following=new Set();this.followingKnown=false;this.likes=new Set();this.pending=new Set();this.writeQueue=Promise.resolve();
+    this.repo.on('replace',({event})=>{if(event.pubkey===this.session.pubkey && event.kind===3){this.following=new Set(pubkeys(event));this.followingKnown=true;this.emit('following',this.following);}});
   }
+  beginView() { this.following=new Set();this.followingKnown=false;this.likes=new Set();this.emit('following',this.following); }
   async loadAccount() {
-    const key=this.session.pubkey;this.following=new Set();this.likes=new Set();
-    if(!key)return;
-    const [contacts] = await Promise.all([this.repo.replacement(3,key),this.repo.replacement(10000,key),this.repo.profile(key)]);
-    if(this.session.pubkey!==key)return;
-    this.following=new Set(pubkeys(contacts));this.likes=new Set();this.emit('following',this.following);
+    const key=this.session.pubkey;if(!key)return;
+    const generation=this.repo.generation;
+    const [contacts]=await Promise.all([this.repo.replacement(3,key,{required:true}),this.repo.replacement(10000,key,{required:true}),this.repo.profile(key)]);
+    if(this.session.pubkey!==key||generation!==this.repo.generation)return;
+    this.following=new Set(pubkeys(contacts));this.followingKnown=true;this.emit('following',this.following);
   }
   async publish(template) {
     const event=await this.session.sign({...template,tags:[...(template.tags??[]).filter(t=>t[0]!=='client'),['client',APP_NAME]]});
@@ -78,7 +80,7 @@ export class Social extends Emitter {
       const exists=pubkeys(current).includes(target);
       const tags=(current?.tags??[]).filter(t=>!(t[0]==='p'&&t[1]===target));if(!exists)tags.push(['p',target]);
       const event=await this.publish({kind:3,created_at:Math.max(nowSeconds(),(current?.created_at??0)+1),tags,content:current?.content??''});
-      this.following=new Set(pubkeys(event));this.emit('following',this.following);return !exists;
+      this.following=new Set(pubkeys(event));this.followingKnown=true;this.emit('following',this.following);return !exists;
     });}finally{this.pending.delete(`follow:${target}`);this.emit('followBusy',target);}
   }
   editProfile(fields) {
@@ -94,14 +96,25 @@ export class Social extends Emitter {
   }
   async list(kind,owner) { return pubkeys(await this.repo.replacement(kind,owner)); }
   async followingBack(owner,candidates) {
-    const contacts=await Promise.all(candidates.map(k=>this.repo.replacement(3,k)));
+    const contacts=await Promise.all(candidates.map(k=>this.repo.replacement(3,k,{required:true})));
     return new Set(candidates.filter((k,i)=>pubkeys(contacts[i]).includes(owner)));
   }
-  async relays(owner) {
-    const modern=await this.repo.replacement(10002,owner);
-    if(modern)return modern.tags.filter(t=>t[0]==='r').map(t=>({url:t[1],mode:t[2]??'read/write'}));
-    const contact=await this.repo.replacement(3,owner), old=parseJSON(contact?.content,{});
-    if(Array.isArray(old))return old.map(url=>({url,mode:'legacy'}));
-    return Object.entries(old??{}).map(([url,flags])=>({url,mode:[flags?.read!==false?'read':'',flags?.write!==false?'write':''].filter(Boolean).join('/')}));
+  async relaySource(owner, options={}) {
+    const modern=await this.repo.replacement(10002,owner,options);
+    const contacts=modern?null:await this.repo.replacement(3,owner,options);
+    return {modern,contacts,entries:relayEntries(modern,contacts)};
+  }
+  async relays(owner) { return (await this.relaySource(owner,{required:true})).entries; }
+  changeRelay(owner, change) {
+    if(owner!==this.session.pubkey)return Promise.reject(new Error('自分の公開リレーだけ変更できます'));
+    return this.exclusive(10002,async key=>{
+      const {modern,contacts}=await this.relaySource(key,{fresh:true,all:true,required:true});
+      if(this.session.pubkey!==key)throw new Error('アカウントが変更されました');
+      const patch=changeRelayTags(relayListTags(modern,contacts),change);
+      if(!patch.changed)return {event:modern,entries:relayEntries(modern,contacts),changed:false};
+      const event=await this.publish({kind:10002,created_at:Math.max(nowSeconds(),(modern?.created_at??0)+1),
+        tags:patch.tags,content:modern?.content??''});
+      return {event,entries:relayEntries(event),changed:true};
+    });
   }
 }

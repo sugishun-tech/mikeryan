@@ -1,5 +1,5 @@
 export const APP_NAME = 'mikeryan';
-export const VERSION = '1.1.1';
+export const VERSION = '1.2.0';
 export const DEFAULTS = Object.freeze({
   relays: ['wss://relay-jp.nostr.wirednet.jp/', 'wss://yabu.me/'],
   batchSize: 30,

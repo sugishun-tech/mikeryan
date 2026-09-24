@@ -1,54 +1,61 @@
-# Architecture · 1.1.1
+# 設計 · 1.2.0
 
-## Read lifecycle
+## 画面アクセスと読み取りの分離
 
-`FeedView` measures actual visible post rectangles below the sticky controls and above the mobile navigation. It passes the lower visible post for older reads or the upper visible post for newer reads to `EventPager`. The latest operation uses current epoch seconds, not the old loaded window. All entry points fix the displayed batch limit at 30.
+`App.render` は画面と保存済みアカウントの表示だけを行います。`FeedView.init` は未取得の状態を描き、ネットワークへ接続しません。`ProfileView.init` は `cachedProfiles` でkind:0をディスクから読み、選択タブに取得ボタンを置きます。スレッドも本文取得ボタンを押すまではルート投稿を取りません。
 
-`EventPager` owns only the currently mounted timeline and scalar continuation cursors. It never serializes a page or consults an old read response. `Repository.query()` always calls the transport. Searches use `retain:false` so discarded search results do not populate the current-screen repository. Only the chosen page is accepted for rendering; identity/reaction queries then decorate that page. Existing DOM nodes remain mounted on directional additions. A visible post's screen coordinate is restored after insertion, using actual layout heights rather than content-visibility placeholders.
+ログイン済みのホーム・グローバル・通知は、初回の読み込み操作内で `ensureAccount` → `Social.loadAccount` を実行します。対象アカウントの最新kind:3・10000を取得してホームの投稿者条件と表示条件を決定します。取得済みkind:0は保存領域から読みます。画面遷移ではアカウントのリストも捨て、次の明示操作まで再取得しません。投稿する・フォローする・プロフィールや公開リレーを編集する等の書き込み前確認は別の明示操作です。
 
-Old and new pages may overlap when the user is midway through the already displayed timeline. A new relay query is still sent. Duplicate event IDs are not rendered twice. Latest replaces the list after a successful response; a failed empty response does not clear the existing screen.
+`Identity` の可視化Observerはディスクから表示を補うだけで、リレーやNIP-05へ問い合わせません。ブラウザー自身による画像URLの読み込みは別です。
 
-## NIP-01 constraints
+## プロフィール専用ストア
 
-`since` and `until` are inclusive; a request has no exclusive event-ID cursor and no ascending-order flag. Relays return the newest matches first. Merely using `since: anchor` with `limit:30` would jump to the newest posts, not the nearest newer posts.
+`ProfileCache` はkind:0以外を拒否します。DB名は配信パス付きの `mikeryan:v1:<path>:profiles`、ストア名は `profiles`、主キーは公開鍵です。設定ページの保存と名前空間・APIを分けています。
 
-Older reads include the anchor second, request space for its known same-second prefix, then select at most 30 strictly older items under `(created_at DESC, id ASC)` ordering. A saturated boundary is expanded only up to a fixed limit; the timestamp is not blindly decremented and unreturned same-second events are not silently skipped.
+レコードは `{version:1, pubkey, event, savedAt, verification}` です。元の署名済みイベントを保存し、ディスクから読んだイベントは内容・公開鍵・kind・イベントID・署名を検証します。検証結果はイベントID・公開鍵・識別子の3つに結び付けます。他人や別の版に紐付いた認証結果を流用しません。破損したレコードは再利用せず、次の明示取得で修復します。
 
-Newer reads initially cover ten minutes from the anchor and narrow saturated intervals. Completed empty intervals can be advanced and widened. At most six range queries are attempted per click. A continuation stores only anchor/range/limit numbers, not response data. A failed relay prevents declaring a range exhausted. Up to 1600 events per filter may be requested for a heavily saturated same-second boundary. Combined responses are deduplicated; at most 30 posts are reflected in the timeline per operation. A relay can impose smaller internal limits or omit events: exhaustive recovery is not guaranteed.
+TTL、バックグラウンド更新、接続先変更時の失効はありません。`cachedProfiles` が全プロフィール利用箇所の入口で、`profileRecords` は最大2000人の高速参照です。高速参照から落ちても永続データは削除せず、必要時にディスクへ戻ります。ログアウトでも公開メタデータは残ります。
 
-## Reducing communication without persistent caches
+通常の `replacementRead(0)` はディスクを先に見ます。既知ならREQはありません。初取得は `rememberProfiles` が正常なkind:0を保存します。未知の複数人は1フィルタへまとめます。古い版が画面へ偶然流れ込んでも更新せず、`fresh:true` が成功したときに限り明示対象を更新します。未知の人の正常な部分応答は保存できますが、欠落・不正応答の負キャッシュは作りません。
 
-Each relay has one connection per transport pool. SharedWorker-capable browsers share the pool across tabs for this application version; fallback is one pool per tab. The worker holds connection/queue state, not a response cache. Identical concurrent requests coalesce only while their Promise is unresolved. A later identical query is sent again.
+明示更新時はトランザクション内で現在値と比較して新しい版だけを保存します。同じ時刻ならNIP-01のID順に従います。別タブの古い書き込みが新しい値を上書きするのを抑制します。IndexedDBが利用できない場合のlocalStorageフォールバックには同じトランザクション保証はありません。現在表示中の別タブへ自動更新通知は送りません。
 
-Successful, valid kind-0 metadata is retained in this tab's session. `Repository.profileReads` records the selected relay scope for up to 2000 identities. Scope changes and `fresh`, `all`, or `required` reads bypass reuse. A new tab/reload and logout/account changes discard it. This is explicitly in-memory metadata reuse, not a persisted read-response cache. It can be stale until a manual profile refresh; read-before-write always queries all configured relays.
+保存失敗時はUIへ警告し、現在取得したデータで表示を続行します。成功していないディスク書き込みを成功として計数しません。ブラウザーがストレージを提供しない場合はメモリのみになります。
 
-`Repository.batchQuery()` coalesces metadata/detail reads for 60ms, grouped by a snapshot of relay URLs and session generation. `replacementRead()` shares in-flight identity queries across feed and profile paths. `profile-batch.js` compacts only unfiltered-in-time kind-0 queries whose limit equals the number of authors. It never widens ordinary event, time-constrained or tag-constrained filters. At most 100 authors are put in one filter. The signed-in user's kind-7 reactions are constrained to the selected page IDs and share this REQ. Reactions and post queries are always fresh, even when negative. No unopened list, full reactions history, or unseen author prefetch is introduced.
+## NIP-05
 
-NIP-01 specifies that replaceable-event reads should return only the latest event for each author/kind. A conforming relay can therefore return 30 profiles for one authors-list filter with limit 30. Relays may clamp the limit or retain/return duplicates. With `profileBatch:true`, `RelayPool` checks missing authors independently on EACH relay after a positive successful response. One repair pass uses single-author limit-1 filters, at most 20 per REQ. It never repeats returned authors or the reaction filter. An entirely empty EOSE has no evidence of truncation and triggers no repair. Failed queries do not trigger repair; failure during repair stops remaining chunks for that relay. This bounded fallback is not a completeness guarantee for arbitrary relays. The fastest relay cannot suppress missing-author checks on another relay.
+プロフィール初取得時に設定が有効なら検証し、成功・不一致・検証不能の結果と日時を同じプロフィールレコードへ保存します。次回の表示はその結果を使います。「プロフィールを更新」はkind:0の取得成功後にNIP-05も新しく検証します。認証マークには保存時点の結果である旨を表示します。HTTP応答文書全体やNIP-05のリレー情報を一般キャッシュへ保存しません。
 
-Malformed, absent and partial/error responses do not become positive reusable metadata. No negative-cache entries are created. An old valid version cannot mark a newer malformed replacement as successful. Logout generations prevent late metadata responses from re-populating a cleared session. Published own metadata updates the in-memory display without a redundant fetch. `fresh:true` returns only the actual newly received event for write preflights, not an old fallback.
+NIP-05による公開鍵検索はユーザーが検索を実行したときの名前解決です。保存済みメタデータの表示とは別操作です。
 
-Each selected relay is awaited independently. A fast relay's EOSE cannot truncate a slower relay. EOSE finishes that finite query and sends CLOSE; timeout and cancellation paths also close subscriptions. No polling or scrolling-triggered post REQ is used. Queue gaps, bounded timeouts, idle close, and rate-limit cooldowns remain. No proxy rotation or restriction evasion is implemented.
+## 保存しないもの
 
-NIP-05 is a separate HTTPS request. Only unresolved identical checks coalesce. Completed verification results are not stored or reused. Fetch uses no-store, no credentials/referrer, rejects redirects, and has time/size/concurrency limits. Existing cards retain their displayed verification state until remounted or rechecked.
+`Repository.events`、`EventPager.events`、フォロー・ミュート・公開リレーの置換可能イベント、いいねの集合は現在画面に限った状態です。`beginView` は自分のリストも含めてkind:0以外をクリアします。投稿・ページ・リストの完了した読取り結果を別画面へ復元しません。一般Storageは依然としてoutbox/health以外のキーを拒否します。
 
-## Persisted state, not fetched data
+設定、ログイン公開鍵、下書き、未達の署名済み送信、リレー休止情報は従来のAPIを使います。未達送信に自分のkind:10002等が含まれることはありますが、これは再送待ちの書き込みであり読み取りキャッシュではありません。
 
-localStorage retains the public key, settings, drafts, authored failed/partial sends, and relay cooldowns. `Storage` accepts only `outbox:` and `health:` operational keys; other keys are rejected. Outbox retry carries forward prior relay acceptance and contacts only undelivered relays. There is no IndexedDB access, Service Worker, persisted read response, saved timeline, or negative profile cache.
+## 公開リレーの差分更新
 
-Post maps are discarded on navigation. Only positive session profiles and the active account's UI/list state are retained. Post/detail reads never substitute those maps for a request; explicit profile refresh and all read-before-write paths bypass profile reuse. A reply preview can display another post already on the screen; otherwise it fetches the named event only on a user click. Protocol synchronization that relies on a local archive, such as set reconciliation, is not enabled.
+NIP-65のkind:10002を優先します。存在しないことを成功応答で確認した場合だけ旧kind:3のrelay JSONを読みます。空のkind:10002は正当な空リストとして扱い、古いリストを復活させません。
 
-## Protocol references
+`Social.changeRelay` は本人だけを許可し、書き込みロック内で全設定リレーから最新状態を再確認します。UIが保持していた一覧を丸ごと上書きせず、追加・削除の差分を最新のタグへ適用します。未知タグ、content、他URL、read/write指定を保持します。重複追加・すでにないURLの削除では署名しません。署名と送信は既存のNIP-07/outbox経路を使います。
+
+このリストは公開プロフィール情報であり、`Settings.value.relays` とは連動させません。追加URLへの自動接続やNIP-65からの接続先推測も行いません。
+
+## ページングと通信
+
+現在位置はDOM上で実際に見える上下端から測ります。3ボタンと30件制限を維持し、方向追加の前後で同じ投稿の画面座標を復元します。NIP-01のsince/untilは境界を含み、limit応答は新しい順です。上方向の近傍探索は1操作最大6回、密な同秒境界はフィルタ最大1600件で打ち切ります。全体で受信30件という制限ではありません。
+
+投稿のREQ後、未知プロフィールとそのページ内の自分のkind:7をまとめます。既知プロフィールはフィルタに入りません。匿名かつ全員既知の場合は装飾用REQ自体が不要です。ログイン済みの場合はいいねREQが残るため、kind:0削減がREQ数の削減とは一致しない場合があります。
+
+`batchQuery` は60msの共通キューでメタデータ等をまとめます。接続プールは進行中の同一要求だけを統合し、完了結果を再利用しません。SharedWorker利用可能時は同版のタブ間で接続を共有し、そうでなければ各タブのプールです。EOSE・タイムアウト・終了後にCLOSEし、定期ポーリングはありません。拒否・レート制限を迂回する機能はありません。
+
+プロフィール不足者の補完はリレーごとに1回、20フィルタずつです。いいねや既取得者は再送しません。空の正常応答や拒否後に再試行を増殖させません。
+
+## 仕様参照
+
+2026-09-24参照。実行時にこれらの文書を取得することはありません。
 
 - NIP-01: https://github.com/nostr-protocol/nips/blob/master/01.md
 - NIP-05: https://github.com/nostr-protocol/nips/blob/master/05.md
-- NIP-07: https://github.com/nostr-protocol/nips/blob/master/07.md
-- NIP-10: https://github.com/nostr-protocol/nips/blob/master/10.md
-- NIP-42: https://github.com/nostr-protocol/nips/blob/master/42.md
 - NIP-65: https://github.com/nostr-protocol/nips/blob/master/65.md
-
-The statements above describe the implementation, not guarantees that all relays implement every convention identically.
-
-## Measurement
-
-See TRAFFIC.md and traffic-results.json for the actual production-code wire-counter comparison against the uploaded 1.1.0 source. REQ/filter/event/JSON-byte counts are not estimates of relay CPU or I/O. Missing-author repair and upward range probes are excluded from that typical-case benchmark and covered by separate tests.

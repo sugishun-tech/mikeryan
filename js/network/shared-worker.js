@@ -1,5 +1,5 @@
-import { Storage } from '../core/storage.js?v=1.1.1';
-import { RelayPool } from './pool.js?v=1.1.1';
+import { Storage } from '../core/storage.js?v=1.2.0';
+import { RelayPool } from './pool.js?v=1.2.0';
 const storage = new Storage();
 const pool = new RelayPool(storage);
 const allowed = new Set(['query', 'publish', 'stats', 'authInfo', 'authenticate']);

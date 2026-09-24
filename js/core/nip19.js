@@ -1,5 +1,5 @@
-import { hexToBytes, bytesToHex } from './crypto.js?v=1.1.1';
-import { isHex } from './utils.js?v=1.1.1';
+import { hexToBytes, bytesToHex } from './crypto.js?v=1.2.0';
+import { isHex } from './utils.js?v=1.2.0';
 const ALPHABET = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l';
 const GENERATORS = [0x3b6a57b2,0x26508e6d,0x1ea119fa,0x3d4233dd,0x2a1462b3];
 function polymod(values) { let c = 1; for (const v of values) { const top = c >>> 25; c = ((c & 0x1ffffff) << 5) ^ v; for (let i=0;i<5;i++) if ((top >>> i)&1) c ^= GENERATORS[i]; } return c >>> 0; }

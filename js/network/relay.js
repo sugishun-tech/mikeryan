@@ -1,6 +1,6 @@
-import { LIMITS } from '../core/config.js?v=1.1.1';
-import { matchesFilter, nowSeconds, sleep } from '../core/utils.js?v=1.1.1';
-import { verifyEvent, validEventShape } from '../core/crypto.js?v=1.1.1';
+import { LIMITS } from '../core/config.js?v=1.2.0';
+import { matchesFilter, nowSeconds, sleep } from '../core/utils.js?v=1.2.0';
+import { verifyEvent, validEventShape } from '../core/crypto.js?v=1.2.0';
 
 export class RelayError extends Error {
   constructor(message, relay, partial = []) { super(message); this.name = 'RelayError'; this.relay = relay; this.partial = partial; }

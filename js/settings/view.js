@@ -1,7 +1,7 @@
-import { DEFAULTS } from '../core/config.js?v=1.1.1';
-import { el, button, busy, field, toast, empty } from '../ui/dom.js?v=1.1.1';
-import { lines, normalizeRelay } from '../core/utils.js?v=1.1.1';
-import { local } from '../core/storage.js?v=1.1.1';
+import { DEFAULTS } from '../core/config.js?v=1.2.0';
+import { el, button, busy, field, toast, empty } from '../ui/dom.js?v=1.2.0';
+import { lines, normalizeRelay } from '../core/utils.js?v=1.2.0';
+import { local } from '../core/storage.js?v=1.2.0';
 export async function settingsView(app,host){
   const s=app.settings.value,form=el('form',{class:'settings-form'}),inputs={};
   const add=(key,label,tag='input',attrs={})=>{const input=el(tag,{...attrs,value:Array.isArray(s[key])?s[key].join('\n'):s[key]});inputs[key]=input;form.append(field(label,input));return input;};

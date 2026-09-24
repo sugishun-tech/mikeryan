@@ -1,7 +1,7 @@
-import { EventPager } from './pagination.js?v=1.1.1';
-import { chunks, sortEvents } from '../core/utils.js?v=1.1.1';
-import { el, button, busy, empty, avatar, toast } from '../ui/dom.js?v=1.1.1';
-import { local } from '../core/storage.js?v=1.1.1';
+import { EventPager } from './pagination.js?v=1.2.0';
+import { chunks, sortEvents } from '../core/utils.js?v=1.2.0';
+import { el, button, busy, empty, avatar, toast } from '../ui/dom.js?v=1.2.0';
+import { local } from '../core/storage.js?v=1.2.0';
 export function composer(app,parent=null){
   const area=el('textarea',{rows:3,placeholder:parent?'返信を投稿':'いまどうしてる？',maxLength:16000,'aria-label':parent?'返信本文':'投稿本文'});
   const draftKey=`draft:${app.session.pubkey}:${parent?.id??'post'}`;area.value=local.get(draftKey)??'';
@@ -16,9 +16,9 @@ export function composer(app,parent=null){
 }
 /** Controls never subscribe on scroll. Scroll is used only to select the anchor. */
 export class FeedView {
-  constructor(app, host, {key, filters, notification=false, threadId=null, composerEnabled=false, moderate=true}) {
+  constructor(app, host, {key, filters, notification=false, threadId=null, composerEnabled=false, moderate=true, beforeRead=null}) {
     this.app=app; this.host=host; this.key=key; this.filters=filters;
-    this.notification=notification; this.threadId=threadId; this.moderate=moderate;
+    this.notification=notification; this.threadId=threadId; this.moderate=moderate;this.beforeRead=beforeRead;
     this.dead=false; this.operation=null; this.hiddenCursors={}; this.visibleEvents=[]; this.nodes=new Map();
     this.pager=new EventPager(filters=>this.alive()?app.repo.query(filters,{retain:false}):Promise.reject(new Error('画面が変更されました')),filters,30);
     this.list=el('div',{class:'timeline'});
@@ -42,7 +42,7 @@ export class FeedView {
   }
   alive(){return !this.dead && this.host.isConnected;}
   dispose(){this.dead=true;}
-  init(){return this.read('latest',{initial:true});}
+  init(){this.status.textContent='まだ取得していません。読み込みボタンを押してください。';return Promise.resolve();}
   viewport() {
     const top=Math.max(56,this.toolbar.getBoundingClientRect().bottom);
     const nav=document.querySelector('.sidebar');
@@ -76,6 +76,7 @@ export class FeedView {
       Object.values(this.buttons).forEach(b=>{b.disabled=true;});
       this.toolbar.setAttribute('aria-busy','true');this.status.textContent='読み込み中…';
       try{
+        if(this.beforeRead){const filters=await this.beforeRead();if(!this.alive())return;if(filters)this.pager.baseFilters=filters;}
         const page=await this.pager.load(direction,anchor);
         if(!this.alive())return;
         await Promise.all(page.map(e=>this.app.repo.accept(e)));

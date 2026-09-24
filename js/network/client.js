@@ -1,11 +1,11 @@
-import { Storage } from '../core/storage.js?v=1.1.1';
-import { RelayPool } from './pool.js?v=1.1.1';
+import { Storage } from '../core/storage.js?v=1.2.0';
+import { RelayPool } from './pool.js?v=1.2.0';
 export class NetworkClient {
   constructor() { this.worker = null; this.localPool = null; this.pending = new Map(); this.counter = 0; this.mode = 'starting'; this.ready = this.init(); }
   async init() {
     if (typeof SharedWorker !== 'undefined') {
       try {
-        this.worker = new SharedWorker(new URL('./shared-worker.js?v=1.1.1', import.meta.url), { type: 'module', name: 'mikeryan-1.1.1' });
+        this.worker = new SharedWorker(new URL('./shared-worker.js?v=1.2.0', import.meta.url), { type: 'module', name: 'mikeryan-1.2.0' });
         this.worker.port.onmessage = ({ data }) => { const p = this.pending.get(data.id); if (!p) return; this.pending.delete(data.id); clearTimeout(p.timer); data.error ? p.reject(new Error(data.error)) : p.resolve(data.result); };
         this.worker.port.start(); await this.rpc('hello', null, 3000); this.mode = 'shared-worker'; return;
       } catch { this.worker?.port.close(); this.worker = null; }
