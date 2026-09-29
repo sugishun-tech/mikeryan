@@ -1,14 +1,20 @@
-import { EventPager } from './pagination.js?v=1.2.0';
-import { chunks, sortEvents } from '../core/utils.js?v=1.2.0';
-import { el, button, busy, empty, avatar, toast } from '../ui/dom.js?v=1.2.0';
-import { local } from '../core/storage.js?v=1.2.0';
+import { EventPager } from './pagination.js?v=1.2.3';
+import { chunks, sortEvents } from '../core/utils.js?v=1.2.3';
+import { el, button, busy, empty, avatar, toast } from '../ui/dom.js?v=1.2.3';
+import { local } from '../core/storage.js?v=1.2.3';
 export function composer(app,parent=null){
   const area=el('textarea',{rows:3,placeholder:parent?'返信を投稿':'いまどうしてる？',maxLength:16000,'aria-label':parent?'返信本文':'投稿本文'});
   const draftKey=`draft:${app.session.pubkey}:${parent?.id??'post'}`;area.value=local.get(draftKey)??'';
   area.addEventListener('input',()=>local.set(draftKey,area.value));
   const send=button(parent?'返信する':'ポストする',async()=>busy(send,async()=>{
     if(!app.session.pubkey){await app.login();return;}
-    if(!area.value.trim())return;const event=await app.social.post(area.value,parent);area.value='';local.remove(draftKey);toast('投稿しました');app.onPosted?.(event);
+    const submitted=area.value;if(!submitted.trim())return;
+    const onPosted=app.onPosted;
+    const event=await app.social.post(submitted,parent);
+    // Edits made while the signature/relay is pending belong to the next post.
+    if(area.value===submitted)area.value='';
+    if(local.get(draftKey)===submitted)local.remove(draftKey);
+    toast('投稿しました');if(row.isConnected)onPosted?.(event);
   }),'button primary');
   const row=el('section',{class:'composer'},avatar(app.repo.peekProfile(app.session.pubkey),'avatar',app.settings.value.loadImages),el('div',{class:'composer-content'},area,el('div',{class:'composer-bottom'},el('span',{class:'muted-text'},'Nostr · テキスト投稿'),send)));
   if(!app.session.pubkey){area.disabled=true;area.placeholder='ログインすると投稿できます';send.textContent='ログイン';}
@@ -20,7 +26,7 @@ export class FeedView {
     this.app=app; this.host=host; this.key=key; this.filters=filters;
     this.notification=notification; this.threadId=threadId; this.moderate=moderate;this.beforeRead=beforeRead;
     this.dead=false; this.operation=null; this.hiddenCursors={}; this.visibleEvents=[]; this.nodes=new Map();
-    this.pager=new EventPager(filters=>this.alive()?app.repo.query(filters,{retain:false}):Promise.reject(new Error('画面が変更されました')),filters,30);
+    this.pager=new EventPager(filters=>this.alive()?app.repo.query(filters,{retain:false,page:true}):Promise.reject(new Error('画面が変更されました')),filters,30);
     this.list=el('div',{class:'timeline'});
     this.status=el('div',{class:'feed-status',role:'status'});
     this.toolbar=el('nav',{class:'feed-toolbar','aria-label':'投稿の読み込み'});
@@ -75,6 +81,7 @@ export class FeedView {
     this.operation=(async()=>{
       Object.values(this.buttons).forEach(b=>{b.disabled=true;});
       this.toolbar.setAttribute('aria-busy','true');this.status.textContent='読み込み中…';
+      const checkpoint=this.pager.snapshot();
       try{
         if(this.beforeRead){const filters=await this.beforeRead();if(!this.alive())return;if(filters)this.pager.baseFilters=filters;}
         const page=await this.pager.load(direction,anchor);
@@ -82,24 +89,32 @@ export class FeedView {
         await Promise.all(page.map(e=>this.app.repo.accept(e)));
         const candidates=page.filter(e=>this.candidate(e));
         const key=this.app.session.pubkey;
-        const info=await this.app.repo.decorate(candidates,key);
+        let info;
+        try { info=await this.app.repo.decorate(candidates,key); }
+        catch(error) { info={events:[],complete:false,errors:[{reason:error.message}]}; }
+        // Unknown due to a failed metadata read is not a confirmed incomplete
+        // profile. Keep the cursor retryable without changing any mute rules.
+        if(!info.complete && this.moderate && !this.notification &&
+           this.app.settings.value.hideIncompleteProfiles && candidates.some(e=>!this.app.repo.knownProfile(e.pubkey))) {
+          throw new Error('投稿者情報の取得が未完了です。表示条件を確認できないため位置を進めず、同じページを再試行します');
+        }
         if(!this.alive())return;
         this.app.social.applyLikes(info.events,candidates,key);
         const reset=direction==='latest'&&(this.pager.complete||page.length>0);
         this.render({reset});
         const hidden=page.filter(e=>!this.visible(e)).length;
-        if(direction==='latest')this.hiddenCursors={};
+        if(direction==='latest'&&this.pager.complete)this.hiddenCursors={};
         else if(page.length&&hidden===page.length)this.hiddenCursors[direction]={screen:screen?.id,cursor:direction==='older'?page.at(-1):page[0]};
         else delete this.hiddenCursors[direction];
         this.status.textContent=[this.pager.warning,
-          page.length?`${page.length}件を取得${hidden?`（${hidden}件は表示条件により非表示）`:''}`:'この範囲に投稿はありません',
+          page.length?`${page.length}件を取得${hidden?`（${hidden}件は表示条件により非表示）`:''}`:this.pager.warning?'取得未完了です。読み込みボタンで再試行できます':'この範囲に投稿はありません',
           !info.complete?'投稿者情報の一部を取得できませんでした':null].filter(Boolean).join(' · ');
         if(direction==='latest'&&!initial) window.scrollTo({top:Math.max(0,window.scrollY+this.start.getBoundingClientRect().top-56),behavior:'instant'});
         else if(position){
           const node=this.nodes.get(position.id);
           if(node)window.scrollBy({top:node.getBoundingClientRect().top-position.top,behavior:'instant'});
         }
-      } catch(error){if(this.alive())this.status.textContent=error.message;throw error;}
+      } catch(error){this.pager.restore(checkpoint);if(this.alive())this.status.textContent=error.message;throw error;}
       finally{Object.values(this.buttons).forEach(b=>{b.disabled=false;});this.toolbar.removeAttribute('aria-busy');}
     })().finally(()=>{this.operation=null;});
     return this.operation;

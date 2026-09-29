@@ -1,20 +1,20 @@
-import { Storage } from './core/storage.js?v=1.2.0';
-import { Settings } from './settings/store.js?v=1.2.0';
-import { NetworkClient } from './network/client.js?v=1.2.0';
-import { Session } from './auth/session.js?v=1.2.0';
-import { Repository } from './core/repository.js?v=1.2.0';
-import { Nip05 } from './profiles/nip05.js?v=1.2.0';
-import { Social } from './social/service.js?v=1.2.0';
-import { Moderation } from './feed/moderation.js?v=1.2.0';
-import { Identity } from './ui/identity.js?v=1.2.0';
-import { Posts } from './ui/posts.js?v=1.2.0';
-import { Router, profileHref, threadHref } from './core/router.js?v=1.2.0';
-import { FeedView, feedFilters, composer } from './feed/view.js?v=1.2.0';
-import { ProfileView } from './profiles/view.js?v=1.2.0';
-import { settingsView } from './settings/view.js?v=1.2.0';
-import { el, button, busy, icon, avatar, loading, empty, toast } from './ui/dom.js?v=1.2.0';
-import { parentId, stableJSON, matchesFilter } from './core/utils.js?v=1.2.0';
-import { decodeKey } from './core/nip19.js?v=1.2.0';
+import { Storage } from './core/storage.js?v=1.2.3';
+import { Settings } from './settings/store.js?v=1.2.3';
+import { NetworkClient } from './network/client.js?v=1.2.3';
+import { Session } from './auth/session.js?v=1.2.3';
+import { Repository } from './core/repository.js?v=1.2.3';
+import { Nip05 } from './profiles/nip05.js?v=1.2.3';
+import { Social } from './social/service.js?v=1.2.3';
+import { Moderation } from './feed/moderation.js?v=1.2.3';
+import { Identity } from './ui/identity.js?v=1.2.3';
+import { Posts } from './ui/posts.js?v=1.2.3';
+import { Router, profileHref, threadHref } from './core/router.js?v=1.2.3';
+import { FeedView, feedFilters, composer } from './feed/view.js?v=1.2.3';
+import { ProfileView } from './profiles/view.js?v=1.2.3';
+import { settingsView } from './settings/view.js?v=1.2.3';
+import { el, button, busy, icon, avatar, loading, empty, toast } from './ui/dom.js?v=1.2.3';
+import { parentId, stableJSON, matchesFilter } from './core/utils.js?v=1.2.3';
+import { decodeKey } from './core/nip19.js?v=1.2.3';
 class App {
   async start(){
     this.settings=new Settings();await this.settings.load();this.storage=new Storage();
@@ -23,7 +23,7 @@ class App {
     this.social=new Social(this.repo,this.session,this.settings,this.storage,this.network);this.moderation=new Moderation(this.settings,this.repo,this.session);
     this.identity=new Identity(this);this.posts=new Posts(this);this.parentId=parentId;this.router=new Router(route=>this.render(route));
     this.accountKey=null;this.accountReady=Promise.resolve();this.onPosted=null;this.routeToken=0;this.lastWarning='';
-    this.applyTheme();this.bind();await this.repo.cachedProfiles([this.session.pubkey]);this.updateAccount();await this.router.start();
+    this.applyTheme();this.bind();if(this.settings.warning)toast(this.settings.warning,true);await this.repo.cachedProfiles([this.session.pubkey]);this.updateAccount();await this.router.start();
   }
   applyTheme(){document.documentElement.dataset.theme=this.settings.value.theme;}
   bind(){
@@ -37,14 +37,14 @@ class App {
     document.getElementById('search-form').addEventListener('submit',e=>{e.preventDefault();const b=document.getElementById('search-button');void busy(b,async()=>{const input=document.getElementById('search-input').value.trim();if(!input)return;
       await this.search(input);
     });});
-    this.session.on('change',()=>{this.repo.resetSession();this.accountKey=null;this.updateAccount();void this.render(this.router.route??{view:'global'});});
+    this.session.on('change',()=>{for(const dialog of document.querySelectorAll('dialog[data-profile-editor]'))dialog.close();this.repo.resetSession();this.accountKey=null;this.updateAccount();void this.render(this.router.route??{view:'global'});});
     this.social.on('following',()=>this.identity.updateFollows());this.social.on('followBusy',()=>this.identity.updateFollows());
     this.social.on('like',()=>this.posts.updateLikes());this.social.on('likes',()=>this.posts.updateLikes());
     this.social.on('notice',message=>toast(message));
     this.settings.on('change',()=>{this.moderation.rebuild();this.applyTheme();this.accountKey=null;});
     this.repo.on('warning',message=>{if(message!==this.lastWarning){this.lastWarning=message;toast('一部のリレーとの通信を休止しました。設定画面に理由を表示します。',true);}});
     this.repo.on('storageWarning',()=>toast('プロフィールを永続保存できません。サイトデータの保存許可・容量を確認してください。今回の表示は継続します。',true));
-    this.repo.on('replace',({event})=>{if(event.kind===0){if(event.pubkey===this.session.pubkey)this.updateAccount();this.identity.refresh(event.pubkey);}});
+    this.repo.on('replace',({event})=>{if(event.kind===3)this.identity.updateFollows();if(event.kind===0){if(event.pubkey===this.session.pubkey)this.updateAccount();this.identity.refresh(event.pubkey);}});
     window.addEventListener('online',()=>toast('接続が戻りました。読み込みボタンで取得できます'));
     window.addEventListener('offline',()=>toast('オフラインです。新しい投稿は取得できません。',true));
     window.addEventListener('unhandledrejection',event=>{console.error(event.reason);toast(event.reason?.message??'処理に失敗しました',true);});
@@ -61,8 +61,14 @@ class App {
     form.addEventListener('submit',event=>{event.preventDefault();submit.click();});dialog.append(form);document.body.append(dialog);dialog.addEventListener('close',()=>dialog.remove());dialog.showModal();input.focus();
   }
   async ensureAccount(){
-    const key=this.session.pubkey;
-    if(key && this.accountKey!==key){this.accountKey=key;this.accountReady=this.social.loadAccount().catch(error=>{if(this.accountKey===key)this.accountKey=null;throw error;}).finally(()=>this.updateAccount());}
+    const key=this.session.pubkey;if(!key)return;
+    if(this.accountKey!==key){
+      this.accountKey=key;
+      const job=this.social.loadAccount().catch(error=>{
+        if(this.accountReady===job)this.accountKey=null;throw error;
+      }).finally(()=>{if(this.accountReady===job)this.updateAccount();});
+      this.accountReady=job;
+    }
     return this.accountReady;
   }
   login(){return this.session.login();}
@@ -72,7 +78,7 @@ class App {
     const profile=this.repo.peekProfile(key);account.replaceChildren(el('a',{href:profileHref(key),class:'account-link'},avatar(profile,'avatar small',this.settings.value.loadImages),el('div',{},el('strong',{},profile.display_name||profile.name||'アカウント'),el('span',{class:'user-handle'},profile.name?'@'+profile.name:key.slice(0,10)+'…'))));
   }
   async render(route){
-    const token=++this.routeToken;window.scrollTo(0,0);this.onPosted=null;this.activeFeed?.dispose();this.activeFeed=null;this.identity.reset();this.repo.beginView(this.session.pubkey);this.social.beginView();this.accountKey=null;const outer=document.getElementById('view'),host=el('section',{class:'view-section'});outer.replaceChildren(host);host.append(loading());
+    const token=++this.routeToken;window.scrollTo(0,0);this.onPosted=null;this.activeFeed?.dispose();this.activeFeed=null;this.identity.reset();this.repo.beginView(this.session.pubkey);this.social.beginView();this.accountKey=null;this.accountReady=Promise.resolve();const outer=document.getElementById('view'),host=el('section',{class:'view-section'});outer.replaceChildren(host);host.append(loading());
     document.title=`${({global:'グローバル',home:'ホーム',notifications:'通知',profile:'プロフィール',me:'プロフィール',settings:'設定',thread:'スレッド'})[route.view]} / mikeryan`;
     document.getElementById('page-title').textContent=({global:'グローバル',home:'ホーム',notifications:'通知',profile:'プロフィール',me:'プロフィール',settings:'設定',thread:'スレッド'})[route.view]??'mikeryan';
     for(const a of document.querySelectorAll('.nav-item'))a.classList.toggle('active',a.dataset.view===route.view||(route.view==='profile'&&route.pubkey===this.session.pubkey&&a.dataset.view==='me'));
@@ -99,12 +105,21 @@ class App {
   }
   async thread(id,host,token){
     const event=await this.repo.event(id);if(token!==this.routeToken)return;
-    if(!event){host.append(empty('投稿が見つかりません','設定中の読み取りリレーに保存されていない可能性があります。'));return;}
+    if(!event){
+      host.querySelectorAll(':scope > .empty-state').forEach(node=>node.remove());
+      host.append(empty('投稿が見つかりません','設定中の読み取りリレーに保存されていない可能性があります。'));return;
+    }
     await this.repo.profiles([event.pubkey]);if(token!==this.routeToken)return;
+    const parent=parentId(event);let target=null;
+    if(parent){
+      target=await this.repo.event(parent);if(token!==this.routeToken)return;
+      if(target){await this.repo.profiles([target.pubkey]);if(token!==this.routeToken)return;}
+    }
+    // Commit only after every required read. A failed parent read must leave
+    // the visible thread and the user's unsent reply intact and retryable.
     host.querySelectorAll(':scope > .empty-state, :scope > .thread-focus, :scope > .thread-parent, :scope > .composer, :scope > .thread-replies').forEach(node=>node.remove());
-    this.activeFeed?.dispose();
-    const parent=parentId(event);
-    if(parent){const target=await this.repo.event(parent);if(token!==this.routeToken)return;if(target){await this.repo.profiles([target.pubkey]);if(token!==this.routeToken)return;host.append(el('div',{class:'thread-parent'},this.posts.render(target)));}}
+    this.activeFeed?.dispose();this.activeFeed=null;this.onPosted=null;
+    if(target)host.append(el('div',{class:'thread-parent'},this.posts.render(target)));
     host.append(this.posts.render(event,{thread:true}));
     if(event.kind!==1)return;
     host.append(composer(this,event));const replies=el('section',{class:'thread-replies'},el('h2',{class:'section-title'},'返信'));host.append(replies);

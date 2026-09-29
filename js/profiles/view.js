@@ -1,15 +1,16 @@
-import { relayTab } from './relays-view.js?v=1.2.0';
-import { editProfileDialog } from './editor.js?v=1.2.0';
+import { relayTab } from './relays-view.js?v=1.2.3';
+import { editProfileDialog } from './editor.js?v=1.2.3';
 export { editProfileDialog };
-import { EventPager } from '../feed/pagination.js?v=1.2.0';
-import { FeedView } from '../feed/view.js?v=1.2.0';
-import { pubkeys } from '../social/service.js?v=1.2.0';
-import { el, avatar, button, busy, empty, loading, richText, copy } from '../ui/dom.js?v=1.2.0';
-import { profileHref } from '../core/router.js?v=1.2.0';
-import { encodeKey } from '../core/nip19.js?v=1.2.0';
-import { safeURL, unique, stableJSON } from '../core/utils.js?v=1.2.0';
+import { FollowerDirectory } from '../social/followers.js?v=1.2.3';
+import { FeedView } from '../feed/view.js?v=1.2.3';
+import { pubkeys } from '../social/service.js?v=1.2.3';
+import { el, avatar, button, busy, empty, loading, richText, copy } from '../ui/dom.js?v=1.2.3';
+import { profileHref } from '../core/router.js?v=1.2.3';
+import { encodeKey } from '../core/nip19.js?v=1.2.3';
+import { validProfile } from './cache.js?v=1.2.3';
+import { safeURL, latest } from '../core/utils.js?v=1.2.3';
 export class ProfileView {
-  constructor(app,route,host){this.app=app;this.route=route;this.host=host;this.owner=route.pubkey;this.offset=0;this.loadedUsers=new Set();this.list=el('div',{class:'profile-tab-content'});}
+  constructor(app,route,host){this.app=app;this.route=route;this.host=host;this.owner=route.pubkey;this.offset=0;this.listOperation=null;this.listVersion=0;this.loadedUsers=new Set();this.list=el('div',{class:'profile-tab-content'});}
   async init(){
     const {app,owner}=this;this.host.append(loading());
     await app.repo.cachedProfiles([owner]);if(!this.host.isConnected)return;
@@ -22,7 +23,7 @@ export class ProfileView {
     }else if(this.route.tab==='relays')relayTab(app,owner,this.list);
     else {
       const type=this.route.tab,label=({following:'フォロー',followers:'フォロワー',mutes:'ミュート'})[type];
-      const read=button(`${label}を取得`,()=>busy(read,async()=>{if(type==='followers')await this.followers();else await this.localList(type);}),'button secondary');
+      const read=button(`${label}を取得`,()=>this.runList(async()=>{if(type==='followers')await this.followers();else await this.localList(type);}),'button secondary');
       this.list.append(read,empty('まだ取得していません',`「${label}を取得」を押してください。`));
     }
   }
@@ -31,7 +32,17 @@ export class ProfileView {
     const cover=el('div',{class:'profile-banner'}),url=safeURL(profile.banner,{image:true});if(url&&app.settings.value.loadImages)cover.append(el('img',{src:url,alt:'',referrerPolicy:'no-referrer',loading:'lazy'}));
     const actions=el('div',{class:'profile-actions'});
     if(owner===app.session.pubkey){
-      const edit=button('プロフィールを編集',()=>busy(edit,async()=>editProfileDialog(app,app.repo.knownProfile(owner)?app.repo.peekProfile(owner):await app.repo.profile(owner,{fresh:true}))),'button secondary');
+      const edit=button('プロフィールを編集',()=>busy(edit,async()=>{
+        const context=app.social.sessionContext();
+        let profile=app.repo.peekProfile(owner);
+        if(!app.repo.knownProfile(owner)){
+          const event=await app.repo.replacement(0,owner,{fresh:true,all:true,required:true});
+          if(event&&!validProfile(event))throw new Error('既存プロフィールのJSONが不正です。上書きは中止しました');
+          profile=event?JSON.parse(event.content):{};
+        }
+        app.social.checkSession(context);
+        if(this.header.isConnected)editProfileDialog(app,profile);
+      }),'button secondary');
       actions.append(edit);
     }
     else if(app.session.pubkey)actions.append(app.identity.followButton(owner));
@@ -47,40 +58,134 @@ export class ProfileView {
     if(!app.repo.knownProfile(owner))info.append(el('p',{class:'help'},'未取得のプロフィールです。「プロフィールを更新」で取得します。'));
     this.header.replaceChildren(cover,info);
   }
-  async localList(type){
-    const app=this.app,spinner=loading();this.list.append(spinner);let source;
-    try{source=await app.repo.replacement(type==='following'?3:10000,this.owner,{required:true});}finally{spinner.remove();}
-    if(!this.list.isConnected)return;
-    this.items=pubkeys(source);this.list.replaceChildren();
-    if(type==='mutes')this.list.append(el('p',{class:'list-note'},'公開されているpタグのみ表示します。暗号化された非公開ミュートは取得・復号しません。'));
-    const refresh=button('一覧を更新',()=>busy(refresh,async()=>{this.offset=0;await this.localList(type);}),'text-button');this.list.append(refresh);
-    this.rows=el('div',{});this.more=button('次の30人を表示',()=>busy(this.more,()=>this.appendLocal(type)),'button load-more');this.list.append(this.rows,this.more);
-    if(!this.items.length){this.rows.append(empty('公開リストは空です'));this.more.hidden=true;return;}
+  runList(task) {
+    if (this.listOperation) return this.listOperation;
+    this.listOperation = Promise.resolve().then(async () => {
+      this.list.setAttribute('aria-busy', 'true');
+      this.list.querySelectorAll('button').forEach(b => b.disabled = true);
+      try { return await task(); }
+      catch (error) {
+        if (this.list.isConnected) {
+          this.listStatus ??= el('p', {class:'list-note',role:'status'});
+          if (!this.listStatus.isConnected) this.list.append(this.listStatus);
+          this.listStatus.textContent = error.message + '。同じ取得ボタンで再試行できます。';
+        }
+      } finally {
+        this.list.removeAttribute('aria-busy');
+        this.list.querySelectorAll('button').forEach(b => b.disabled = false);
+        this.app.identity.updateFollows();
+      }
+    }).finally(() => {this.listOperation = null;});
+    return this.listOperation;
+  }
+  async localList(type) {
+    const spinner = loading(); this.list.append(spinner);
+    let source;
+    try { source = await this.app.repo.replacement(type === 'following' ? 3 : 10000, this.owner, {required:true}); }
+    finally { spinner.remove(); }
+    if (!this.list.isConnected) return;
+    if (type === 'following') source = latest([source, this.app.repo.replacements.get(`3:${this.owner}`)]);
+    this.listVersion++; this.items = pubkeys(source); this.offset = 0;
+    this.rowNodes = new Map(); this.list.replaceChildren();
+    if (type === 'mutes') this.list.append(el('p', {class:'list-note'}, '公開されているpタグのみ表示します。暗号化された非公開ミュートは取得・復号しません。'));
+    const refresh = button('一覧を更新', () => this.runList(() => this.localList(type)), 'text-button');
+    this.listStatus = el('p', {class:'list-note',role:'status'});
+    this.rows = el('div', {});
+    this.more = button('次の30人を表示', () => this.runList(() => this.appendLocal(type)), 'button load-more');
+    this.retryDetails = button('表示中の補助情報を再取得', () => this.runList(() =>
+      this.loadDetails([...this.rowNodes.keys()], {type})), 'text-button');
+    this.list.append(refresh, this.listStatus, this.rows, this.more, this.retryDetails);
+    this.list.querySelectorAll('button').forEach(b => b.disabled = !!this.listOperation);
+    if (!this.items.length) {this.rows.append(empty('公開リストは空です'));this.more.hidden = true;this.retryDetails.hidden = true;return;}
     await this.appendLocal(type);
   }
-  async appendLocal(type){
-    const app=this.app,page=this.items.slice(this.offset,this.offset+app.settings.value.batchSize);
-    const [,mutual]=await Promise.all([app.repo.profiles(page),type==='following'?app.social.followingBack(this.owner,page):Promise.resolve(new Set())]);
-    if(!this.rows.isConnected)return;this.rows.append(...page.map(p=>app.identity.userRow(p,{mutual:mutual.has(p),owner:type==='following'?this.owner:null})));this.offset+=page.length;this.more.hidden=this.offset>=this.items.length;
+  async appendLocal(type) {
+    const page = this.items.slice(this.offset, this.offset + 30);
+    if (!this.rows.isConnected || !page.length) return;
+    // Membership comes from the signed list, NOT metadata or mutual status.
+    // Paint the public-key row before doing any optional network requests.
+    for (const key of page) {
+      const row = this.app.identity.userRow(key, {mutual:type === 'following' ? null : false, owner:type === 'following' ? this.owner : null});
+      this.rows.append(row); this.rowNodes.set(key, row);
+    }
+    this.offset += page.length; this.more.hidden = this.offset >= this.items.length;
+    await this.loadDetails(page, {type});
   }
-  async followers(){
-    const app=this.app;this.list.replaceChildren();this.list.append(el('p',{class:'list-note'},'設定中のリレーで見つかったフォロワーです。全Nostrの総数ではありません。候補の最新フォローリストを確認してから表示します。'));
-    this.followerPager=new EventPager(filters=>app.repo.query(filters),[{kinds:[3],'#p':[this.owner]}],30);
-    this.loadedUsers=new Set();this.rows=el('div',{});
-    this.more=button('次の30人を表示',()=>busy(this.more,()=>this.appendFollowers()),'button load-more');
-    const refresh=button('フォロワーを更新',()=>busy(refresh,async()=>{this.list.replaceChildren();await this.followers();}),'text-button');
-    this.list.append(refresh,this.rows,this.more);
-    await this.appendFollowers();
+  async loadDetails(users, {type, refreshOwn = false} = {}) {
+    const rows = this.rows, version = this.listVersion;
+    this.listStatus.textContent = `${this.rowNodes.size}人を表示 · 補助情報を確認中…`;
+    const [profiles, mutual] = await Promise.allSettled([
+      this.app.repo.profiles(users),
+      type === 'following' ? this.app.social.followingBack(this.owner, users) :
+        type === 'followers' ? (async () => {
+          if (refreshOwn) await this.followerDirectory.readOwner();
+          const event = latest([this.followerDirectory.ownerEvent, this.app.repo.replacements.get(`3:${this.owner}`)]);
+          return event ? new Set(pubkeys(event)) : null;
+        })() : Promise.resolve(new Set())
+    ]);
+    if (!rows.isConnected || rows !== this.rows || version !== this.listVersion) return;
+    const mutuals = mutual.status === 'fulfilled' ? mutual.value : null;
+    for (const key of users) {
+      const previous = this.rowNodes.get(key); if (!previous) continue;
+      const state = !mutuals || mutuals.unknown?.has(key) ? null : mutuals.has(key);
+      const row = this.app.identity.userRow(key, {mutual:state, owner:type === 'mutes' ? null : this.owner});
+      previous.replaceWith(row); this.rowNodes.set(key, row);
+    }
+    const incomplete = profiles.status === 'rejected' || profiles.value?.complete === false ||
+      mutual.status === 'rejected' || !mutuals || mutuals.complete === false;
+    this.detailsWarning = incomplete ? 'プロフィールまたは相互フォローの確認が一部未完了です。未確認は非フォローと区別しています。補助情報を再取得できます。' : '';
+    this.listStatus.textContent = `${this.rowNodes.size}人を表示` + (this.detailsWarning ? ' · ' + this.detailsWarning : '');
+    this.retryDetails.hidden = !incomplete;
+    if (type === 'followers') this.paintFollowerStatus();
   }
-  async appendFollowers(){
-    const app=this.app,page=await this.followerPager.older();if(!this.rows.isConnected)return;
-    const candidates=unique(page.map(e=>e.pubkey)).filter(p=>!this.loadedUsers.has(p));
-    // '#p' is discovery, not proof of CURRENT following: fetch the unfiltered latest kind:3.
-    const current=await app.social.followingBack(this.owner,candidates);if(!this.rows.isConnected)return;
-    const users=candidates.filter(p=>current.has(p));await app.repo.profiles(users);
-    const own=new Set(pubkeys(await app.repo.replacement(3,this.owner)));if(!this.rows.isConnected)return;
-    this.rows.querySelector('.empty-state')?.remove();for(const p of users){this.rows.append(app.identity.userRow(p,{mutual:own.has(p),owner:this.owner}));this.loadedUsers.add(p);}
-    if(!this.loadedUsers.size)this.rows.append(empty('このページではフォロワーが見つかりません','次の30人を表示すると別の期間を確認できます。'));
-    this.more.hidden=this.followerPager.exhausted;
+  async followers() {
+    const directory = new FollowerDirectory(this.app.repo, this.app.social, this.owner);
+    const first = await directory.next();
+    if (!this.list.isConnected) return;
+    // Keep the current directory and all its rows if every discovery lane failed.
+    // A subset reconstructed from old mutuals is not a successful fresh directory.
+    if (this.rowNodes?.size && !directory.ownerComplete && directory.streams.every(stream => !!stream.pager.warning)) {
+      throw new Error('フォロワー一覧の更新を確認できませんでした。表示済みの一覧を維持しています');
+    }
+    this.listVersion++; this.list.replaceChildren();
+    this.list.append(el('p', {class:'list-note'}, '設定中の読み取りリレーで確認できたフォロワーです。全Nostrの総数ではありません。リレーごとに候補を探し、本人のフォロー先からも相互フォローを確認します。未取得・通信失敗はフォロー解除とみなしません。'));
+    this.followerDirectory = directory;
+    this.loadedUsers = new Set(); this.rowNodes = new Map(); this.detailsWarning = '';
+    this.rows = el('div', {}); this.listStatus = el('p', {class:'list-note',role:'status'});
+    this.more = button('次の30人を表示', () => this.runList(() => this.appendFollowers()), 'button load-more');
+    const refresh = button('フォロワーを更新', () => this.runList(() => this.followers()), 'text-button');
+    this.retryFollowers = button('未確認の候補を再確認', () => this.runList(() => this.appendFollowers(true)), 'text-button');
+    this.retryFollowers.hidden = true;
+    this.retryDetails = button('表示中の補助情報を再取得', () => this.runList(() =>
+      this.loadDetails([...this.rowNodes.keys()], {type:'followers',refreshOwn:true})), 'text-button');
+    this.retryDetails.hidden = true;
+    this.list.append(refresh, this.listStatus, this.rows, this.more, this.retryFollowers, this.retryDetails);
+    this.list.querySelectorAll('button').forEach(b => b.disabled = !!this.listOperation);
+    await this.appendFollowers(false, first);
+  }
+  paintFollowerStatus() {
+    const directory = this.followerDirectory;
+    this.more.hidden = directory.exhausted;
+    this.retryFollowers.hidden = !directory.needsRetry;
+    const warnings = [directory.warning, this.detailsWarning].filter(Boolean);
+    this.listStatus.textContent = `${this.rowNodes.size}人を表示` + (warnings.length ? ' · ' + warnings.join(' ') : '') +
+      (!directory.exhausted ? ' · 未確認の期間・候補があります。「次の30人を表示」で続けられます。' : directory.needsRetry ? ' · 候補の探索は終了しました。未確認の状態は再確認できます。' : ' · 読み取りリレー内の候補を最後まで確認しました。');
+  }
+  async appendFollowers(retry = false, initialPage = null) {
+    const rows = this.rows, version = this.listVersion, directory = this.followerDirectory;
+    const page = initialPage ?? await (retry ? directory.retry() : directory.next());
+    if (!rows.isConnected || rows !== this.rows || version !== this.listVersion) return;
+    for (const key of page.removed) {
+      this.rowNodes.get(key)?.remove(); this.rowNodes.delete(key); this.loadedUsers.delete(key);
+    }
+    this.rows.querySelector('.empty-state')?.remove();
+    for (const key of page.users) {
+      if (this.rowNodes.has(key)) continue;
+      const row = this.app.identity.userRow(key, {mutual:null,owner:this.owner});
+      this.rows.append(row); this.rowNodes.set(key,row); this.loadedUsers.add(key);
+    }
+    if (!this.rowNodes.size) this.rows.append(empty('この確認ではフォロワーが見つかりません',
+      directory.exhausted ? '確認範囲は設定中の読み取りリレーに限られます。' : '別の期間・本人のフォロー先も続けて確認できます。'));
+    await this.loadDetails(retry ? [...this.rowNodes.keys()] : page.users, {type:'followers'});
   }
 }

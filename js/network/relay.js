@@ -1,6 +1,6 @@
-import { LIMITS } from '../core/config.js?v=1.2.0';
-import { matchesFilter, nowSeconds, sleep } from '../core/utils.js?v=1.2.0';
-import { verifyEvent, validEventShape } from '../core/crypto.js?v=1.2.0';
+import { LIMITS } from '../core/config.js?v=1.2.3';
+import { matchesFilter, nowSeconds, sleep } from '../core/utils.js?v=1.2.3';
+import { verifyEvent, validEventShape, eventSizeLimit, isPublicList } from '../core/crypto.js?v=1.2.3';
 
 export class RelayError extends Error {
   constructor(message, relay, partial = []) { super(message); this.name = 'RelayError'; this.relay = relay; this.partial = partial; }
@@ -51,11 +51,12 @@ export class RelayConnection {
       const timer = setTimeout(() => { fail('error: 接続タイムアウト'); socket?.close(); }, LIMITS.connectionTimeout);
       try { socket = this.socketFactory(this.url); this.socket = socket; } catch (e) { fail(e.message); return; }
       socket.onopen = () => { if (settled) { socket.close(); return; } settled = true; clearTimeout(timer); this.stats.connections++; resolve(); };
-      socket.onmessage = event => this.onMessage(event.data);
+      socket.onmessage = event => { if (this.socket === socket) this.onMessage(event.data); };
       socket.onerror = () => fail('error: 接続できません');
       socket.onclose = () => {
         fail('error: 接続が閉じられました');
-        if (this.socket === socket) { this.socket = null; this.challenge = null; }
+        if (this.socket !== socket) return;
+        this.socket = null; this.challenge = null;
         for (const p of [...this.pending.values()]) p.fail('error: 接続が切れました');
       };
     }).catch(async error => { await this.penalize(error.message); throw error; }).finally(() => { this.connecting = null; });
@@ -68,8 +69,14 @@ export class RelayConnection {
     this.socket.send(text);
   }
   onMessage(raw) {
-    if (typeof raw !== 'string' || raw.length > LIMITS.frameBytes) { this.stats.invalid++; return; }
-    this.stats.receivedBytes += new TextEncoder().encode(raw).length;
+    if (typeof raw !== 'string') { this.stats.invalid++; return; }
+    const bytes = raw.length > LIMITS.frameBytes ? raw.length : new TextEncoder().encode(raw).length;
+    if (bytes > LIMITS.frameBytes) {
+      this.stats.invalid++;
+      for (const p of [...this.pending.values()]) p.fail('restricted: 応答が受信サイズ上限を超えました。空の一覧としては扱いません');
+      return;
+    }
+    this.stats.receivedBytes += bytes;
     let msg; try { msg = JSON.parse(raw); } catch { return; }
     if (!Array.isArray(msg)) return;
     if (msg[0] === 'AUTH' && typeof msg[1] === 'string' && msg[1].length < 4096) { this.challenge = msg[1]; return; }
@@ -91,12 +98,13 @@ export class RelayConnection {
       await this.connect();
       return new Promise((resolve, reject) => {
         const id = `m${++this.sequence}`; const found = new Map(); let closed = false;
-        let verification = Promise.resolve(), received = 0;
+        let verification = Promise.resolve(), received = 0, verificationFailed = false;
         const maximum = Math.min(6000, Math.max(1, filters.reduce((n,f) => n + (f.limit || 30), 0)) * 2);
         const finish = async (error = null) => {
           if (closed) return; closed = true; clearTimeout(timer); this.pending.delete(id);
           if (this.socket?.readyState === 1) { try { this.send(['CLOSE', id]); this.stats.closes++; } catch {} }
           await verification;
+          if (verificationFailed && !error) error = 'error: 署名検証を完了できませんでした';
           if (error) { await this.penalize(error); reject(new RelayError(error, this.url, [...found.values()])); }
           else { await this.succeeded(); resolve([...found.values()]); }
         };
@@ -106,11 +114,21 @@ export class RelayConnection {
           event: event => {
             if (closed) return;
             if (++received > maximum) { void finish('restricted: 応答件数の上限を超えました'); return; }
-            if (!validEventShape(event) || event.created_at > nowSeconds() + 600 || !filters.some(f => matchesFilter(event, f))) { this.stats.invalid++; return; }
+            if (isPublicList(event) && ((event.tags?.length > LIMITS.listTags) ||
+                new TextEncoder().encode(JSON.stringify(event)).length > eventSizeLimit(event))) {
+              void finish('restricted: 公開リストが受信サイズ上限を超えました。空の一覧としては扱いません'); return;
+            }
+            const exactReplacement = [0,3,10000,10002].includes(event?.kind) &&
+              filters.some(f => f.kinds?.includes(event.kind) && f.authors?.includes(event.pubkey));
+            if (!validEventShape(event) || event.created_at > nowSeconds() + 600) {
+              this.stats.invalid++; if (exactReplacement) verificationFailed = true; return;
+            }
+            if (!filters.some(f => matchesFilter(event, f))) { this.stats.invalid++; return; }
             verification = verification.then(async () => {
-              if (await this.verify(event)) {
-                found.set(event.id, event); this.stats.events++;
-              } else this.stats.invalid++;
+              try {
+                if (await this.verify(event)) {found.set(event.id, event); this.stats.events++;}
+                else {this.stats.invalid++; if (exactReplacement) verificationFailed = true;}
+              } catch {this.stats.invalid++; verificationFailed = true;}
             });
           }
         });
@@ -137,6 +155,10 @@ export class RelayConnection {
     }, { allowAuth: auth });
   }
   armIdle() { clearTimeout(this.idleTimer); if (!this.queued && !this.pending.size) this.idleTimer = setTimeout(() => this.close(), LIMITS.idleTimeout); }
-  close() { clearTimeout(this.idleTimer); this.socket?.close(); this.socket = null; }
+  close() {
+    clearTimeout(this.idleTimer);
+    for (const p of [...this.pending.values()]) p.fail('error: 接続を終了しました');
+    const socket = this.socket; this.socket = null; this.challenge = null; socket?.close();
+  }
   snapshot() { return { relay: this.url, connected: this.socket?.readyState === 1, queued: this.queued, ...this.stats, ...this.health, authRequired: !!this.challenge }; }
 }

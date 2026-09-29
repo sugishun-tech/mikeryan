@@ -1,47 +1,68 @@
-# テスト方法 · 1.2.0
+# テスト方法 · 1.2.3
 
-## Node
+## Node・静的検査・ビルド
 
-Node.js 20以上。npm依存パッケージは不要です。
+Node.js 20以上。npm依存パッケージは不要です。今回の実行はNode 22.16.0です。
 
 ```sh
 npm run check
 npm test
 npm run build
+# 今回の47件の故障注入・履歴回帰だけ
+node --test tests/audit.test.js tests/network-client.test.js tests/router-history.test.js
+# 各100通りのページング生成データ
+node --test tests/pagination-properties.test.js
+# Node標準の実行カバレッジ。UIや実ブラウザー統合の網羅率ではない
+node --test --experimental-test-coverage --test-coverage-include='js/**' tests/*.test.js
 ```
 
-署名、フィルタ、並行要求、30件ページング、通信の打ち切り、永続プロフィールの利用、手動更新、保存失敗、NIP-05、公開リレー編集をテストします。IndexedDB部分は最小APIフィクスチャです。localStorage型のディスクアダプターは実際の別Nodeプロセスを使う復元試験も含みます。
+全211件。既存162件、追加回帰47件、生成データ2件です。旧版との失敗比較や具体的な観点は [検証結果](./TEST_RESULTS.md) にあります。実行結果のスキップや失敗を合格へ読み替えないでください。
 
-## 今回の画面テスト
+## Chromium画面試験
 
 ```sh
 python3 -m pip install playwright cryptography websockets
-CHROMIUM_PATH=/usr/bin/chromium python3 tests/browser_persistence.py
+MIKERYAN_TEST_FAST=1 CHROMIUM_PATH=/usr/bin/chromium python3 tests/browser_persistence.py
+CHROMIUM_PATH=/usr/bin/chromium python3 tests/browser_completeness.py
+CHROMIUM_PATH=/usr/bin/chromium python3 tests/browser_relationships.py
+CHROMIUM_PATH=/usr/bin/chromium python3 tests/browser_audit.py
 ```
 
-Chromiumが別の場所にある場合はCHROMIUM_PATHを変更します。実DOMとネイティブES modulesを使いますが、WebSocket・localStorage・URL遷移・SHAの境界はテスト用です。現在仕様の65項目を検証し、`tests/output/persistence-browser-results.json` へ出力します。`browser_offline.py` と `browser_navigation.py` からハーネス関数を再利用します。この2つと `browser_profile.py` の直接実行は旧リリース用で、今回の画面検証コマンドではありません。
+それぞれ65、34、30、47項目、合計176項目。結果は `tests/output/` のJSONへ保存します。Chromiumのパスは環境に合わせて変更します。
 
-## 実HTTP・実保存APIを使う追加確認
+実DOM・ネイティブES modulesを使用し、通信・保存・履歴・署名拡張・SHA計算にはテストアダプターを使用します。投稿を公開リレーへ送らず、実秘密鍵も使用しません。模擬通信の要求間隔は上記保存試験では環境変数により、残る3試験ではローダーにより無効化します。製品の要求間隔はNodeの別試験で確認します。
+
+`browser_offline.py` / `browser_navigation.py` は現在試験が利用するハーネス関数を含みます。この2つおよび `browser_profile.py` の古い直接実行部分は過去の自動取得仕様向けで、上記の現行試験には含めません。古い単独エントリーを現行仕様の合格結果として扱わないでください。
+
+## 実WebSocketを使うlocalhost試験
+
+Node 22以上の標準WebSocketとPython websocketsを使います。
+
+```sh
+python3 tests/transport_integration.py
+```
+
+実行時に127.0.0.1の空きポートへ一時的なリレーを起動し、公開テスト鍵で署名したフィクスチャだけを送受信します。9項目の結果を `tests/output/transport-results.json` へ保存します。サーバーは実行終了時に停止し、署名付きの一時ファイルも削除します。公衆リレー・実拡張・ブラウザーを検証する試験ではありません。
+
+## ネイティブのブラウザー統合確認
 
 ```sh
 CHROMIUM_PATH=/usr/bin/chromium python3 tests/browser_smoke.py
 ```
 
-localhostにHTTP/WebSocketを起動し、実IndexedDB・実URL・共有接続を確認するための1.2.0用スクリプトです。NIP-05のHTTPと署名拡張はテスト用に置換します。実秘密鍵や公開リレーを使いません。今回の実行環境ではブラウザーのURLアクセスが管理ポリシーで拒否されたため、このスクリプトの通過は確認していません。
+実HTTP・WebSocket・IndexedDB・URL・SharedWorkerを確認するためのスクリプトです。NIP-05とNIP-07は公開テストフィクスチャです。今回の環境では管理ポリシーがURLアクセスを遮断し、開始できませんでした。未通過として記録し、176項目にも9項目にも含めません。
 
-通常のFirefoxでも、次の条件を確認できます。プロフィールを明示取得した後にタブを閉じて再び開き、取得ボタンを押さず保存済みの名前が出ること。NetworkのWSログでアクセスだけではREQがないこと。既知の人を含む投稿を取得してもkind:0のフィルタがなく、プロフィール更新ボタンではその人のkind:0だけが送信されること。StorageのIndexedDBにはkind:0のみがあり、投稿・フォロー・ミュート・公開リレーがないこと。設定のリレーはlocalStorageの従来設定に残ること。
+通常の配信環境では、拡張機能の許可、CSP/CORS、保存容量、タブ間接続、戻る・進む、公衆リレーの認証・件数制限を別途確認してください。プロフィールを明示取得した後の再読み込みでも保存済みの名前が出ること、取得ボタンを押すまではREQがないこと、取得データの永続ストアがkind:0専用であることも確認点です。
 
-## 再現可能な通信比較
+## 過去の通信比較
 
 ```sh
-# 現在版のみ
-npm run benchmark
-# 別ディレクトリへ展開した、変更していない1.1.1と比較
-node scripts/benchmark-persistence.mjs --baseline /path/to/1.1.1/mikeryan
-# 結果の上書きを避ける場合
+# 現在の計測を過去の記録と分けて出力
+node scripts/benchmark-persistence.mjs --output /tmp/traffic.json
+# 元の1.1.1ソースを別途保持している場合だけ
 node scripts/benchmark-persistence.mjs --baseline /path/to/1.1.1/mikeryan --output /tmp/traffic.json
 ```
 
-旧版の自動ダウンロードはしません。以前のZIPを展開して使います。標準出力と `docs/persistence-traffic-results.json` に計測を出します。旧 `scripts/benchmark.mjs` は1.1.0→1.1.1用の過去の比較器で、今回のレポートとは別です。
+同梱のTRAFFIC.mdとJSONは1.2.0の過去記録です。今回の全ケースの通信削減率ではありません。`npm run benchmark` は標準出力先の過去JSONを上書きするため、記録を残す場合は別の `--output` を指定してください。
 
-すべての署名鍵は公開のテスト専用フィクスチャです。実アカウントやウォレットに使わないでください。
+すべてのフィクスチャ鍵は公開のテスト専用です。実アカウントやウォレットには使用しないでください。

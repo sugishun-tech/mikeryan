@@ -1,8 +1,8 @@
 /* Public-data-only BIP-340 verification. Never use these non-constant-time
  * point operations with private keys. All signing is delegated to NIP-07.
  * Equations: BIP-340; Jacobian coordinates avoid an inverse per addition. */
-import { isHex } from './utils.js?v=1.2.0';
-import { LIMITS } from './config.js?v=1.2.0';
+import { isHex } from './utils.js?v=1.2.3';
+import { LIMITS } from './config.js?v=1.2.3';
 const P = 0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2fn;
 const N = 0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141n;
 const G = [0x79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798n, 0x483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8n, 1n];
@@ -53,16 +53,18 @@ export async function verifySchnorr(message, pubkeyHex, signatureHex) {
     return x === r && (y&1n) === 0n;
   } catch { return false; }
 }
+export const isPublicList = e => [3, 10000, 10002].includes(e?.kind);
+export const eventSizeLimit = e => isPublicList(e) ? LIMITS.listEventBytes : LIMITS.eventBytes;
 export function validEventShape(e) {
   return !!e && isHex(e.id) && isHex(e.pubkey) && typeof e.sig === 'string' && /^[0-9a-f]{128}$/.test(e.sig)
     && Number.isSafeInteger(e.created_at) && e.created_at >= 0 && Number.isInteger(e.kind) && e.kind >= 0 && e.kind <= 65535
-    && typeof e.content === 'string' && e.content.length <= LIMITS.eventBytes
-    && Array.isArray(e.tags) && e.tags.length <= LIMITS.tags && e.tags.every(t => Array.isArray(t) && t.length > 0 && t.every(v => typeof v === 'string'));
+    && typeof e.content === 'string' && e.content.length <= eventSizeLimit(e)
+    && Array.isArray(e.tags) && e.tags.length <= (isPublicList(e) ? LIMITS.listTags : LIMITS.tags) && e.tags.every(t => Array.isArray(t) && t.length > 0 && t.every(v => typeof v === 'string'));
 }
 export async function eventHash(event) { return bytesToHex(await sha256(encode(JSON.stringify([0,event.pubkey,event.created_at,event.kind,event.tags,event.content])))); }
 export async function verifyEvent(event) {
   if (!validEventShape(event)) return false;
-  if (encode(JSON.stringify(event)).length > LIMITS.eventBytes) return false;
+  if (encode(JSON.stringify(event)).length > eventSizeLimit(event)) return false;
   const hash = await eventHash(event);
   return hash === event.id && await verifySchnorr(hexToBytes(hash), event.pubkey, event.sig);
 }

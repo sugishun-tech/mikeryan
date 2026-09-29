@@ -1,8 +1,9 @@
-import { RelayConnection } from './relay.js?v=1.2.0';
-import { LIMITS } from '../core/config.js?v=1.2.0';
-import { canonicalFilters, chunks, normalizeRelay, sortEvents, stableJSON, unique } from '../core/utils.js?v=1.2.0';
-import { missingProfileFilters } from './profile-batch.js?v=1.2.0';
-import { verifyEvent } from '../core/crypto.js?v=1.2.0';
+import { RelayConnection } from './relay.js?v=1.2.3';
+import { LIMITS } from '../core/config.js?v=1.2.3';
+import { canonicalFilters, chunks, normalizeRelay, sortEvents, stableJSON, unique } from '../core/utils.js?v=1.2.3';
+import { missingProfileFilters, missingReplacementFilters } from './profile-batch.js?v=1.2.3';
+import { readPage } from './page.js?v=1.2.3';
+import { verifyEvent } from '../core/crypto.js?v=1.2.3';
 
 export class RelayPool {
   constructor(storage, options = {}) { this.storage = storage; this.options = options; this.connections = new Map(); this.inflight = new Map(); this.coalesced = 0; }
@@ -11,7 +12,7 @@ export class RelayPool {
     const conn = this.connections.get(url); conn.gap = Math.max(gap, this.options.gap ?? 0); return conn;
   }
   urls(relays) { const urls = unique(relays.map(normalizeRelay).filter(Boolean)); if (!urls.length || urls.length > LIMITS.relays) throw new Error('リレー設定が不正です'); return urls; }
-  async query({ relays, filters, gap = 1200, profileBatch = false }) {
+  async query({ relays, filters, gap = 1200, profileBatch = false, page = false }) {
     const urls = this.urls(relays), normalized = canonicalFilters(filters);
     if (!normalized.length) return { events: [], complete: true, errors: [] };
     if (normalized.length > 400) throw new Error('一度の問い合わせが大きすぎます。フォロー数を減らすか、個別のプロフィールを開いてください');
@@ -19,28 +20,43 @@ export class RelayPool {
       if (!Number.isInteger(f.limit) || f.limit < 1 || f.limit > LIMITS.maxPageLimit) throw new Error('取得上限が不正です');
       if (Object.values(f).some(v => Array.isArray(v) && !v.length)) throw new Error('空の検索条件は利用できません');
     }
-    const key = `query:${stableJSON([urls, normalized, profileBatch])}`;
+    const key = `query:${stableJSON([urls, normalized, profileBatch, page])}`;
     if (this.inflight.has(key)) { this.coalesced++; return this.inflight.get(key); }
     const task = (async () => {
-      const events = [], errors = [];
+      const events = [], errors = [], sources = [];
       // Every relay finishes independently. The fastest relay cannot truncate the others.
       await Promise.all(urls.map(async url => {
-        for (const group of chunks(normalized, LIMITS.filters)) {
+        for (const group of chunks(normalized, page ? 1 : LIMITS.filters)) {
           try {
-            const received = await this.connection(url, gap).query(group);
+            const connection = this.connection(url, gap);
+            if (page) {
+              const result = await readPage(connection, group[0]);
+              events.push(...result.events); sources.push({relay: url, ...result.source});
+              continue;
+            }
+            const received = await connection.query(group);
             events.push(...received);
             if (profileBatch) {
-              // One repair pass, per relay; a result from another relay cannot
-              // hide this relay's missing/newer profile. Rate limiting stops here.
+              // Bounded repair stages, per relay: a different relay cannot
+              // hide missing identities here. Any refusal stops these repairs.
               for (const repair of chunks(missingProfileFilters(group, received), LIMITS.filters)) {
-                events.push(...await this.connection(url, gap).query(repair));
+                const repaired = await connection.query(repair);
+                events.push(...repaired);
+                // Some relays apply a subscription-wide cap or process only
+                // the first filter. Isolate still-missing exact replacements.
+                for (const single of missingReplacementFilters(repair, repaired)) {
+                  events.push(...await connection.query([single]));
+                }
+              }
+              for (const single of missingReplacementFilters(group, received, {excludeProfiles: true})) {
+                events.push(...await connection.query([single]));
               }
             }
           }
           catch (e) { events.push(...(e.partial ?? [])); errors.push({ relay: url, reason: e.message }); break; }
         }
       }));
-      const result = { events: sortEvents(events), complete: errors.length === 0, errors };
+      const result = { events: sortEvents(events), complete: errors.length === 0, errors, ...(page ? {sources} : {}) };
       return result;
     })();
     this.inflight.set(key, task);

@@ -1,4 +1,4 @@
-import { el, button, busy, field, toast } from '../ui/dom.js?v=1.2.0';
+import { el, button, busy, field, toast } from '../ui/dom.js?v=1.2.3';
 
 const PROFILE_FIELDS = {
   display_name: '表示名',
@@ -20,6 +20,8 @@ export function editProfileDialog(app, profile = {}) {
     dataset: { profileEditor: '' },
     'aria-labelledby': 'profile-editor-title'
   });
+  const context=app.social.sessionContext();
+  const initial=Object.fromEntries(Object.keys(PROFILE_FIELDS).map(key=>[key,String(profile[key]??'')]));
   const form = el('form');
   const inputs = {};
   let saving = false;
@@ -49,7 +51,10 @@ export function editProfileDialog(app, profile = {}) {
     event.preventDefault();
     if (saving || !form.reportValidity()) return;
     void busy(save, async () => {
-      const fields = Object.fromEntries(Object.entries(inputs).map(([key, input]) => [key, input.value]));
+      const fields = Object.fromEntries(Object.entries(inputs)
+        .filter(([key,input])=>input.value!==initial[key]).map(([key,input])=>[key,input.value]));
+      app.social.checkSession(context);
+      if(!Object.keys(fields).length){dialog.close();return;}
       saving = true;
       close.disabled = true;
       save.textContent = '保存中…';
@@ -57,7 +62,7 @@ export function editProfileDialog(app, profile = {}) {
       error.hidden = true;
       error.textContent = '';
       try {
-        await app.social.editProfile(fields);
+        await app.social.editProfile(fields,context);
       } catch (cause) {
         error.textContent = cause?.message || 'プロフィールを保存できませんでした。';
         error.hidden = false;
@@ -69,9 +74,10 @@ export function editProfileDialog(app, profile = {}) {
         save.textContent = '保存する';
         for (const input of Object.values(inputs)) input.disabled = false;
       }
+      if(!dialog.isConnected)return;
       dialog.close();
       toast('プロフィールを更新しました');
-      await app.render(app.router.route);
+      if(app.social.sameSession(context))await app.render(app.router.route);
     });
   });
   dialog.addEventListener('cancel', event => {

@@ -1,9 +1,18 @@
-# テストの入口 · 1.2.0
+# テストの入口 · 1.2.3
 
-- `npm test`: 現在版のNode単体テスト。
-- `python3 tests/browser_persistence.py`: 現在仕様のオフライン画面回帰試験。
-- `python3 tests/browser_smoke.py`: 通常のブラウザー環境用の実HTTP・IndexedDB追加試験。今回の環境では管理ポリシーによりページアクセスできず、未通過。
+現行の再現手順、アダプター、必要な実行環境、未検証範囲は [docs/TESTING.md](../docs/TESTING.md)、実行結果は [docs/TEST_RESULTS.md](../docs/TEST_RESULTS.md) にまとめています。
 
-`browser_navigation.py` と `browser_offline.py` のハーネス関数を現在の画面試験でも再利用しています。その直接実行、および `browser_profile.py` の単独実行の期待値は過去版用です。今回実行した画面試験の入口と混同しないでください。
+```sh
+npm test
+MIKERYAN_TEST_FAST=1 python3 tests/browser_persistence.py
+python3 tests/browser_completeness.py
+python3 tests/browser_relationships.py
+python3 tests/browser_audit.py
+python3 tests/transport_integration.py
+```
 
-署名鍵・イベントはテスト専用の公開フィクスチャです。実アカウントやウォレットに使わないでください。検証境界と再現方法は `docs/TESTING.md`、現在の通過結果は `docs/TEST_RESULTS.md` にあります。
+Node211件、Chromiumは65+34+30+47の176項目、localhost実WebSocket9項目。Chromiumの場所が異なる場合は `CHROMIUM_PATH` を指定します。実WebSocket試験はNode22以上が必要です。
+
+`browser_smoke.py` は実HTTP・IndexedDB・SharedWorkerの追加試験で、今回の環境ではURLアクセスが遮断され未通過です。`browser_offline.py` / `browser_navigation.py` のハーネスは再利用していますが、この2つと `browser_profile.py` の直接実行部分は旧仕様用です。現行の通過件数に含めていません。
+
+署名鍵とイベントは公開のテスト専用フィクスチャです。実アカウントやウォレットには使用しないでください。変更履歴はルートのCHANGELOG.mdのみです。

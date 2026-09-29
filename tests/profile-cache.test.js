@@ -89,7 +89,9 @@ test('Verification record for another pubkey or event cannot be reused as a badg
 });
 test('Storage-full failure is visible, nonfatal and not reported as a successful persistent write',async()=>{
  let warnings=0;const cache=new ProfileCache({indexedDB:null,localStorage:{getItem:()=>null,setItem:()=>{throw Error('quota');}},onError:()=>warnings++});
- assert.equal((await cache.put(e)).event.id,e.id);await cache.put(e);assert.equal(warnings,1);assert.equal(cache.stats.writes,0);assert.equal(await cache.get(e.pubkey),null);
+ assert.equal((await cache.put(e)).event.id,e.id);await cache.put(e);assert.equal(warnings,1);assert.equal(cache.stats.writes,0);assert.equal((await cache.get(e.pubkey)).event.id,e.id);
+ const reopened=new ProfileCache({indexedDB:null,localStorage:{getItem:()=>null,setItem:()=>{throw Error('quota');}}});
+ assert.equal(await reopened.get(e.pubkey),null);
 });
 test('IndexedDB branch uses only profiles store and survives a closed/reopened cache (API fixture)',async()=>{
  const indexedDB=idbFixture(),a=new ProfileCache({indexedDB,localStorage:null});await a.put(e);await a.close();

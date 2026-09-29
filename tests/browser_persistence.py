@@ -41,7 +41,7 @@ async def main():
     Object.defineProperty(window,'SharedWorker',{value:undefined,configurable:true});
     Object.defineProperty(window,'crypto',{value:{subtle:{digest:async(alg,bytes)=>Uint8Array.from(await window.testDigest(Array.from(new Uint8Array(bytes)))).buffer}},configurable:true});
    }""")
-   await page.evaluate(LOADER,dict(sources=sources,avatar=avatar))
+   await page.evaluate(LOADER,dict(sources=sources,avatar=avatar,relaxGap=os.environ.get('MIKERYAN_TEST_FAST')=='1'))
    await page.wait_for_selector('.feed-toolbar');await page.wait_for_timeout(100)
    return page
   page=await load()
@@ -111,7 +111,7 @@ async def main():
   ok('Profile persisted through complete page replacement',await page.locator('.profile-info .display-name').inner_text()=='保存更新テスト' and not await reqs())
   n=len(await reqs());h=await http();await read('最新を読み込む')
   sent=(await reqs())[n:]
-  ok('Restored profile page fetches posts and likes, never cached metadata',len(sent)==2 and not any(f.get('kinds')==[0] for m in sent for f in m[2:]) and await http()==h)
+  ok('Restored profile page fetches posts, a bounded short-page probe and likes, never cached metadata',len(sent)==3 and not any(f.get('kinds')==[0] for m in sent for f in m[2:]) and await http()==h)
   for view in ('home','notifications','global'):
    n=len(await reqs());h=await http();await nav('#/'+view,'.feed-toolbar')
    ok(f'{view} navigation does not load posts or account lists',len(await reqs())==n and await http()==h and await page.locator('.timeline>.post').count()==0)
@@ -126,13 +126,13 @@ async def main():
   for tab,label in [('following','フォロー'),('followers','フォロワー'),('mutes','ミュート')]:
    await nav(f'#/profile/{alice}/{tab}',f'button:text-is("{label}を取得")');n=len(await reqs());h=await http()
    await page.get_by_role('button',name=f'{label}を取得',exact=True).click()
-   await page.wait_for_selector('.user-row');await page.wait_for_timeout(100)
+   await page.wait_for_selector('.user-row');await page.wait_for_function("!document.querySelector('.profile-tab-content[aria-busy=\"true\"]')");await page.wait_for_timeout(100)
    sent=(await reqs())[n:]
    ok(f'{label} explicit read uses cached user profiles but fresh lists',len(sent)>0 and not any(f.get('kinds')==[0] for m in sent for f in m[2:]) and await http()==h)
    await nav('#/settings','.settings-form');n=len(await reqs())
    await nav(f'#/profile/{alice}/{tab}',f'button:text-is("{label}を取得")')
    ok(f'{label} rows are not restored as a list cache on revisit',await page.locator('.user-row').count()==0 and len(await reqs())==n)
-   await page.get_by_role('button',name=f'{label}を取得',exact=True).click();await page.wait_for_selector('.user-row')
+   await page.get_by_role('button',name=f'{label}を取得',exact=True).click();await page.wait_for_selector('.user-row');await page.wait_for_function("!document.querySelector('.profile-tab-content[aria-busy=\"true\"]')")
    ok(f'{label} re-read sends fresh REQs',len(await reqs())>n)
   await nav(f'#/profile/{alice}/relays','button:text-is("リレーを取得")')
   n=len(await reqs());await page.get_by_role('button',name='リレーを取得',exact=True).click();await page.wait_for_selector('.public-relays .relay-row')
@@ -186,7 +186,7 @@ async def main():
   ok('Logout preserves public profile cache without fetching',len(await reqs())==n and await http()==h and await page.evaluate('[...__saved.keys()].filter(k=>k.includes(":profiles:")).length')==4)
   ok('Every finished REQ has a CLOSE',len(await reqs())==await page.evaluate('__messages.filter(m=>m[0]==="CLOSE").length'))
   ok('No JavaScript page errors',not errors)
-  result=dict(mode='Chromium native modules and DOM with mocked transport/localStorage/navigation/SHA; no native IndexedDB/SharedWorker',passed=len(checks),checks=checks,errors=errors,browser=browser.version)
+  result=dict(mode='Chromium native modules and DOM with mocked transport/localStorage/navigation/SHA; no native IndexedDB/SharedWorker',requestSpacingDisabled=os.environ.get('MIKERYAN_TEST_FAST')=='1',passed=len(checks),checks=checks,errors=errors,browser=browser.version)
   (OUT/'persistence-browser-results.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
   await browser.close()
  print('RESULT:',len(checks),'checks passed')

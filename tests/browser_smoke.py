@@ -1,4 +1,4 @@
-"""1.2.0 native-API integration check for a normal browser environment.
+"""1.2.3 native-API integration check for a normal browser environment.
 Uses actual localhost HTTP/WebSockets/IndexedDB/modules/SharedWorker. NIP-05 HTTP
 and the NIP-07 signer use public test fixtures. Not a public-relay or extension test.
 Run: CHROMIUM_PATH=/usr/bin/chromium python3 tests/browser_smoke.py
@@ -117,7 +117,7 @@ async def main():
             await read(page)
             ok('Native explicit cold anonymous read gets posts and metadata', len(requests()) == 2)
             records = await page.evaluate('''async()=>{
-                const {storagePrefix}=await import('./js/core/config.js?v=1.2.0');
+                const {storagePrefix}=await import('./js/core/config.js?v=1.2.3');
                 return new Promise((resolve,reject)=>{const r=indexedDB.open(storagePrefix()+'profiles',1);
                   r.onerror=()=>reject(r.error);r.onsuccess=()=>{const db=r.result;
                     const tx=db.transaction('profiles','readonly'), q=tx.objectStore('profiles').getAll();
@@ -142,7 +142,7 @@ async def main():
             await second.wait_for_selector('.feed-toolbar')
             await read(second)
             ok('Second tab reuses native persistent profiles', len(requests()) == n+1 and http_count == h)
-            worker_mode = await second.evaluate("async()=>{const {app}=await import('./js/app.js?v=1.2.0');await app.network.ready;return app.network.mode}")
+            worker_mode = await second.evaluate("async()=>{const {app}=await import('./js/app.js?v=1.2.3');await app.network.ready;return app.network.mode}")
             if worker_mode == 'shared-worker':
                 ok('Native SharedWorker shares one connection across two tabs', len(connections) == 1)
             else:

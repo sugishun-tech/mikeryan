@@ -1,5 +1,6 @@
 {
   "mode": "Chromium native modules and DOM with mocked transport/localStorage/navigation/SHA; no native IndexedDB/SharedWorker",
+  "requestSpacingDisabled": true,
   "passed": 65,
   "checks": [
     "Anonymous initial access: zero REQ, zero NIP-05 HTTP and zero relay sockets",
@@ -29,7 +30,7 @@
     "Login itself causes no relay/verification requests",
     "Fresh module instance restores login and profile without network",
     "Profile persisted through complete page replacement",
-    "Restored profile page fetches posts and likes, never cached metadata",
+    "Restored profile page fetches posts, a bounded short-page probe and likes, never cached metadata",
     "home navigation does not load posts or account lists",
     "home explicit read uses persisted identities and does not redo NIP-05",
     "notifications navigation does not load posts or account lists",

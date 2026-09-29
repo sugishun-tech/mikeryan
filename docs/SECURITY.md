@@ -91,3 +91,7 @@ The current execution environment blocks browser URL navigation. Unit tests
 and native-module/offline-adapted DOM tests ran; real browser SharedWorker,
 extension interoperability, GitHub deployment and public-relay acceptance
 remain integration checks for a normal browser environment.
+
+## Large public lists
+
+Public list kinds 3, 10000 and 10002 are bounded at 4 MiB of serialized UTF-8 and 50,000 tags. Other events retain the 256 KiB / 10,000-tag limits. Incoming frames are bounded at 8 MiB before parsing. Oversize public lists and frames fail the read instead of being treated as a successful empty list. Signatures and event IDs are still verified; these larger limits do not permit unsigned or malformed data. A verification-provider exception settles the request as incomplete instead of leaving the queue pending. No missing-row fix disables mute or display filters.

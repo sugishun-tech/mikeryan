@@ -7,7 +7,7 @@ const current={kind:10002,pubkey:owner,created_at:100,content:'keep',tags:[['r',
 function harness(source=current,{incomplete=false}={}) {
  const calls=[],settings={value:{relays:['wss://configured.example/'],requestGapMs:0}},session={pubkey:owner};
  const repo={on(){},replacement:async(kind,key,opts)=>{calls.push({kind,key,opts});if(incomplete)throw Error('最新のデータを全リレーで確認できません');return kind===10002?source:null;}};
- const social=new Social(repo,session,settings,{},{});social.exclusive=async(kind,fn)=>fn(owner);
+ const social=new Social(repo,session,settings,{},{});social.exclusive=async(kind,fn)=>fn(owner,social.sessionContext());
  const sent=[];social.publish=async event=>{sent.push(event);return {...event,pubkey:owner};};return {social,calls,sent,settings,session};
 }
 test('NIP-65 tags expose read/write modes and retain unknown markers',()=>{assert.deepEqual(relayEntries(current).map(r=>r.mode),['read','write','unknown']);});

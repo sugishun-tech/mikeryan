@@ -1,6 +1,6 @@
-import { storagePrefix, LIMITS } from '../core/config.js?v=1.2.0';
-import { isHex, parseJSON, compareEvents } from '../core/utils.js?v=1.2.0';
-import { verifyEvent, validEventShape } from '../core/crypto.js?v=1.2.0';
+import { storagePrefix, LIMITS } from '../core/config.js?v=1.2.3';
+import { isHex, parseJSON, compareEvents } from '../core/utils.js?v=1.2.3';
+import { verifyEvent, validEventShape } from '../core/crypto.js?v=1.2.3';
 
 export function validProfile(event) {
   const value = parseJSON(event?.content);
@@ -53,6 +53,7 @@ export class ProfileCache {
     return this.dbPromise;
   }
   async raw(pubkey) {
+    if (this.memory.has(pubkey)) return this.memory.get(pubkey);
     const db = await this.database();
     if (db) return new Promise((resolve, reject) => {
       const tx = db.transaction('profiles','readonly'), req = tx.objectStore('profiles').get(pubkey);
@@ -79,12 +80,13 @@ export class ProfileCache {
       if (!replace || compareEvents(old.event,event) < 0) return old;
       return incoming;
     };
+    let chosen = incoming;
     try {
-      const db = await this.database(); let chosen;
+      const db = await this.database();
       if (db) chosen = await new Promise((resolve,reject) => {
         const tx = db.transaction('profiles','readwrite'), store = tx.objectStore('profiles'), req = store.get(event.pubkey);
         let record;
-        req.onsuccess = () => { record = choose(req.result); store.put(record); };
+        req.onsuccess = () => { record = choose(this.memory.get(event.pubkey) ?? req.result); chosen = record; store.put(record); };
         tx.oncomplete = () => resolve(record); tx.onabort = () => reject(tx.error ?? new Error('プロフィールの保存が中断されました'));
         tx.onerror = () => {};
       });
@@ -93,10 +95,14 @@ export class ProfileCache {
         if (this.local) this.local.setItem(`${this.name}:${event.pubkey}`,JSON.stringify(chosen));
         else { this.memory.set(event.pubkey,chosen); this.warn(new Error('永続保存が利用できません')); }
       }
+      if (db || this.local) this.memory.delete(event.pubkey);
       this.stats.writes++; return {...chosen,verification:profileVerification(chosen)};
     } catch(error) {
       // Current-screen data still works; never pretend a failed write persisted.
-      this.warn(error); return incoming;
+      this.warn(error);
+      this.memory.delete(event.pubkey); this.memory.set(event.pubkey, chosen);
+      while (this.memory.size > LIMITS.sessionProfiles) this.memory.delete(this.memory.keys().next().value);
+      return {...chosen,verification:profileVerification(chosen)};
     }
   }
   async close() { const db = this.dbPromise ? await this.dbPromise : null; db?.close(); this.dbPromise = null; }

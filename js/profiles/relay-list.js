@@ -1,4 +1,4 @@
-import { normalizeRelay, parseJSON, unique } from '../core/utils.js?v=1.2.0';
+import { normalizeRelay, parseJSON, unique } from '../core/utils.js?v=1.2.3';
 
 /** NIP-65 entries are public account data, never application connection settings. */
 export function relayEntries(modern, contacts = null) {

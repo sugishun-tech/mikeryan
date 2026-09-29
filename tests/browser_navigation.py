@@ -9,13 +9,15 @@ from browser_offline import html, MOCK
 from fixture_signer import fixtures, sign
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'tests/output'; OUT.mkdir(exist_ok=True)
-LOADER=r"""async ({sources,avatar})=>{
+LOADER=r"""async ({sources,avatar,relaxGap=false})=>{
  const urls=new Map(),base='https://offline.example/mikeryan/';
  function load(file){
   if(urls.has(file))return urls.get(file);
   let source=sources[file];if(source===undefined)throw Error('Missing module '+file);
+  // UI fault suites may disable spacing; real queue timing has separate Node tests.
+  if(relaxGap && file==='js/network/pool.js')source=source.replace('conn.gap = Math.max(gap, this.options.gap ?? 0);','conn.gap = 0;');
   source=source.replace(/import\.meta\.url/g,JSON.stringify(base+file));
-  source=source.replace(/\blocation\./g,'window.__testLocation.').replace(/\bhistory\.back\(/g,'window.__testHistory.back(');
+  source=source.replace(/\blocation\./g,'window.__testLocation.').replace(/\bhistory\./g,'window.__testHistory.');
   if(file==='js/core/config.js')source=source.replace(/^export const FALLBACK_ICON = .*;$/m,'export const FALLBACK_ICON = '+JSON.stringify(avatar)+';');
   if(file==='js/app.js')source=source.replace('const app=new App();','const app=new App();window.__app=app;');
   source=source.replace(/(from\s+)(['"])(\.[^'"]+)\2/g,(_,prefix,quote,relative)=>prefix+JSON.stringify(load(new URL(relative,base+file).pathname.slice('/mikeryan/'.length))));

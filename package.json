@@ -1,6 +1,6 @@
 {
   "name": "mikeryan",
-  "version": "1.2.0",
+  "version": "1.2.3",
   "private": true,
   "type": "module",
   "description": "A single-site, low-traffic Nostr client for GitHub Pages",
@@ -11,7 +11,11 @@
     "serve": "python3 -m http.server 8080",
     "build": "node scripts/build.mjs",
     "benchmark": "node scripts/benchmark-persistence.mjs",
-    "test:browser": "python3 tests/browser_persistence.py"
+    "test:browser": "python3 tests/browser_persistence.py",
+    "test:browser:completeness": "python3 tests/browser_completeness.py",
+    "test:browser:relationships": "python3 tests/browser_relationships.py",
+    "test:browser:audit": "python3 tests/browser_audit.py",
+    "test:transport": "python3 tests/transport_integration.py"
   },
   "engines": {
     "node": ">=20"

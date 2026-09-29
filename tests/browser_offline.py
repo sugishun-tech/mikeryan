@@ -46,9 +46,10 @@ MOCK=r'''
  const memory=new Map(Object.entries(saved||{}));window.__saved=memory;
  Object.defineProperty(window,'localStorage',{value:{getItem:k=>memory.get(k)??null,setItem:(k,v)=>memory.set(k,String(v)),removeItem:k=>memory.delete(k)},configurable:true});
  Object.defineProperty(window,'indexedDB',{value:undefined,configurable:true});
- let hash='';const stack=[];
- const loc={search:'',href:'https://offline.example/mikeryan/',get hash(){return hash;},set hash(v){if(v===hash)return;stack.push(hash);hash=v;loc.href='https://offline.example/mikeryan/'+v;queueMicrotask(()=>window.dispatchEvent(new Event('hashchange')));},reload(){}};
- window.__testLocation=loc;window.__testHistory={back(){loc.hash=stack.pop()||'#/global';}};
+ let hash='',index=0;const entries=[{hash:'',state:null}];
+ const dispatch=()=>{loc.href='https://offline.example/mikeryan/'+hash;queueMicrotask(()=>window.dispatchEvent(new Event('hashchange')));};
+ const loc={search:'',href:'https://offline.example/mikeryan/',get hash(){return hash;},set hash(v){if(v===hash)return;entries.splice(index+1);entries.push({hash:v,state:entries[index].state});index++;hash=v;dispatch();},reload(){}};
+ window.__testLocation=loc;window.__testHistory={get state(){return entries[index].state;},replaceState(state){entries[index].state=structuredClone(state);},back(){if(index>0){hash=entries[--index].hash;dispatch();}},forward(){if(index+1<entries.length){hash=entries[++index].hash;dispatch();}}};
  document.addEventListener('click',e=>{const a=e.target.closest('a');if(!a)return;const href=a.getAttribute('href');if(href?.startsWith('#/')){e.preventDefault();loc.hash=href;}},true);
  window.__testFetch=async(url,options)=>{url=String(url);if(url.endsWith('/default.json'))return new Response(JSON.stringify(settings));if(url.includes('/.well-known/nostr.json?')){if(url.includes('offline.example.com'))throw Error('offline');return new Response(JSON.stringify({names:{alice:data.keys.alice,bob:data.keys.bob}}));}throw Error('Unexpected test fetch: '+url);};
  const match=(e,f)=>(!f.kinds||f.kinds.includes(e.kind))&&(!f.authors||f.authors.includes(e.pubkey))&&(!f.ids||f.ids.includes(e.id))&&(f.since===undefined||e.created_at>=f.since)&&(f.until===undefined||e.created_at<=f.until)&&Object.entries(f).every(([k,v])=>!k.startsWith('#')||e.tags.some(t=>t[0]===k.slice(1)&&v.includes(t[1])));

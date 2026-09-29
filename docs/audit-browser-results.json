@@ -1,0 +1,196 @@
+{
+  "suite": "cross-feature-audit",
+  "checks": [
+    {
+      "name": "Posting disables duplicate-submit button",
+      "passed": true
+    },
+    {
+      "name": "Typing while a post is in flight does not lose the next draft",
+      "passed": true
+    },
+    {
+      "name": "Newer draft remains in browser storage",
+      "passed": true
+    },
+    {
+      "name": "Exactly the submitted text is published once",
+      "passed": true
+    },
+    {
+      "name": "Composer and toolbar fit 320px after asynchronous send",
+      "passed": true
+    },
+    {
+      "name": "Composer and toolbar fit 390px after asynchronous send",
+      "passed": true
+    },
+    {
+      "name": "Composer and toolbar fit 768px after asynchronous send",
+      "passed": true
+    },
+    {
+      "name": "Draft preservation: no uncaught JavaScript errors",
+      "passed": true
+    },
+    {
+      "name": "Old composer completion does not insert posts into the new account view",
+      "passed": true
+    },
+    {
+      "name": "Old composer completion does not fetch the new account timeline",
+      "passed": true
+    },
+    {
+      "name": "Late composer completion: no uncaught JavaScript errors",
+      "passed": true
+    },
+    {
+      "name": "Profile editor changes only edited fields, preserving newer remote fields",
+      "passed": true
+    },
+    {
+      "name": "Profile editor still publishes the edited display name",
+      "passed": true
+    },
+    {
+      "name": "Profile editor preserves unknown metadata",
+      "passed": true
+    },
+    {
+      "name": "Profile merge: no uncaught JavaScript errors",
+      "passed": true
+    },
+    {
+      "name": "Changing account closes the previous account profile editor",
+      "passed": true
+    },
+    {
+      "name": "Changing account alone does not sign or publish edits",
+      "passed": true
+    },
+    {
+      "name": "Profile editor account isolation: no uncaught JavaScript errors",
+      "passed": true
+    },
+    {
+      "name": "A new account without a kind:0 event can open its profile editor",
+      "passed": true
+    },
+    {
+      "name": "A new account can publish its first valid kind:0 event",
+      "passed": true
+    },
+    {
+      "name": "First profile creation: no uncaught JavaScript errors",
+      "passed": true
+    },
+    {
+      "name": "Parent lookup failure preserves the existing thread body",
+      "passed": true
+    },
+    {
+      "name": "Parent lookup failure preserves the reply composer and unsent text",
+      "passed": true
+    },
+    {
+      "name": "Thread read remains manually retryable after failure",
+      "passed": true
+    },
+    {
+      "name": "Transactional thread refresh: no uncaught JavaScript errors",
+      "passed": true
+    },
+    {
+      "name": "Back follows ordinary profile-tab anchor navigation",
+      "passed": true
+    },
+    {
+      "name": "Back navigation still starts no automatic relay requests",
+      "passed": true
+    },
+    {
+      "name": "Anchor navigation history: no uncaught JavaScript errors",
+      "passed": true
+    },
+    {
+      "name": "Saving an unchanged profile does not sign or publish an unnecessary event",
+      "passed": true
+    },
+    {
+      "name": "No-op profile edit: no uncaught JavaScript errors",
+      "passed": true
+    },
+    {
+      "name": "Malformed imported settings produce an explicit error instead of truthy coercion",
+      "passed": true
+    },
+    {
+      "name": "Rejected settings import leaves active values unchanged",
+      "passed": true
+    },
+    {
+      "name": "Rejected settings import leaves the settings form usable",
+      "passed": true
+    },
+    {
+      "name": "Settings import rejection: no uncaught JavaScript errors",
+      "passed": true
+    },
+    {
+      "name": "A failed account read does not poison anonymous reads after logout",
+      "passed": true
+    },
+    {
+      "name": "Anonymous recovery still performs no signing",
+      "passed": true
+    },
+    {
+      "name": "Logout after failed account read: no uncaught JavaScript errors",
+      "passed": true
+    },
+    {
+      "name": "All-relay failure during follower refresh preserves every previously shown identity",
+      "passed": true
+    },
+    {
+      "name": "Failed follower refresh remains explicitly retryable",
+      "passed": true
+    },
+    {
+      "name": "Follower refresh recovers after the user explicitly retries",
+      "passed": true
+    },
+    {
+      "name": "Follower refresh atomicity: no uncaught JavaScript errors",
+      "passed": true
+    },
+    {
+      "name": "Untrusted note HTML is rendered literally",
+      "passed": true
+    },
+    {
+      "name": "Untrusted note content cannot create executable DOM",
+      "passed": true
+    },
+    {
+      "name": "Scrolling remains network-silent after the audit fixes",
+      "passed": true
+    },
+    {
+      "name": "An explicit latest read still displays at most thirty posts",
+      "passed": true
+    },
+    {
+      "name": "Completed subscriptions still have one CLOSE each",
+      "passed": true
+    },
+    {
+      "name": "Rendering and manual-fetch invariants: no uncaught JavaScript errors",
+      "passed": true
+    }
+  ],
+  "passed": 47,
+  "failed": 0,
+  "boundaries": "Mock relay/NIP-07/storage/navigation/SHA adapter; real Chromium DOM and ES modules."
+}

@@ -1,7 +1,7 @@
-import { Emitter, chunks, compareEvents, isHex, latest, matchesFilter, parseJSON, sortEvents, stableJSON, unique } from './utils.js?v=1.2.0';
-import { LIMITS } from './config.js?v=1.2.0';
-import { ProfileCache, validProfile } from '../profiles/cache.js?v=1.2.0';
-import { compactProfileFilters } from '../network/profile-batch.js?v=1.2.0';
+import { Emitter, chunks, compareEvents, isHex, latest, matchesFilter, parseJSON, sortEvents, stableJSON, unique } from './utils.js?v=1.2.3';
+import { LIMITS } from './config.js?v=1.2.3';
+import { ProfileCache, validProfile } from '../profiles/cache.js?v=1.2.3';
+import { compactLatestFilters } from '../network/profile-batch.js?v=1.2.3';
 
 const emptyResult = () => ({events: [], complete: true, errors: []});
 const relayScope = relays => stableJSON(unique(relays).sort());
@@ -78,9 +78,9 @@ export class Repository extends Emitter {
       }
     }
   }
-  async query(filters, {all = false, retain = true, relays = this.readRelays(all), profileBatch = false} = {}) {
+  async query(filters, {all = false, retain = true, relays = this.readRelays(all), profileBatch = false, page = false} = {}) {
     const generation = this.generation;
-    const result = await this.network.query({relays, filters, profileBatch, gap: this.settings.value.requestGapMs});
+    const result = await this.network.query({relays, filters, profileBatch, page, gap: this.settings.value.requestGapMs});
     if (retain && generation === this.generation) await Promise.all(result.events.map(e => this.accept(e)));
     if (result.errors?.length) this.emit('warning', result.errors.map(e => `${e.relay}: ${e.reason}`).join('\n'));
     return result;
@@ -110,8 +110,11 @@ export class Repository extends Emitter {
     return this.peekProfile(pubkey);
   }
   async profiles(pubkeys, options = {}) {
-    await Promise.all(unique(pubkeys).filter(isHex).map(p => this.replacement(0, p, options)));
+    const results = await Promise.all(unique(pubkeys).filter(isHex).map(p => this.replacementRead(0, p, options)));
+    if (options.required && results.some(r => !r.complete)) throw new Error('プロフィールの一部を確認できませんでした');
     await this.verifyProfiles(pubkeys,{fresh:!!options.fresh});
+    return {events: sortEvents(results.flatMap(r => r.events)), complete: results.every(r => r.complete),
+      errors: results.flatMap(r => r.errors ?? [])};
   }
 
   /** The profile path and the feed decoration path share in-progress reads. */
@@ -153,7 +156,7 @@ export class Repository extends Emitter {
       const {relays, generation} = group[0];
       try {
         if(generation!==this.generation){for(const item of group)item.resolve({...emptyResult(),complete:false});return;}
-        const filters = compactProfileFilters(group.flatMap(item => item.filters));
+        const filters = compactLatestFilters(group.flatMap(item => item.filters));
         const result = await this.query(filters, {relays, profileBatch: true, retain: false});
         if (generation === this.generation) {
           await Promise.all(result.events.map(event => this.accept(event)));
@@ -194,20 +197,35 @@ export class Repository extends Emitter {
   }
   async event(id) {
     if (!isHex(id)) return null;
-    if (this.pending.has(`id:${id}`)) return this.pending.get(`id:${id}`);
-    const promise = new Promise(resolve => {
-      this.idQueue.set(id, resolve);
-      if (!this.idTimer) this.idTimer = setTimeout(() => void this.flushIds(), 60);
-    }).finally(() => this.pending.delete(`id:${id}`));
-    this.pending.set(`id:${id}`, promise); return promise;
+    const generation=this.generation, relays=this.readRelays(), scope=relayScope(relays);
+    const key=`id:${generation}:${scope}:${id}`;
+    if (this.pending.has(key)) return this.pending.get(key);
+    const promise = new Promise((resolve,reject) => {
+      this.idQueue.set(key,{id,generation,relays,scope,resolve,reject});
+      if (!this.idTimer) this.idTimer=setTimeout(()=>void this.flushIds(),60);
+    }).finally(()=>this.pending.delete(key));
+    this.pending.set(key,promise);return promise;
   }
   async flushIds() {
-    const entries = [...this.idQueue.entries()]; this.idQueue.clear(); this.idTimer = null;
-    for (const group of chunks(entries, 100)) {
-      let result;
-      try { result = await this.query([{ids: group.map(([id]) => id), limit: group.length}]); }
-      catch { result = {events: []}; }
-      for (const [id, resolve] of group) resolve(result.events.find(e => e.id === id) ?? null);
+    const entries=[...this.idQueue.values()];this.idQueue.clear();this.idTimer=null;
+    const scopes=new Map();
+    for(const item of entries){
+      const key=`${item.generation}:${item.scope}`;
+      if(!scopes.has(key))scopes.set(key,[]);scopes.get(key).push(item);
+    }
+    for(const items of scopes.values())for(const group of chunks(items,100)){
+      const {generation,relays}=group[0];
+      try {
+        if(generation!==this.generation)throw new Error('表示先が変更されたため投稿の取得を中止しました');
+        const result=await this.query([{ids:group.map(item=>item.id),limit:group.length}],{relays,retain:false});
+        if(generation!==this.generation)throw new Error('表示先が変更されたため投稿の取得を中止しました');
+        await Promise.all(result.events.map(event=>this.accept(event)));
+        for(const item of group){
+          const event=result.events.find(event=>event.id===item.id);
+          if(!event && !result.complete)item.reject(new Error('投稿の取得を完了できませんでした。同じ取得ボタンで再試行してください'));
+          else item.resolve(event??null);
+        }
+      }catch(error){for(const item of group)item.reject(error);}
     }
   }
   async published(event) {
