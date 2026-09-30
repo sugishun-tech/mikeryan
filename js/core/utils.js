@@ -44,8 +44,10 @@ export function canonicalFilters(filters) {
   return unique(filters.map(f => stableJSON(Object.fromEntries(Object.entries(f).map(([k, v]) => [k, Array.isArray(v) ? unique(v).sort() : v]))))).sort().map(s => JSON.parse(s));
 }
 export function parentId(event) {
+  if ([6,16].includes(event?.kind)) return null;
+  const quoted=new Set((event?.tags??[]).filter(t=>t[0]==='q').map(t=>t[1]));
   const tags = (event?.tags ?? []).filter(t => t[0] === 'e' && isHex(t[1]));
-  return (tags.find(t => t[3] === 'reply') ?? tags.find(t => t[3] === 'root') ?? tags.filter(t => !t[3]).at(-1))?.[1] ?? null;
+  return (tags.find(t => t[3] === 'reply') ?? tags.find(t => t[3] === 'root') ?? tags.filter(t => !t[3] && !quoted.has(t[1])).at(-1))?.[1] ?? null;
 }
 export function replyTags(parent, self) {
   const root = parent.tags.find(t => t[0] === 'e' && t[3] === 'root' && isHex(t[1]));

@@ -1,4 +1,4 @@
-import { storagePrefix } from './config.js?v=1.2.3';
+import { storagePrefix } from './config.js?v=1.3.0';
 /** User-authored pending sends and relay cooldowns only. Never a read-response store. */
 export class Storage {
   constructor(name = 'state') {

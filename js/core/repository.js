@@ -1,7 +1,8 @@
-import { Emitter, chunks, compareEvents, isHex, latest, matchesFilter, parseJSON, sortEvents, stableJSON, unique } from './utils.js?v=1.2.3';
-import { LIMITS } from './config.js?v=1.2.3';
-import { ProfileCache, validProfile } from '../profiles/cache.js?v=1.2.3';
-import { compactLatestFilters } from '../network/profile-batch.js?v=1.2.3';
+import { matchesReference, referenceKey } from '../content/references.js?v=1.3.0';
+import { Emitter, chunks, compareEvents, isHex, latest, matchesFilter, parseJSON, sortEvents, stableJSON, unique } from './utils.js?v=1.3.0';
+import { LIMITS } from './config.js?v=1.3.0';
+import { ProfileCache, validProfile } from '../profiles/cache.js?v=1.3.0';
+import { compactLatestFilters } from '../network/profile-batch.js?v=1.3.0';
 
 const emptyResult = () => ({events: [], complete: true, errors: []});
 const relayScope = relays => stableJSON(unique(relays).sort());
@@ -194,6 +195,23 @@ export class Repository extends Emitter {
     await this.verifyProfiles(authors);
     const errors = [...new Map(results.flatMap(r => r.errors ?? []).map(e => [stableJSON(e), e])).values()];
     return {events: sortEvents(results.flatMap(r => r.events)), complete: results.every(r => r.complete), errors};
+  }
+  /** NIP-19/NIP-33 coordinates. Exact d-tag filters must not be compacted. */
+  async address(reference) {
+    const {kind,pubkey,identifier}=reference;
+    if (!isHex(pubkey) || !Number.isInteger(kind) || typeof identifier!=='string') return null;
+    if (kind===0) return this.replacement(0,pubkey);
+    const generation=this.generation, relays=this.readRelays();
+    const key=`address:${generation}:${relayScope(relays)}:${referenceKey(reference)}`;
+    if (this.pending.has(key)) return this.pending.get(key);
+    const filter={kinds:[kind],authors:[pubkey],...(kind>=30000?{'#d':[identifier]}:{}),limit:1};
+    const promise=this.batchQuery([filter],relays).then(result=>{
+      if (generation!==this.generation) return null;
+      const event=latest(result.events.filter(e=>matchesReference(e,reference)));
+      if (!event && !result.complete) throw new Error('投稿の取得を完了できませんでした');
+      return event;
+    }).finally(()=>this.pending.delete(key));
+    this.pending.set(key,promise); return promise;
   }
   async event(id) {
     if (!isHex(id)) return null;

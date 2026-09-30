@@ -1,14 +1,14 @@
-import { relayTab } from './relays-view.js?v=1.2.3';
-import { editProfileDialog } from './editor.js?v=1.2.3';
+import { relayTab } from './relays-view.js?v=1.3.0';
+import { editProfileDialog } from './editor.js?v=1.3.0';
 export { editProfileDialog };
-import { FollowerDirectory } from '../social/followers.js?v=1.2.3';
-import { FeedView } from '../feed/view.js?v=1.2.3';
-import { pubkeys } from '../social/service.js?v=1.2.3';
-import { el, avatar, button, busy, empty, loading, richText, copy } from '../ui/dom.js?v=1.2.3';
-import { profileHref } from '../core/router.js?v=1.2.3';
-import { encodeKey } from '../core/nip19.js?v=1.2.3';
-import { validProfile } from './cache.js?v=1.2.3';
-import { safeURL, latest } from '../core/utils.js?v=1.2.3';
+import { FollowerDirectory } from '../social/followers.js?v=1.3.0';
+import { FeedView } from '../feed/view.js?v=1.3.0';
+import { pubkeys } from '../social/service.js?v=1.3.0';
+import { el, avatar, button, busy, empty, loading, richText, copy } from '../ui/dom.js?v=1.3.0';
+import { profileHref } from '../core/router.js?v=1.3.0';
+import { encodeKey } from '../core/nip19.js?v=1.3.0';
+import { validProfile } from './cache.js?v=1.3.0';
+import { safeURL, latest } from '../core/utils.js?v=1.3.0';
 export class ProfileView {
   constructor(app,route,host){this.app=app;this.route=route;this.host=host;this.owner=route.pubkey;this.offset=0;this.listOperation=null;this.listVersion=0;this.loadedUsers=new Set();this.list=el('div',{class:'profile-tab-content'});}
   async init(){
@@ -19,7 +19,7 @@ export class ProfileView {
     for(const [id,label]of Object.entries({posts:'投稿',following:'フォロー',followers:'フォロワー',mutes:'ミュート',relays:'リレー'}))tabs.append(el('a',{href:profileHref(owner,id),class:this.route.tab===id?'active':'','aria-current':this.route.tab===id?'page':null},label));
     this.host.replaceChildren(this.header,tabs,this.list);
     if(this.route.tab==='posts'){
-      this.feed=new FeedView(app,this.list,{key:`profile:${owner}`,filters:[{kinds:[1],authors:[owner]}],moderate:false});await this.feed.init();
+      this.feed=new FeedView(app,this.list,{key:`profile:${owner}`,filters:[{kinds:[1,6,16],authors:[owner]}],moderate:false});await this.feed.init();
     }else if(this.route.tab==='relays')relayTab(app,owner,this.list);
     else {
       const type=this.route.tab,label=({following:'フォロー',followers:'フォロワー',mutes:'ミュート'})[type];

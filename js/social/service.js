@@ -1,6 +1,6 @@
-import { relayEntries, relayListTags, changeRelayTags } from '../profiles/relay-list.js?v=1.2.3';
-import { APP_NAME, OUTBOX_RETENTION, storagePrefix } from '../core/config.js?v=1.2.3';
-import { Emitter, compareEvents, isHex, latest, nowSeconds, normalizeRelay, parseJSON, replyTags, unique } from '../core/utils.js?v=1.2.3';
+import { relayEntries, relayListTags, changeRelayTags } from '../profiles/relay-list.js?v=1.3.0';
+import { APP_NAME, OUTBOX_RETENTION, storagePrefix } from '../core/config.js?v=1.3.0';
+import { Emitter, compareEvents, isHex, latest, nowSeconds, normalizeRelay, parseJSON, replyTags, unique } from '../core/utils.js?v=1.3.0';
 const pubkeys = event => unique((event?.tags ?? []).filter(t=>t[0]==='p' && isHex(t[1])).map(t=>t[1]));
 export { pubkeys };
 export class Social extends Emitter {

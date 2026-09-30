@@ -1,7 +1,7 @@
-import { EventPager } from './pagination.js?v=1.2.3';
-import { chunks, sortEvents } from '../core/utils.js?v=1.2.3';
-import { el, button, busy, empty, avatar, toast } from '../ui/dom.js?v=1.2.3';
-import { local } from '../core/storage.js?v=1.2.3';
+import { EventPager } from './pagination.js?v=1.3.0';
+import { chunks, sortEvents } from '../core/utils.js?v=1.3.0';
+import { el, button, busy, empty, avatar, toast } from '../ui/dom.js?v=1.3.0';
+import { local } from '../core/storage.js?v=1.3.0';
 export function composer(app,parent=null){
   const area=el('textarea',{rows:3,placeholder:parent?'返信を投稿':'いまどうしてる？',maxLength:16000,'aria-label':parent?'返信本文':'投稿本文'});
   const draftKey=`draft:${app.session.pubkey}:${parent?.id??'post'}`;area.value=local.get(draftKey)??'';
@@ -83,6 +83,7 @@ export class FeedView {
       this.toolbar.setAttribute('aria-busy','true');this.status.textContent='読み込み中…';
       const checkpoint=this.pager.snapshot();
       try{
+        this.app.posts.beginRead?.();
         if(this.beforeRead){const filters=await this.beforeRead();if(!this.alive())return;if(filters)this.pager.baseFilters=filters;}
         const page=await this.pager.load(direction,anchor);
         if(!this.alive())return;
@@ -146,8 +147,8 @@ export class FeedView {
   }
 }
 export function feedFilters(app,view){
-  if(view==='global')return [{kinds:[1]}];
-  if(view==='notifications')return [{kinds:[1,7],'#p':[app.session.pubkey]}];
+  if(view==='global')return [{kinds:[1,6,16]}];
+  if(view==='notifications')return [{kinds:[1,6,7,16],'#p':[app.session.pubkey]}];
   const authors=[...new Set([app.session.pubkey,...app.social.following])];
-  return chunks(authors,100).map(group=>({kinds:[1],authors:group}));
+  return chunks(authors,100).map(group=>({kinds:[1,6,16],authors:group}));
 }

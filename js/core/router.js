@@ -1,11 +1,13 @@
-import { profileKey, decodeKey } from './nip19.js?v=1.2.3';
-import { isHex } from './utils.js?v=1.2.3';
+import { nostrReference, referenceHref } from '../content/references.js?v=1.3.0';
+import { profileKey, decodeKey } from './nip19.js?v=1.3.0';
+import { isHex } from './utils.js?v=1.3.0';
 const tabs=new Set(['posts','following','followers','mutes','relays']);
 export const profileHref=(key,tab='posts')=>`#/profile/${key}/${tab}`;
 export const threadHref=id=>`#/thread/${id}`;
 export function parseRoute(hash,search='') {
   const parts=hash.replace(/^#\/?/,'').split('/');
   if(parts[0]==='profile' && isHex(parts[1]))return {view:'profile',pubkey:parts[1],tab:tabs.has(parts[2])?parts[2]:'posts'};
+  if(parts[0]==='address' && parts[1]){try{const reference=nostrReference('nostr:'+decodeURIComponent(parts[1]));if(reference?.type==='address')return {view:'address',reference};}catch{/* Invalid route stays local. */}}
   if(parts[0]==='thread' && isHex(parts[1]))return {view:'thread',id:parts[1]};
   if(['global','home','notifications','settings','me'].includes(parts[0]))return {view:parts[0]};
   if(!hash){
@@ -21,7 +23,7 @@ export function parseRoute(hash,search='') {
   }
   return {view:'global'};
 }
-export function routeHash(route){if(route.view==='profile')return profileHref(route.pubkey,route.tab);if(route.view==='thread')return threadHref(route.id);return '#/'+route.view;}
+export function routeHash(route){if(route.view==='address')return referenceHref(route.reference);if(route.view==='profile')return profileHref(route.pubkey,route.tab);if(route.view==='thread')return threadHref(route.id);return '#/'+route.view;}
 const HISTORY_KEY='mikeryanRoute';
 export class Router {
   constructor(onRoute){this.onRoute=onRoute;this.route=null;this.historyDepth=0;this.historySession=null;}

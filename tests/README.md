@@ -16,3 +16,10 @@ Node211件、Chromiumは65+34+30+47の176項目、localhost実WebSocket9項目�
 `browser_smoke.py` は実HTTP・IndexedDB・SharedWorkerの追加試験で、今回の環境ではURLアクセスが遮断され未通過です。`browser_offline.py` / `browser_navigation.py` のハーネスは再利用していますが、この2つと `browser_profile.py` の直接実行部分は旧仕様用です。現行の通過件数に含めていません。
 
 署名鍵とイベントは公開のテスト専用フィクスチャです。実アカウントやウォレットには使用しないでください。変更履歴はルートのCHANGELOG.mdのみです。
+
+## Rich content (1.3.0)
+
+`node --test tests/content.test.js` runs 70 new reference/parser/resolver cases.
+`python3 tests/browser_content.py` runs 99 DOM/media/sandbox checks.
+Pillow supplies a local image fixture. X widgets and YouTube messages are mocked;
+live providers and real HTTP CSP are NOT covered. See docs/TESTING.md.

@@ -1,20 +1,21 @@
-import { Storage } from './core/storage.js?v=1.2.3';
-import { Settings } from './settings/store.js?v=1.2.3';
-import { NetworkClient } from './network/client.js?v=1.2.3';
-import { Session } from './auth/session.js?v=1.2.3';
-import { Repository } from './core/repository.js?v=1.2.3';
-import { Nip05 } from './profiles/nip05.js?v=1.2.3';
-import { Social } from './social/service.js?v=1.2.3';
-import { Moderation } from './feed/moderation.js?v=1.2.3';
-import { Identity } from './ui/identity.js?v=1.2.3';
-import { Posts } from './ui/posts.js?v=1.2.3';
-import { Router, profileHref, threadHref } from './core/router.js?v=1.2.3';
-import { FeedView, feedFilters, composer } from './feed/view.js?v=1.2.3';
-import { ProfileView } from './profiles/view.js?v=1.2.3';
-import { settingsView } from './settings/view.js?v=1.2.3';
-import { el, button, busy, icon, avatar, loading, empty, toast } from './ui/dom.js?v=1.2.3';
-import { parentId, stableJSON, matchesFilter } from './core/utils.js?v=1.2.3';
-import { decodeKey } from './core/nip19.js?v=1.2.3';
+import { nostrReference, referenceHref } from './content/references.js?v=1.3.0';
+import { Storage } from './core/storage.js?v=1.3.0';
+import { Settings } from './settings/store.js?v=1.3.0';
+import { NetworkClient } from './network/client.js?v=1.3.0';
+import { Session } from './auth/session.js?v=1.3.0';
+import { Repository } from './core/repository.js?v=1.3.0';
+import { Nip05 } from './profiles/nip05.js?v=1.3.0';
+import { Social } from './social/service.js?v=1.3.0';
+import { Moderation } from './feed/moderation.js?v=1.3.0';
+import { Identity } from './ui/identity.js?v=1.3.0';
+import { Posts } from './ui/posts.js?v=1.3.0';
+import { Router, profileHref, threadHref } from './core/router.js?v=1.3.0';
+import { FeedView, feedFilters, composer } from './feed/view.js?v=1.3.0';
+import { ProfileView } from './profiles/view.js?v=1.3.0';
+import { settingsView } from './settings/view.js?v=1.3.0';
+import { el, button, busy, icon, avatar, loading, empty, toast } from './ui/dom.js?v=1.3.0';
+import { parentId, stableJSON, matchesFilter } from './core/utils.js?v=1.3.0';
+import { decodeKey } from './core/nip19.js?v=1.3.0';
 class App {
   async start(){
     this.settings=new Settings();await this.settings.load();this.storage=new Storage();
@@ -52,6 +53,7 @@ class App {
   async search(raw){
     const input=String(raw).trim();if(!input)return;
     if(input.includes('@')){this.router.go(profileHref(await this.nip05.resolve(input)));return;}
+    const reference=nostrReference(/^nostr:/i.test(input)?input:'nostr:'+input);if(reference){this.router.go(referenceHref(reference));return;}
     const d=decodeKey(input);this.router.go(['note','nevent'].includes(d.type)?threadHref(d.data):profileHref(d.data));
   }
   searchDialog(){
@@ -78,9 +80,9 @@ class App {
     const profile=this.repo.peekProfile(key);account.replaceChildren(el('a',{href:profileHref(key),class:'account-link'},avatar(profile,'avatar small',this.settings.value.loadImages),el('div',{},el('strong',{},profile.display_name||profile.name||'アカウント'),el('span',{class:'user-handle'},profile.name?'@'+profile.name:key.slice(0,10)+'…'))));
   }
   async render(route){
-    const token=++this.routeToken;window.scrollTo(0,0);this.onPosted=null;this.activeFeed?.dispose();this.activeFeed=null;this.identity.reset();this.repo.beginView(this.session.pubkey);this.social.beginView();this.accountKey=null;this.accountReady=Promise.resolve();const outer=document.getElementById('view'),host=el('section',{class:'view-section'});outer.replaceChildren(host);host.append(loading());
-    document.title=`${({global:'グローバル',home:'ホーム',notifications:'通知',profile:'プロフィール',me:'プロフィール',settings:'設定',thread:'スレッド'})[route.view]} / mikeryan`;
-    document.getElementById('page-title').textContent=({global:'グローバル',home:'ホーム',notifications:'通知',profile:'プロフィール',me:'プロフィール',settings:'設定',thread:'スレッド'})[route.view]??'mikeryan';
+    const token=++this.routeToken;window.scrollTo(0,0);this.onPosted=null;this.activeFeed?.dispose();this.activeFeed=null;this.identity.reset();this.posts.reset();this.repo.beginView(this.session.pubkey);this.social.beginView();this.accountKey=null;this.accountReady=Promise.resolve();const outer=document.getElementById('view'),host=el('section',{class:'view-section'});outer.replaceChildren(host);host.append(loading());
+    document.title=`${({global:'グローバル',home:'ホーム',notifications:'通知',profile:'プロフィール',me:'プロフィール',settings:'設定',thread:'スレッド',address:'スレッド'})[route.view]} / mikeryan`;
+    document.getElementById('page-title').textContent=({global:'グローバル',home:'ホーム',notifications:'通知',profile:'プロフィール',me:'プロフィール',settings:'設定',thread:'スレッド',address:'スレッド'})[route.view]??'mikeryan';
     for(const a of document.querySelectorAll('.nav-item'))a.classList.toggle('active',a.dataset.view===route.view||(route.view==='profile'&&route.pubkey===this.session.pubkey&&a.dataset.view==='me'));
     try{
       if(route.view==='settings'){host.replaceChildren();await settingsView(this,host);return;}
@@ -91,8 +93,8 @@ class App {
       if(route.view==='profile'){
         const page=new ProfileView(this,route,host);await page.init();if(token!==this.routeToken)return;
         this.onPosted=event=>{if(page.feed&&event.pubkey===route.pubkey)return page.feed.insert(event);};
-      }else if(route.view==='thread'){
-        const read=button('投稿を取得',()=>busy(read,()=>this.thread(route.id,host,token)),'button secondary');
+      }else if(route.view==='thread'||route.view==='address'){
+        const read=button('投稿を取得',()=>busy(read,()=>this.thread(route.reference??route.id,host,token)),'button secondary');
         host.append(read,empty('まだ取得していません','「投稿を取得」を押すと本文と返信先を取得します。'));
       }
       else{
@@ -104,7 +106,8 @@ class App {
     }catch(e){if(token===this.routeToken){host.replaceChildren(empty('読み込みに失敗しました',e.message));host.append(button('もう一度試す',()=>void this.render(route),'button secondary'));}}
   }
   async thread(id,host,token){
-    const event=await this.repo.event(id);if(token!==this.routeToken)return;
+    const event=await (typeof id==='object'?this.repo.address(id):this.repo.event(id));if(token!==this.routeToken)return;
+    if(event)id=event.id;
     if(!event){
       host.querySelectorAll(':scope > .empty-state').forEach(node=>node.remove());
       host.append(empty('投稿が見つかりません','設定中の読み取りリレーに保存されていない可能性があります。'));return;
