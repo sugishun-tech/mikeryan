@@ -1,0 +1,405 @@
+{
+  "mode": "Native DOM/modules + real opaque X sandbox; mocked relay/storage/navigation/SHA/images/X widgets/YouTube messages. Main CSP and public providers NOT exercised.",
+  "browser": "144.0.7559.96",
+  "passed": 99,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "No relay REQ on startup, despite mixed rich-content fixtures",
+      "passed": true
+    },
+    {
+      "name": "note: exactly one rich slot",
+      "passed": true
+    },
+    {
+      "name": "note: original URI remains a clickable internal link",
+      "passed": true
+    },
+    {
+      "name": "note: renders existing post component",
+      "passed": true
+    },
+    {
+      "name": "nevent: exactly one rich slot",
+      "passed": true
+    },
+    {
+      "name": "nevent: original URI remains a clickable internal link",
+      "passed": true
+    },
+    {
+      "name": "nevent: renders existing post component",
+      "passed": true
+    },
+    {
+      "name": "npub: exactly one rich slot",
+      "passed": true
+    },
+    {
+      "name": "npub: original URI remains a clickable internal link",
+      "passed": true
+    },
+    {
+      "name": "npub: renders existing profile component",
+      "passed": true
+    },
+    {
+      "name": "nprofile: exactly one rich slot",
+      "passed": true
+    },
+    {
+      "name": "nprofile: original URI remains a clickable internal link",
+      "passed": true
+    },
+    {
+      "name": "nprofile: renders existing profile component",
+      "passed": true
+    },
+    {
+      "name": "naddr: exactly one rich slot",
+      "passed": true
+    },
+    {
+      "name": "naddr: original URI remains a clickable internal link",
+      "passed": true
+    },
+    {
+      "name": "naddr: renders existing post component",
+      "passed": true
+    },
+    {
+      "name": "naddr resolves latest matching identifier, not other article",
+      "passed": true
+    },
+    {
+      "name": "Multiple NIP-21 references remain links; one is rich",
+      "passed": true
+    },
+    {
+      "name": "Nested Nostr/image/video are links only",
+      "passed": true
+    },
+    {
+      "name": "Depth-two event was never requested",
+      "passed": true
+    },
+    {
+      "name": "Concurrent note/nevent references share one relay ID read",
+      "passed": true
+    },
+    {
+      "name": "Unconfigured relay hints never open sockets",
+      "passed": true
+    },
+    {
+      "name": "Missing note keeps text and ordinary link",
+      "passed": true
+    },
+    {
+      "name": "Invalid first NIP-21 does not promote the second NIP-21",
+      "passed": true
+    },
+    {
+      "name": "Ancestor cycle becomes a link, without recursion",
+      "passed": true
+    },
+    {
+      "name": "Depth-one cards do not start any embeds or relay reads",
+      "passed": true
+    },
+    {
+      "name": "repostJSON: one original card with reposter attribution",
+      "passed": true
+    },
+    {
+      "name": "Verified inline original avoids ID fetch",
+      "passed": true
+    },
+    {
+      "name": "repostEmpty: one original card with reposter attribution",
+      "passed": true
+    },
+    {
+      "name": "repostMalformed: one original card with reposter attribution",
+      "passed": true
+    },
+    {
+      "name": "repostForged: one original card with reposter attribution",
+      "passed": true
+    },
+    {
+      "name": "Forged inner content never displayed as authentic author",
+      "passed": true
+    },
+    {
+      "name": "generic: one original card with reposter attribution",
+      "passed": true
+    },
+    {
+      "name": "genericEmpty: one original card with reposter attribution",
+      "passed": true
+    },
+    {
+      "name": "genericNested: one original card with reposter attribution",
+      "passed": true
+    },
+    {
+      "name": "Generic repost of repost stops at one expansion",
+      "passed": true
+    },
+    {
+      "name": "Unavailable original retains repost header and target link",
+      "passed": true
+    },
+    {
+      "name": "quote: quote is labelled and uses single rich slot",
+      "passed": true
+    },
+    {
+      "name": "quote: real reply distinction",
+      "passed": true
+    },
+    {
+      "name": "quoteAddress: quote is labelled and uses single rich slot",
+      "passed": true
+    },
+    {
+      "name": "quoteAddress: real reply distinction",
+      "passed": true
+    },
+    {
+      "name": "quoteReply: quote is labelled and uses single rich slot",
+      "passed": true
+    },
+    {
+      "name": "quoteReply: real reply distinction",
+      "passed": true
+    },
+    {
+      "name": "image: one lazy responsive image",
+      "passed": true
+    },
+    {
+      "name": "image: image does not exceed post width",
+      "passed": true
+    },
+    {
+      "name": "imeta: one lazy responsive image",
+      "passed": true
+    },
+    {
+      "name": "imeta: image does not exceed post width",
+      "passed": true
+    },
+    {
+      "name": "NIP-92 metadata provides alt and dimensions",
+      "passed": true
+    },
+    {
+      "name": "images: one lazy responsive image",
+      "passed": true
+    },
+    {
+      "name": "images: image does not exceed post width",
+      "passed": true
+    },
+    {
+      "name": "Additional image URLs remain links without fetch",
+      "passed": true
+    },
+    {
+      "name": "Broken image hides image but retains both source links",
+      "passed": true
+    },
+    {
+      "name": "Duplicate image fetched once per view",
+      "passed": true
+    },
+    {
+      "name": "Image layout has no overflow at 390px",
+      "passed": true
+    },
+    {
+      "name": "Image layout has no overflow at 320px",
+      "passed": true
+    },
+    {
+      "name": "Offscreen images are not eagerly fetched or allocated",
+      "passed": true
+    },
+    {
+      "name": "Image initializes when near viewport",
+      "passed": true
+    },
+    {
+      "name": "youtube: allowed privacy-enhanced responsive player",
+      "passed": true
+    },
+    {
+      "name": "youtube: link remains on successful load",
+      "passed": true
+    },
+    {
+      "name": "youtubeWatch: allowed privacy-enhanced responsive player",
+      "passed": true
+    },
+    {
+      "name": "youtubeWatch: link remains on successful load",
+      "passed": true
+    },
+    {
+      "name": "youtubeShorts: allowed privacy-enhanced responsive player",
+      "passed": true
+    },
+    {
+      "name": "youtubeShorts: link remains on successful load",
+      "passed": true
+    },
+    {
+      "name": "youtubeMultiple: allowed privacy-enhanced responsive player",
+      "passed": true
+    },
+    {
+      "name": "youtubeMultiple: link remains on successful load",
+      "passed": true
+    },
+    {
+      "name": "Multiple videos create only one player",
+      "passed": true
+    },
+    {
+      "name": "YouTube keeps origin-only Referer for player identification",
+      "passed": true
+    },
+    {
+      "name": "YouTube error: iframe removed and ordinary links retained",
+      "passed": true
+    },
+    {
+      "name": "YouTube hang: iframe removed and ordinary links retained",
+      "passed": true
+    },
+    {
+      "name": "YouTube ignores wrong-origin and wrong-source readiness",
+      "passed": true
+    },
+    {
+      "name": "CSP violation event safely downgrades the video",
+      "passed": true
+    },
+    {
+      "name": "Late YouTube error after ready falls back too",
+      "passed": true
+    },
+    {
+      "name": "Player can be manually closed while keeping link",
+      "passed": true
+    },
+    {
+      "name": "x: one isolated X card and retained links",
+      "passed": true
+    },
+    {
+      "name": "x: sandbox blocks parent DOM and NIP-07 access",
+      "passed": true
+    },
+    {
+      "name": "twitter: one isolated X card and retained links",
+      "passed": true
+    },
+    {
+      "name": "twitter: sandbox blocks parent DOM and NIP-07 access",
+      "passed": true
+    },
+    {
+      "name": "xMultiple: one isolated X card and retained links",
+      "passed": true
+    },
+    {
+      "name": "xMultiple: sandbox blocks parent DOM and NIP-07 access",
+      "passed": true
+    },
+    {
+      "name": "Multiple X links initialize one bridge only",
+      "passed": true
+    },
+    {
+      "name": "No provider JavaScript inserted into account document",
+      "passed": true
+    },
+    {
+      "name": "X error: iframe removed with normal link fallback",
+      "passed": true
+    },
+    {
+      "name": "X empty: iframe removed with normal link fallback",
+      "passed": true
+    },
+    {
+      "name": "X scriptError: iframe removed with normal link fallback",
+      "passed": true
+    },
+    {
+      "name": "X hang: iframe removed with normal link fallback",
+      "passed": true
+    },
+    {
+      "name": "X rejects wrong source and token",
+      "passed": true
+    },
+    {
+      "name": "X requested height is capped at 1000px",
+      "passed": true
+    },
+    {
+      "name": "Existing X card does not overflow 320px viewport",
+      "passed": true
+    },
+    {
+      "name": "Below X minimum card width, no embed is attempted",
+      "passed": true
+    },
+    {
+      "name": "Mixed NIP-21/image/X/YouTube/q uses first body image only",
+      "passed": true
+    },
+    {
+      "name": "Nostr-first mixed content allocates no media or nested frames",
+      "passed": true
+    },
+    {
+      "name": "Hostile markup is literal; untrusted video domains and nsec are not embedded",
+      "passed": true
+    },
+    {
+      "name": "Malformed sibling cannot prevent normal image post rendering",
+      "passed": true
+    },
+    {
+      "name": "Thousands of links are paged to at most 128 link nodes",
+      "passed": true
+    },
+    {
+      "name": "Long text continuation keeps links clickable without accumulating DOM",
+      "passed": true
+    },
+    {
+      "name": "View reset disposes pending embed jobs and iframes",
+      "passed": true
+    },
+    {
+      "name": "Repost/address/profile cards fit mobile width",
+      "passed": true
+    },
+    {
+      "name": "Fetched posts, images and embed results are never persisted",
+      "passed": true
+    },
+    {
+      "name": "No uncaught parent-page JavaScript errors",
+      "passed": true
+    }
+  ],
+  "errors": []
+}

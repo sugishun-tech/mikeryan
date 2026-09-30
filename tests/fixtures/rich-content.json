@@ -1,0 +1,527 @@
+{
+  "keys": {
+    "alice": "f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9",
+    "bob": "e493dbf1c10d80f3581e4904930b1404cc6c13900ee0758474fa94abe8c4cd13",
+    "carol": "2f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4"
+  },
+  "events": {
+    "aliceProfile": {
+      "kind": 0,
+      "tags": [],
+      "content": "{\"name\": \"alice\", \"display_name\": \"アリス\", \"about\": \"プロフィール紹介文\"}",
+      "created_at": 1790722800,
+      "pubkey": "f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9",
+      "id": "76e628100fb4a2b5478c3aba833402770bfddd1b1cee8edf5ab064602b06b1a3",
+      "sig": "e2536031c45e3c6642ed265373dd726097451aacf5004ecddaa602f765f5b70b4f1094d315f8615604ef2470f95f2149c1dcb703ee6ff554a84feedfbfc37f11"
+    },
+    "bobProfile": {
+      "kind": 0,
+      "tags": [],
+      "content": "{\"name\": \"bob\", \"display_name\": \"ボブ\", \"about\": \"プロフィール紹介文\"}",
+      "created_at": 1790722801,
+      "pubkey": "e493dbf1c10d80f3581e4904930b1404cc6c13900ee0758474fa94abe8c4cd13",
+      "id": "bf676a9cf8609dfe24af2121f684c21d72eb85a0424d216ca0a4e55f1e09d0df",
+      "sig": "ddaf98f7a0710fad4e6b0fd4788df4ffd412dae95de802eca56c8494004f21aadd4b0ba04fffe885503b1d875d506de283dbfe5e956c8bb961a3113b6dd0ad7e"
+    },
+    "carolProfile": {
+      "kind": 0,
+      "tags": [],
+      "content": "{\"name\": \"carol\", \"display_name\": \"キャロル\", \"about\": \"プロフィール紹介文\"}",
+      "created_at": 1790722802,
+      "pubkey": "2f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+      "id": "5c9c0904ed47d585041d975803bf6c750a2d39339e2e132b533fa5908121c496",
+      "sig": "4b4371289fb3570deebfef820d262083c5c9b13b347ef113341cffbae6ab92ad4afecb138f882ace29d550f92cdac429e769360e584bd20276b6127806524711"
+    },
+    "deep": {
+      "kind": 1,
+      "tags": [],
+      "content": "最大深度を超えて取得してはいけない投稿",
+      "created_at": 1790722803,
+      "pubkey": "2f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+      "id": "8270f2e8edd2732c4990cade6c4298f9ea441713038e8729d3176a9ab281a370",
+      "sig": "e3a9323034700c61d868692c9256f11b5135a4cdac186baaf70542c04c39aa4dc45c6ead1ff1ef44e4b9fcd8bf10a40364bd46687f4c2523ea743dc92e959b8f"
+    },
+    "original": {
+      "kind": 1,
+      "tags": [],
+      "content": "元の投稿です。入れ子はリンクのみ。nostr:note1sfc0968d6fejcjvset0xcs5cl84yg9cnqw8gw2wnza4f4v5p5dcqmlft95 https://media.example/nested.jpg https://youtu.be/M7lc1UVf-VE",
+      "created_at": 1790722804,
+      "pubkey": "e493dbf1c10d80f3581e4904930b1404cc6c13900ee0758474fa94abe8c4cd13",
+      "id": "e4813fbfd694f119d8d1a4ffe7b29ecb22ce64a75b05dfb39fb73094f3819298",
+      "sig": "3389eccf078d4241034b4b7f9494aab7c76080d7e0fab8ea9f3fb82cb3aed2c9a606400be54c6cbdc2d6c4a725ed1b383ed6cba700576120df515ea20a6b095f"
+    },
+    "oldArticle": {
+      "kind": 30023,
+      "tags": [
+        [
+          "d",
+          "article:日本語"
+        ],
+        [
+          "title",
+          "旧版"
+        ]
+      ],
+      "content": "旧記事",
+      "created_at": 1790722780,
+      "pubkey": "e493dbf1c10d80f3581e4904930b1404cc6c13900ee0758474fa94abe8c4cd13",
+      "id": "ae5ed80338ab9793dbee42196495acf64b2a289ef56535b879d1d28ac50bf75b",
+      "sig": "85989d3d2ef649fbb5d3a12d99e1c7d595336f1219680e0f500542481129bf4afa3309c27452d0ea5d3ce89ac135f39c65086b3b35c42d19cfaf71e6442abc48"
+    },
+    "article": {
+      "kind": 30023,
+      "tags": [
+        [
+          "d",
+          "article:日本語"
+        ],
+        [
+          "title",
+          "記事"
+        ]
+      ],
+      "content": "最新版の記事。nostr:note1sfc0968d6fejcjvset0xcs5cl84yg9cnqw8gw2wnza4f4v5p5dcqmlft95",
+      "created_at": 1790722806,
+      "pubkey": "e493dbf1c10d80f3581e4904930b1404cc6c13900ee0758474fa94abe8c4cd13",
+      "id": "be7fb00568cc8d6e655e0cbee5b719a7df95c400389c313a15087dc7a9363673",
+      "sig": "e0d09b7e8fca55727bfe8390a1de079f36ff4be38a36fc457c78d8dd52e6e588a2fbd041e412960dab2d732fceae828c18c555de028c6ee259af8ea0e90e8a18"
+    },
+    "otherArticle": {
+      "kind": 30023,
+      "tags": [
+        [
+          "d",
+          "other"
+        ]
+      ],
+      "content": "違う識別子",
+      "created_at": 1790722807,
+      "pubkey": "e493dbf1c10d80f3581e4904930b1404cc6c13900ee0758474fa94abe8c4cd13",
+      "id": "b6ba30d0051fdeef1d5889b5f5b32c6e0134d2d49dbf2e373a9316e1791af9f0",
+      "sig": "62c04f7c73f448bad084f1d8d8d808782568c072e11a7fbaa136af53fbff63b804dc88afd48b5a38ee2b8fd13383f15761b16404a244bc3d7a09d15e750ad4e8"
+    },
+    "ref_note": {
+      "kind": 1,
+      "tags": [],
+      "content": "参照の表示。nostr:note1ujqnl07kjnc3nkx35nl70v57ev3vue98tvzalvulkucffuupj2vqj34puf",
+      "created_at": 1790722808,
+      "pubkey": "f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9",
+      "id": "7515e44892b0481c0ddb6426fd86d5e7a4991df7248a7b271b307fd6de3b80e9",
+      "sig": "3240fc55a931fda276742ac1b1a4a589cf51c07df6aaa29e636503489e497f395f5f2b617cf0bbff968900e50ebb73e0cf3ad0596fc1429160a71dded762594c"
+    },
+    "ref_nevent": {
+      "kind": 1,
+      "tags": [],
+      "content": "参照の表示。nostr:nevent1qqswfqflhltffugemrg6fll8k20vkgkwvjn4kpwlkw0mwvy57wqe9xqprfmhxue69uhh2mnrdahxv6t8w4ex2epwv4uxzmtsd3jsyg8yj0dlrsgdsre4s8jfqjfsk9qye3kp8yqwup6cga86jj4733xdzvpsgqqqqqqszh9llm",
+      "created_at": 1790722809,
+      "pubkey": "f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9",
+      "id": "7a78838829b3ca52d8fdf93b64dbdee98286003024b23c3083f0c4d414c3557e",
+      "sig": "a195b890b866294bdd16331ea8b02bb4055ae082b4216b4672d50fd6ed33b8a686d52c3959ded866c90243130274b1abd353b7bdab22b97c0cd5eec37a72ada6"
+    },
+    "ref_npub": {
+      "kind": 1,
+      "tags": [],
+      "content": "参照の表示。nostr:npub1ujfahuwppkq0xkq7fyzfxzc5qnxxcyuspms8tpr5l222h6xye5fsccv64k",
+      "created_at": 1790722810,
+      "pubkey": "f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9",
+      "id": "0ca161a630f7d17882c12ae442d610c8f5b1deb02843c2beea78a869aef38e12",
+      "sig": "c87166fbba4d2e8a67bed7a5408974985868117fcdabe60b58bbbe87ce8c518eb4fd2501365bcbf9b4c6af36fbb7ed9a9a631b58a15a89f127fbe1677fc05955"
+    },
+    "ref_nprofile": {
+      "kind": 1,
+      "tags": [],
+      "content": "参照の表示。nostr:nprofile1qqswfy7m78qsmq8ntq0yjpynpv2qfnrvzwgqacr4s360499tarzv6ycprfmhxue69uhh2mnrdahxv6t8w4ex2epwv4uxzmtsd3jssvgxgh",
+      "created_at": 1790722811,
+      "pubkey": "f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9",
+      "id": "5a124464c183ea06fb502048be4e905e1ef6ecfe1b234ac323cb5a03c2f8439d",
+      "sig": "5749fac62824b9ad59e6615aa64c0255ed4f780da5bc375cc09d7013841d80a811bb3d31fb6a957f87f3a05e4b58b384ad563f5075322b87855d22e746691c4b"
+    },
+    "ref_naddr": {
+      "kind": 1,
+      "tags": [],
+      "content": "参照の表示。nostr:naddr1qqgkzun5d93kcef6u6t6te5u4n5248szyrjf8kl3cyxcpu6creysfyctzszvcmqnjq8wqavywnaff2lgcnx3xqcyqqq823c48eejl",
+      "created_at": 1790722812,
+      "pubkey": "f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9",
+      "id": "122e1755fae534e570bff04833652876911de0fe03c68783c00bf1de4e17662f",
+      "sig": "72f853a29e16114438105fb1daa1ee3c10b3548568a35e55c31730d0747159fc57546162e8fc97c588b7321e60067ed99c3a44653824c03e3eb8528c1d8c1c71"
+    },
+    "multiple": {
+      "kind": 1,
+      "tags": [],
+      "content": "nostr:note1ujqnl07kjnc3nkx35nl70v57ev3vue98tvzalvulkucffuupj2vqj34puf nostr:nprofile1qqswfy7m78qsmq8ntq0yjpynpv2qfnrvzwgqacr4s360499tarzv6ycprfmhxue69uhh2mnrdahxv6t8w4ex2epwv4uxzmtsd3jssvgxgh nostr:naddr1qqgkzun5d93kcef6u6t6te5u4n5248szyrjf8kl3cyxcpu6creysfyctzszvcmqnjq8wqavywnaff2lgcnx3xqcyqqq823c48eejl",
+      "created_at": 1790722813,
+      "pubkey": "f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9",
+      "id": "e41b4abd2fe7969ff22cb71d475076cc7c6008b6ba2018b9b0ac9cbb50eac205",
+      "sig": "45aa1eeea25a1459851bc30e29ffa28e45cb02db6910f09dcfd3ea1f329a00dba56341a02572bc1c7ae362bd454b74839a69a62b39880e12ffac09f315c4fada"
+    },
+    "missing": {
+      "kind": 1,
+      "tags": [],
+      "content": "nostr:note1llllllllllllllllllllllllllllllllllllllllllllllllllls35u7tx",
+      "created_at": 1790722814,
+      "pubkey": "f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9",
+      "id": "441f929fbb0d48e1dd12fb58b1a28f344429f4ca71c045aabf6c36e30c048b28",
+      "sig": "9463499743ec6bd0620e8e52d98ee7417c2c158c748d649cc9c06174efd7ee74f2a9413cb6c3aaf14e19ba9166712d83475061b93e7279e8f1849a9557579781"
+    },
+    "invalidFirst": {
+      "kind": 1,
+      "tags": [],
+      "content": "nostr:note1ujqnl07kjnc3nkx35nl70v57ev3vue98tvzalvulkucffuupj2vqj34puq nostr:note1ujqnl07kjnc3nkx35nl70v57ev3vue98tvzalvulkucffuupj2vqj34puf",
+      "created_at": 1790722815,
+      "pubkey": "f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9",
+      "id": "7dfca298df9195ae531d5a6267652527631039ab2d6dbadf88c14bd225796c68",
+      "sig": "c5eda2103c2074a51883312ebf9fbdb4db92225e9f85ef1e2f9cd5220ca80e42f8e1c74268dbb52389315c3c66da5b55fed944f3ce2222b4bea08e34257400aa"
+    },
+    "image": {
+      "kind": 1,
+      "tags": [],
+      "content": "画像 https://media.example/photo.JPG?size=1000",
+      "created_at": 1790722816,
+      "pubkey": "f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9",
+      "id": "4da245dde086d6cd64390b958f0e2512904944e9164176e2d4af92ffa24d4723",
+      "sig": "019a46b36dc3826e23185094b56e6529edf748c76a63d109ca031b7a8316c85df324ec2281e5b1c849a6cf756e2b3b8bcb1097e5b754792d61aafd7aab5f34c0"
+    },
+    "imeta": {
+      "kind": 1,
+      "tags": [
+        [
+          "imeta",
+          "url https://media.example/no-extension",
+          "m image/webp",
+          "dim 3000x1000",
+          "alt 青空の写真"
+        ]
+      ],
+      "content": "説明 https://media.example/no-extension",
+      "created_at": 1790722817,
+      "pubkey": "f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9",
+      "id": "7d79bb976e734db13e45969701d71f7bb1597922cbc28dfb2f1602bcffd8eb5b",
+      "sig": "eb288e301777bae02a3808eb2a7648cc8ff6e9cddf595962d14e4fbf458e4a19b6b38db67cdd1bf5efda71cb5c94924f8bae3390370ac9dcb19bed08b111b00d"
+    },
+    "images": {
+      "kind": 1,
+      "tags": [],
+      "content": "https://media.example/photo.JPG?size=1000 https://media.example/second.png https://media.example/third.gif",
+      "created_at": 1790722818,
+      "pubkey": "f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9",
+      "id": "77049e2e794380a4734d8763772eb64ecf8955c5bb3d797cb101d9b1fdcd6c4a",
+      "sig": "ab4b02d74ad116ab766914c73d823f4a600e2d6cf42b8f6874468b97c18231fce072629e7dee4cf07ddd576d9dfa9cba19cf8e9aa414a1cd68852b2887c31a20"
+    },
+    "imageFailure": {
+      "kind": 1,
+      "tags": [],
+      "content": "https://media.example/fail.png",
+      "created_at": 1790722819,
+      "pubkey": "f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9",
+      "id": "3bd762b264e79d480e4abe8a9229228bccd3abbd0e6d979518da8fbd0602542a",
+      "sig": "3622ad25888207ea277666d6eec5c4fe3caa061d6e76212996335d440daa9f5d54e3186e4320665baf296edbcbc83b18edbb8fc9ba6ad40f4975fce1a6b04c18"
+    },
+    "youtube": {
+      "kind": 1,
+      "tags": [],
+      "content": "動画 https://youtu.be/M7lc1UVf-VE",
+      "created_at": 1790722820,
+      "pubkey": "f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9",
+      "id": "adb66c0d1a7508ffa0761e855bc375f552078d0e69d58a8820da4bdbf5775112",
+      "sig": "0087e70044cf249ace4aa94b50d3651ea661f50df90bd4283030a74c03dff5beb4c1c8f60723d3f610e815c0d3f0e88dbd8f6b9ff474a4651e5a03e7dd843e25"
+    },
+    "youtubeWatch": {
+      "kind": 1,
+      "tags": [],
+      "content": "https://www.youtube.com/watch?v=M7lc1UVf-VE&feature=share",
+      "created_at": 1790722821,
+      "pubkey": "f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9",
+      "id": "bf16189a2b0d8e761f3635ed5b66cb5b589b7c3141c913f0b1d383b3228a1319",
+      "sig": "b507e1ebc35a38abbcdee4e0caa365682f2890352af349d86f15843538e12574042ee8c981671c3cd8a280c35c26786bfe944eb451c760fddbea9bda61256659"
+    },
+    "youtubeShorts": {
+      "kind": 1,
+      "tags": [],
+      "content": "https://youtube.com/shorts/M7lc1UVf-VE",
+      "created_at": 1790722822,
+      "pubkey": "f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9",
+      "id": "aa9f852af7838e69376f883435974e7fc2403b62a6e86ebaac7afa7d0eda455e",
+      "sig": "a99a97809c6fe4477b604301d15c0c30834363e77a9788dd1046f2fb3ad087d3b61f8d5d4cb7c0c52f1cdf53b16598894d0f68b1072085b6a3fd6e9452bb8786"
+    },
+    "youtubeMultiple": {
+      "kind": 1,
+      "tags": [],
+      "content": "https://youtu.be/M7lc1UVf-VE https://youtu.be/abcdefghijk",
+      "created_at": 1790722823,
+      "pubkey": "f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9",
+      "id": "af89d3357816ad04e6d2e24f182e410d6c79d3b0ee6558328235c4026ed3258c",
+      "sig": "94c0106fde3b4347997d7266d0669281969437c7abc6e9fa86c8b28ca6c255145862f4943e6a54202ebeb9c479dc5be70af18f4415f4b29fe9aade9254528137"
+    },
+    "x": {
+      "kind": 1,
+      "tags": [],
+      "content": "X https://x.com/alice/status/1234567890123456789",
+      "created_at": 1790722824,
+      "pubkey": "f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9",
+      "id": "ee6a84c9da3353bd8fa25c2555bac1e7c00afdffad71f3c4e9f4e974d94bb17c",
+      "sig": "cc3d9d354b9f7292575f35d07dad46f4f59c1ce45f62f53f9c584bd3f4684946c9758ce35f4b95e51822b0b8749a9c6f48f75b315d8140bc45013a7634c0f4b6"
+    },
+    "twitter": {
+      "kind": 1,
+      "tags": [],
+      "content": "https://twitter.com/bob/status/1234567890123456789",
+      "created_at": 1790722825,
+      "pubkey": "f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9",
+      "id": "0683ebf0c0321a6e7cf2d04f8990fd4e0fe4098ad195695d3e4faa98c466d06c",
+      "sig": "f1d0faea3ec322c68ac02a677c2c9c645d6fb68fd77c125cfe4f0c3dd775cedeb819531a2ba20db0c920fd9582d950ebd6da3c74b7bc930872c1ae00d6979bcb"
+    },
+    "xMultiple": {
+      "kind": 1,
+      "tags": [],
+      "content": "https://x.com/alice/status/1234567890123456789 https://twitter.com/bob/status/987654321",
+      "created_at": 1790722826,
+      "pubkey": "f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9",
+      "id": "6c691c99448024aeca9bc7c62f0615e179fef27cced5c441ad20a892305ec453",
+      "sig": "770322146383e80f673ce31edd5531556a479bb6f524cfae29b6086bee4f00c23bc7405be149465ded87e2828ef7b3266e89bf185e21884187f18523e0afc8ac"
+    },
+    "repostJSON": {
+      "kind": 6,
+      "tags": [
+        [
+          "e",
+          "e4813fbfd694f119d8d1a4ffe7b29ecb22ce64a75b05dfb39fb73094f3819298",
+          "wss://unconfigured.example"
+        ],
+        [
+          "p",
+          "e493dbf1c10d80f3581e4904930b1404cc6c13900ee0758474fa94abe8c4cd13"
+        ]
+      ],
+      "content": "{\"kind\": 1, \"tags\": [], \"content\": \"元の投稿です。入れ子はリンクのみ。nostr:note1sfc0968d6fejcjvset0xcs5cl84yg9cnqw8gw2wnza4f4v5p5dcqmlft95 https://media.example/nested.jpg https://youtu.be/M7lc1UVf-VE\", \"created_at\": 1790722804, \"pubkey\": \"e493dbf1c10d80f3581e4904930b1404cc6c13900ee0758474fa94abe8c4cd13\", \"id\": \"e4813fbfd694f119d8d1a4ffe7b29ecb22ce64a75b05dfb39fb73094f3819298\", \"sig\": \"3389eccf078d4241034b4b7f9494aab7c76080d7e0fab8ea9f3fb82cb3aed2c9a606400be54c6cbdc2d6c4a725ed1b383ed6cba700576120df515ea20a6b095f\"}",
+      "created_at": 1790722827,
+      "pubkey": "f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9",
+      "id": "140f821cefd73280b5e150d015f3b1e31bd736a3498533b6157e40c7f20ed10b",
+      "sig": "49fcc9f7405ef49e393732be0c36595d351aa53a0a815869f3a42d2d12ec73807c239f3b6f2578874dffa7ea55d0c201e5c6e8dc9ebf30e56596c686495c22b3"
+    },
+    "repostEmpty": {
+      "kind": 6,
+      "tags": [
+        [
+          "e",
+          "e4813fbfd694f119d8d1a4ffe7b29ecb22ce64a75b05dfb39fb73094f3819298",
+          "wss://unconfigured.example"
+        ],
+        [
+          "p",
+          "e493dbf1c10d80f3581e4904930b1404cc6c13900ee0758474fa94abe8c4cd13"
+        ]
+      ],
+      "content": "",
+      "created_at": 1790722828,
+      "pubkey": "f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9",
+      "id": "f5da1f5959c930499f58b5379a86274617643f975707117f27404fbbe9debab6",
+      "sig": "15d2b40ae1268fce3fd1a4e309f4452d818943db166588705704b3f9dc4c53e2ecbe003e73f20737be56f9658a50748c590ed28694d2737b678b52ad5a1dba5d"
+    },
+    "repostMalformed": {
+      "kind": 6,
+      "tags": [
+        [
+          "e",
+          "e4813fbfd694f119d8d1a4ffe7b29ecb22ce64a75b05dfb39fb73094f3819298",
+          "wss://unconfigured.example"
+        ],
+        [
+          "p",
+          "e493dbf1c10d80f3581e4904930b1404cc6c13900ee0758474fa94abe8c4cd13"
+        ]
+      ],
+      "content": "{bad json",
+      "created_at": 1790722829,
+      "pubkey": "f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9",
+      "id": "99b1d4b616fa5dd5471c64b64772dd7c4df0484989aadef612c72d38d166a99c",
+      "sig": "485a28413a9e053a4f90af0b5481e798cf4745d3d908b9c0c1d0b248691b8e2210059ba02bc4c8dfed13f20fd6e4bfbbc7151172a47308a81e0f74b7689bd754"
+    },
+    "repostMissing": {
+      "kind": 6,
+      "tags": [
+        [
+          "e",
+          "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "wss://unconfigured.example"
+        ]
+      ],
+      "content": "",
+      "created_at": 1790722830,
+      "pubkey": "f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9",
+      "id": "9201414361f37478cfa4e3657fb1e240df11e46ab741d14d96410d13ee161c4c",
+      "sig": "007b362661a451705d89e4aeb1a262fc09dd5d2c53013eedf1edb7363796b13b858f05e32a3d6978bf69c2305caf39287c19875815607299854f8ee822fc623c"
+    },
+    "repostForged": {
+      "kind": 6,
+      "tags": [
+        [
+          "e",
+          "e4813fbfd694f119d8d1a4ffe7b29ecb22ce64a75b05dfb39fb73094f3819298",
+          "wss://unconfigured.example"
+        ],
+        [
+          "p",
+          "e493dbf1c10d80f3581e4904930b1404cc6c13900ee0758474fa94abe8c4cd13"
+        ]
+      ],
+      "content": "{\"kind\": 1, \"tags\": [], \"content\": \"偽造された内容\", \"created_at\": 1790722804, \"pubkey\": \"e493dbf1c10d80f3581e4904930b1404cc6c13900ee0758474fa94abe8c4cd13\", \"id\": \"e4813fbfd694f119d8d1a4ffe7b29ecb22ce64a75b05dfb39fb73094f3819298\", \"sig\": \"3389eccf078d4241034b4b7f9494aab7c76080d7e0fab8ea9f3fb82cb3aed2c9a606400be54c6cbdc2d6c4a725ed1b383ed6cba700576120df515ea20a6b095f\"}",
+      "created_at": 1790722831,
+      "pubkey": "f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9",
+      "id": "ed256474b413b7853da1997b3b6682bb74470cbcf9761ba0d0f9e0d43e161d39",
+      "sig": "e631a19f53b767593bd5e0872ee3daf57015d139b466fa954e71d45865537d1d12f29e3f231388b6aef261add3b41c8d8235eeebee78d6b9bbbcf2a7c92c2c59"
+    },
+    "generic": {
+      "kind": 16,
+      "tags": [
+        [
+          "a",
+          "30023:e493dbf1c10d80f3581e4904930b1404cc6c13900ee0758474fa94abe8c4cd13:article:日本語"
+        ],
+        [
+          "k",
+          "30023"
+        ]
+      ],
+      "content": "{\"kind\": 30023, \"tags\": [[\"d\", \"article:日本語\"], [\"title\", \"記事\"]], \"content\": \"最新版の記事。nostr:note1sfc0968d6fejcjvset0xcs5cl84yg9cnqw8gw2wnza4f4v5p5dcqmlft95\", \"created_at\": 1790722806, \"pubkey\": \"e493dbf1c10d80f3581e4904930b1404cc6c13900ee0758474fa94abe8c4cd13\", \"id\": \"be7fb00568cc8d6e655e0cbee5b719a7df95c400389c313a15087dc7a9363673\", \"sig\": \"e0d09b7e8fca55727bfe8390a1de079f36ff4be38a36fc457c78d8dd52e6e588a2fbd041e412960dab2d732fceae828c18c555de028c6ee259af8ea0e90e8a18\"}",
+      "created_at": 1790722832,
+      "pubkey": "f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9",
+      "id": "d168780e04bb782c072b6b2994165305eb42fc446fe8ccea0e6b68f3f20882a1",
+      "sig": "40f2f43580aa50b7790e2dff48d364c15439fc5eac3839c21f0b4467ab5731afe4860fb314f70dea1019d8da13a445e846a53f31d27b079336f04ef947de41d0"
+    },
+    "genericEmpty": {
+      "kind": 16,
+      "tags": [
+        [
+          "a",
+          "30023:e493dbf1c10d80f3581e4904930b1404cc6c13900ee0758474fa94abe8c4cd13:article:日本語"
+        ],
+        [
+          "k",
+          "30023"
+        ]
+      ],
+      "content": "",
+      "created_at": 1790722833,
+      "pubkey": "f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9",
+      "id": "b957bd006ec86751c081f720227272ab18f1ed267bf76c13080d0a65846f0827",
+      "sig": "1228dd1481511efdf4004c8f40b940f32c93bead3a3e59a58af8dd51206574dfe9220eb9c644d69437528441226a3a1895d26994a3a5868024355afa429a7708"
+    },
+    "genericNested": {
+      "kind": 16,
+      "tags": [
+        [
+          "e",
+          "140f821cefd73280b5e150d015f3b1e31bd736a3498533b6157e40c7f20ed10b"
+        ],
+        [
+          "k",
+          "6"
+        ]
+      ],
+      "content": "{\"kind\": 6, \"tags\": [[\"e\", \"e4813fbfd694f119d8d1a4ffe7b29ecb22ce64a75b05dfb39fb73094f3819298\", \"wss://unconfigured.example\"], [\"p\", \"e493dbf1c10d80f3581e4904930b1404cc6c13900ee0758474fa94abe8c4cd13\"]], \"content\": \"{\\\"kind\\\": 1, \\\"tags\\\": [], \\\"content\\\": \\\"元の投稿です。入れ子はリンクのみ。nostr:note1sfc0968d6fejcjvset0xcs5cl84yg9cnqw8gw2wnza4f4v5p5dcqmlft95 https://media.example/nested.jpg https://youtu.be/M7lc1UVf-VE\\\", \\\"created_at\\\": 1790722804, \\\"pubkey\\\": \\\"e493dbf1c10d80f3581e4904930b1404cc6c13900ee0758474fa94abe8c4cd13\\\", \\\"id\\\": \\\"e4813fbfd694f119d8d1a4ffe7b29ecb22ce64a75b05dfb39fb73094f3819298\\\", \\\"sig\\\": \\\"3389eccf078d4241034b4b7f9494aab7c76080d7e0fab8ea9f3fb82cb3aed2c9a606400be54c6cbdc2d6c4a725ed1b383ed6cba700576120df515ea20a6b095f\\\"}\", \"created_at\": 1790722827, \"pubkey\": \"f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9\", \"id\": \"140f821cefd73280b5e150d015f3b1e31bd736a3498533b6157e40c7f20ed10b\", \"sig\": \"49fcc9f7405ef49e393732be0c36595d351aa53a0a815869f3a42d2d12ec73807c239f3b6f2578874dffa7ea55d0c201e5c6e8dc9ebf30e56596c686495c22b3\"}",
+      "created_at": 1790722834,
+      "pubkey": "f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9",
+      "id": "b3f3d6fa15b6f62a665bb1433f804548393b267eb120cb49da7d32708e1281b0",
+      "sig": "c7c36811873d6f4edf8b4edd77c32d1813497b7b4953456759b4bffe860460b4f300a634ef2db78e337125f3a25f89d3d18400747f5ebabc13bb3e9f60f65638"
+    },
+    "quote": {
+      "kind": 1,
+      "tags": [
+        [
+          "q",
+          "e4813fbfd694f119d8d1a4ffe7b29ecb22ce64a75b05dfb39fb73094f3819298"
+        ],
+        [
+          "e",
+          "e4813fbfd694f119d8d1a4ffe7b29ecb22ce64a75b05dfb39fb73094f3819298"
+        ]
+      ],
+      "content": "引用コメント",
+      "created_at": 1790722835,
+      "pubkey": "f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9",
+      "id": "725b16f904e27b1ec7f5ca6e1d0e1ef5f61c2c51a76a665ba0bf06b08856ab50",
+      "sig": "e1b0984fcd7434d9accd2f767cb6c37b9908a6b2f80e41b10af722501861ffea6fb7183058cf28ae7cace445c94e9e18e54f90253d1a4254c8f4ccacc272055f"
+    },
+    "quoteAddress": {
+      "kind": 1,
+      "tags": [
+        [
+          "q",
+          "30023:e493dbf1c10d80f3581e4904930b1404cc6c13900ee0758474fa94abe8c4cd13:article:日本語"
+        ]
+      ],
+      "content": "記事を引用",
+      "created_at": 1790722836,
+      "pubkey": "f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9",
+      "id": "c5f3457485ab913b18e94fb994ef18297693a6232c3281c9f968c9d71a7e0e42",
+      "sig": "f0408182c50145c000372727138883de97af744ffd2375991222ddecf15aecca6525c4a62b074668cc896954551f123d62f0e157860860cdd385fb0a55023661"
+    },
+    "quoteReply": {
+      "kind": 1,
+      "tags": [
+        [
+          "q",
+          "e4813fbfd694f119d8d1a4ffe7b29ecb22ce64a75b05dfb39fb73094f3819298"
+        ],
+        [
+          "e",
+          "8270f2e8edd2732c4990cade6c4298f9ea441713038e8729d3176a9ab281a370",
+          "",
+          "reply"
+        ]
+      ],
+      "content": "これは返信であり引用もある",
+      "created_at": 1790722837,
+      "pubkey": "f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9",
+      "id": "53eb966bd804fbd698bcabf05ca0f132c86dcc6ba39db411006b1c980c1ccecb",
+      "sig": "db5b475216a2cbe9b855920e12322e090216990781710d1a76e8014cd72d4c302bcf5ba3297e8f17301cd301bfc20a52825ba19d9449ab3d2cc36a51a68de708"
+    },
+    "mixed": {
+      "kind": 1,
+      "tags": [
+        [
+          "q",
+          "e4813fbfd694f119d8d1a4ffe7b29ecb22ce64a75b05dfb39fb73094f3819298"
+        ]
+      ],
+      "content": "https://media.example/photo.JPG?size=1000 nostr:note1ujqnl07kjnc3nkx35nl70v57ev3vue98tvzalvulkucffuupj2vqj34puf https://x.com/a/status/1234567890123456789 https://youtu.be/M7lc1UVf-VE",
+      "created_at": 1790722838,
+      "pubkey": "f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9",
+      "id": "52559a31d3e71071d3d9910f80f3308357c960fd7cea545056df9af7747c1cef",
+      "sig": "1bd558d64a1ecb11a0df85136dafc610631cfc0340fc71caee54fca48eab29efeafe157f49463b5fa619ed14004fe3b98135b0872c73bfb9d467c05a96873a62"
+    },
+    "mixedNostrFirst": {
+      "kind": 1,
+      "tags": [
+        [
+          "q",
+          "e4813fbfd694f119d8d1a4ffe7b29ecb22ce64a75b05dfb39fb73094f3819298"
+        ]
+      ],
+      "content": "nostr:note1ujqnl07kjnc3nkx35nl70v57ev3vue98tvzalvulkucffuupj2vqj34puf https://media.example/photo.JPG?size=1000 https://x.com/a/status/1234567890123456789 https://youtu.be/M7lc1UVf-VE",
+      "created_at": 1790722839,
+      "pubkey": "f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9",
+      "id": "065a3a276eb2e8a5c9a9113f28e397926e487e76be51ff4c82e703e0316565f0",
+      "sig": "c7bb30e70f5ed7bb92f6d7a18ef61d045319bc7099c63bf41055f6ef73acb59cdfa80899fa26fa7f970ad30bd5a1887ada4520ae73693049d17a5964a289d7dd"
+    },
+    "hostile": {
+      "kind": 1,
+      "tags": [],
+      "content": "<script>window.__pwned=1</script> https://youtube.com.evil.example/watch?v=M7lc1UVf-VE javascript:alert(1) nostr:nsec1private",
+      "created_at": 1790722840,
+      "pubkey": "f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9",
+      "id": "8f88f85643fa52b61861bc56ac5948573702bbf0502de9b3470845ee32e399c6",
+      "sig": "1ad34b9cbe785ebbd0958209dbf774dee04ac392fc9c177b9a9d827d33ac16c22e06ec445bb6c3d78d791f7ed5a85a878ccafd08f237a8159f0eaac7849b1eea"
+    }
+  },
+  "uris": {
+    "note": "nostr:note1ujqnl07kjnc3nkx35nl70v57ev3vue98tvzalvulkucffuupj2vqj34puf",
+    "nevent": "nostr:nevent1qqswfqflhltffugemrg6fll8k20vkgkwvjn4kpwlkw0mwvy57wqe9xqprfmhxue69uhh2mnrdahxv6t8w4ex2epwv4uxzmtsd3jsyg8yj0dlrsgdsre4s8jfqjfsk9qye3kp8yqwup6cga86jj4733xdzvpsgqqqqqqszh9llm",
+    "npub": "nostr:npub1ujfahuwppkq0xkq7fyzfxzc5qnxxcyuspms8tpr5l222h6xye5fsccv64k",
+    "nprofile": "nostr:nprofile1qqswfy7m78qsmq8ntq0yjpynpv2qfnrvzwgqacr4s360499tarzv6ycprfmhxue69uhh2mnrdahxv6t8w4ex2epwv4uxzmtsd3jssvgxgh",
+    "naddr": "nostr:naddr1qqgkzun5d93kcef6u6t6te5u4n5248szyrjf8kl3cyxcpu6creysfyctzszvcmqnjq8wqavywnaff2lgcnx3xqcyqqq823c48eejl",
+    "deep": "nostr:note1sfc0968d6fejcjvset0xcs5cl84yg9cnqw8gw2wnza4f4v5p5dcqmlft95"
+  },
+  "coordinate": "30023:e493dbf1c10d80f3581e4904930b1404cc6c13900ee0758474fa94abe8c4cd13:article:日本語",
+  "invalid": "nostr:note1ujqnl07kjnc3nkx35nl70v57ev3vue98tvzalvulkucffuupj2vqj34puq"
+}

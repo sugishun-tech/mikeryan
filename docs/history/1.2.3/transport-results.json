@@ -1,0 +1,22 @@
+{
+  "suite": "local-native-websocket",
+  "passed": 9,
+  "checks": [
+    "Creating the production relay pool opens no unsolicited sockets",
+    "Native WebSocket reassembles fragmented JSON and verifies genuine profile signatures",
+    "Duplicate signed events received over a real socket are deduplicated",
+    "A finite native request receives its page and closes after EOSE",
+    "A signed fixture publication receives a real socket OK acknowledgement",
+    "Native transport receives and binds the relay authentication challenge",
+    "Signed test NIP-42 authentication is accepted by the local relay",
+    "A real disconnect before EOSE is incomplete, not a confirmed empty page",
+    "Disconnect never starts an automatic read or reconnect"
+  ],
+  "boundaries": "Node native WebSocket and production cryptographic verification; local Python relay; public test keys; no browser or public relay.",
+  "wire_counts": {
+    "REQ": 3,
+    "CLOSE": 2,
+    "EVENT": 1,
+    "AUTH": 1
+  }
+}

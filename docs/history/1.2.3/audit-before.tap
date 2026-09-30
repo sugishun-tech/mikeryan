@@ -1,0 +1,870 @@
+TAP version 13
+# Subtest: Pending login cannot undo an explicit logout
+not ok 1 - Pending login cannot undo an explicit logout
+  ---
+  duration_ms: 2.937623
+  type: 'test'
+  location: '/mnt/data/audit/baseline/tests/audit.test.js:35:1'
+  failureType: 'testCodeFailure'
+  error: 'Missing expected rejection.'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  operator: 'rejects'
+  stack: |-
+    async TestContext.<anonymous> (file:///mnt/data/audit/baseline/tests/audit.test.js:38:2)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# Subtest: A stale login cannot overwrite a newer login attempt
+not ok 2 - A stale login cannot overwrite a newer login attempt
+  ---
+  duration_ms: 0.761103
+  type: 'test'
+  location: '/mnt/data/audit/baseline/tests/audit.test.js:40:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + 'f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9'
+    - 'e493dbf1c10d80f3581e4904930b1404cc6c13900ee0758474fa94abe8c4cd13'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'e493dbf1c10d80f3581e4904930b1404cc6c13900ee0758474fa94abe8c4cd13'
+  actual: 'f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/data/audit/baseline/tests/audit.test.js:44:38)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: Queued signing snapshots the requested body and tags at click time
+not ok 3 - Queued signing snapshots the requested body and tags at click time
+  ---
+  duration_ms: 0.576746
+  type: 'test'
+  location: '/mnt/data/audit/baseline/tests/audit.test.js:46:1'
+  failureType: 'testCodeFailure'
+  error: '署名結果が依頼内容またはログイン中の公開鍵と一致しません'
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///mnt/data/audit/baseline/js/auth/session.js:42:291
+  ...
+# Subtest: Logout and login to the same key invalidate an older signing operation
+not ok 4 - Logout and login to the same key invalidate an older signing operation
+  ---
+  duration_ms: 17.702622
+  type: 'test'
+  location: '/mnt/data/audit/baseline/tests/audit.test.js:53:1'
+  failureType: 'testCodeFailure'
+  error: 'Missing expected rejection.'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  operator: 'rejects'
+  stack: |-
+    async TestContext.<anonymous> (file:///mnt/data/audit/baseline/tests/audit.test.js:57:2)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: Account changes during signature verification are checked again before return
+not ok 5 - Account changes during signature verification are checked again before return
+  ---
+  duration_ms: 17.315722
+  type: 'test'
+  location: '/mnt/data/audit/baseline/tests/audit.test.js:59:1'
+  failureType: 'testCodeFailure'
+  error: 'Missing expected rejection.'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  operator: 'rejects'
+  stack: |-
+    async TestContext.<anonymous> (file:///mnt/data/audit/baseline/tests/audit.test.js:65:2)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: follow: delayed read cannot sign old-account data using a new account
+not ok 6 - follow: delayed read cannot sign old-account data using a new account
+  ---
+  duration_ms: 2.014967
+  type: 'test'
+  location: '/mnt/data/audit/baseline/tests/audit.test.js:67:45'
+  failureType: 'testCodeFailure'
+  error: 'Missing expected rejection.'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  operator: 'rejects'
+  stack: |-
+    async TestContext.<anonymous> (file:///mnt/data/audit/baseline/tests/audit.test.js:71:2)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: profile: delayed read cannot sign old-account data using a new account
+not ok 7 - profile: delayed read cannot sign old-account data using a new account
+  ---
+  duration_ms: 1.07839
+  type: 'test'
+  location: '/mnt/data/audit/baseline/tests/audit.test.js:67:45'
+  failureType: 'testCodeFailure'
+  error: 'Missing expected rejection.'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  operator: 'rejects'
+  stack: |-
+    async TestContext.<anonymous> (file:///mnt/data/audit/baseline/tests/audit.test.js:71:2)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: A successful old-view account read cannot overwrite a newer received follow list
+not ok 8 - A successful old-view account read cannot overwrite a newer received follow list
+  ---
+  duration_ms: 0.545519
+  type: 'test'
+  location: '/mnt/data/audit/baseline/tests/audit.test.js:73:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    false !== true
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/data/audit/baseline/tests/audit.test.js:78:9)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: Follow read-modify-write preserves a newer signed current-view list
+not ok 9 - Follow read-modify-write preserves a newer signed current-view list
+  ---
+  duration_ms: 1.66413
+  type: 'test'
+  location: '/mnt/data/audit/baseline/tests/audit.test.js:80:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+    + Set(1) {
+    - Set(2) {
+        '2f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4',
+    -   'e493dbf1c10d80f3581e4904930b1404cc6c13900ee0758474fa94abe8c4cd13'
+      }
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual:
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/data/audit/baseline/tests/audit.test.js:83:44)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: Concurrent incomplete sends retain both signed events in the outbox
+not ok 10 - Concurrent incomplete sends retain both signed events in the outbox
+  ---
+  duration_ms: 1.908628
+  type: 'test'
+  location: '/mnt/data/audit/baseline/tests/audit.test.js:85:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    1 !== 2
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 2
+  actual: 1
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/data/audit/baseline/tests/audit.test.js:88:9)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: A transport exception after signing preserves the exact event for retry
+not ok 11 - A transport exception after signing preserves the exact event for retry
+  ---
+  duration_ms: 0.47891
+  type: 'test'
+  location: '/mnt/data/audit/baseline/tests/audit.test.js:90:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    undefined !== 1
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 1
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/data/audit/baseline/tests/audit.test.js:92:58)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: Concurrent retries of one event share one send operation
+not ok 12 - Concurrent retries of one event share one send operation
+  ---
+  duration_ms: 1.435616
+  type: 'test'
+  location: '/mnt/data/audit/baseline/tests/audit.test.js:94:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    2 !== 1
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 1
+  actual: 2
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/data/audit/baseline/tests/audit.test.js:97:127)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: Outbox removes acknowledgements completed in another tab, not stale memory
+not ok 13 - Outbox removes acknowledgements completed in another tab, not stale memory
+  ---
+  duration_ms: 1.007103
+  type: 'test'
+  location: '/mnt/data/audit/baseline/tests/audit.test.js:99:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + [
+    +   {
+    +     event: 'x'
+    +   }
+    + ]
+    - undefined
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  actual:
+    0:
+      event: 'x'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/data/audit/baseline/tests/audit.test.js:101:9)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: A failed persistent write remains readable from the current tab instead of stale disk
+not ok 14 - A failed persistent write remains readable from the current tab instead of stale disk
+  ---
+  duration_ms: 0.523786
+  type: 'test'
+  location: '/mnt/data/audit/baseline/tests/audit.test.js:103:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+      [
+    +   'old'
+    -   'new'
+      ]
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0: 'new'
+  actual:
+    0: 'old'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/data/audit/baseline/tests/audit.test.js:105:9)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: State storage reports failed persistence instead of silently claiming success
+not ok 15 - State storage reports failed persistence instead of silently claiming success
+  ---
+  duration_ms: 0.356866
+  type: 'test'
+  location: '/mnt/data/audit/baseline/tests/audit.test.js:107:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + undefined
+    - false
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: false
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/data/audit/baseline/tests/audit.test.js:108:69)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: A failed profile write cannot downgrade a newer known record
+not ok 16 - A failed profile write cannot downgrade a newer known record
+  ---
+  duration_ms: 0.965851
+  type: 'test'
+  location: '/mnt/data/audit/baseline/tests/audit.test.js:110:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + '5d5335d01afdfc0370ecbf154116817d7faa1a14a6b4751c8c0a7e42504bc3c5'
+    - '0000000000000000000000000000000000000000000000000000000000000009'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: '0000000000000000000000000000000000000000000000000000000000000009'
+  actual: '5d5335d01afdfc0370ecbf154116817d7faa1a14a6b4751c8c0a7e42504bc3c5'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/data/audit/baseline/tests/audit.test.js:113:117)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: Profile persistence failure retains current-session metadata for reload within the tab
+not ok 17 - Profile persistence failure retains current-session metadata for reload within the tab
+  ---
+  duration_ms: 0.291868
+  type: 'test'
+  location: '/mnt/data/audit/baseline/tests/audit.test.js:115:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + undefined
+    - '5d5335d01afdfc0370ecbf154116817d7faa1a14a6b4751c8c0a7e42504bc3c5'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: '5d5335d01afdfc0370ecbf154116817d7faa1a14a6b4751c8c0a7e42504bc3c5'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/data/audit/baseline/tests/audit.test.js:118:9)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: Malformed settings are rejected without replacing saved settings: null
+not ok 18 - Malformed settings are rejected without replacing saved settings: null
+  ---
+  duration_ms: 0.473321
+  type: 'test'
+  location: '/mnt/data/audit/baseline/tests/audit.test.js:120:118'
+  failureType: 'testCodeFailure'
+  error: 'Missing expected exception.'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  operator: 'throws'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/data/audit/baseline/tests/audit.test.js:121:9)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: Malformed settings are rejected without replacing saved settings: []
+not ok 19 - Malformed settings are rejected without replacing saved settings: []
+  ---
+  duration_ms: 0.124206
+  type: 'test'
+  location: '/mnt/data/audit/baseline/tests/audit.test.js:120:118'
+  failureType: 'testCodeFailure'
+  error: 'Missing expected exception.'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  operator: 'throws'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/data/audit/baseline/tests/audit.test.js:121:9)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: Malformed settings are rejected without replacing saved settings: 42
+not ok 20 - Malformed settings are rejected without replacing saved settings: 42
+  ---
+  duration_ms: 0.103496
+  type: 'test'
+  location: '/mnt/data/audit/baseline/tests/audit.test.js:120:118'
+  failureType: 'testCodeFailure'
+  error: 'Missing expected exception.'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  operator: 'throws'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/data/audit/baseline/tests/audit.test.js:121:9)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: Malformed settings are rejected without replacing saved settings: "broken"
+not ok 21 - Malformed settings are rejected without replacing saved settings: "broken"
+  ---
+  duration_ms: 0.14606
+  type: 'test'
+  location: '/mnt/data/audit/baseline/tests/audit.test.js:120:118'
+  failureType: 'testCodeFailure'
+  error: 'Missing expected exception.'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  operator: 'throws'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/data/audit/baseline/tests/audit.test.js:121:9)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: Malformed settings are rejected without replacing saved settings: {"relays":"wss://example.com"}
+ok 22 - Malformed settings are rejected without replacing saved settings: {"relays":"wss://example.com"}
+  ---
+  duration_ms: 0.073651
+  type: 'test'
+  ...
+# Subtest: Malformed settings are rejected without replacing saved settings: {"muteContentPatterns":"x"}
+not ok 23 - Malformed settings are rejected without replacing saved settings: {"muteContentPatterns":"x"}
+  ---
+  duration_ms: 0.218087
+  type: 'test'
+  location: '/mnt/data/audit/baseline/tests/audit.test.js:120:118'
+  failureType: 'testCodeFailure'
+  error: 'Missing expected exception.'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  operator: 'throws'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/data/audit/baseline/tests/audit.test.js:121:9)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: Malformed settings are rejected without replacing saved settings: {"loadImages":"false"}
+not ok 24 - Malformed settings are rejected without replacing saved settings: {"loadImages":"false"}
+  ---
+  duration_ms: 0.171758
+  type: 'test'
+  location: '/mnt/data/audit/baseline/tests/audit.test.js:120:118'
+  failureType: 'testCodeFailure'
+  error: 'Missing expected exception.'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  operator: 'throws'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/data/audit/baseline/tests/audit.test.js:121:9)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: Legacy settings migration remains usable when persistence is denied
+not ok 25 - Legacy settings migration remains usable when persistence is denied
+  ---
+  duration_ms: 0.634383
+  type: 'test'
+  location: '/mnt/data/audit/baseline/tests/audit.test.js:123:1'
+  failureType: 'testCodeFailure'
+  error: '設定を保存できません。ブラウザーのサイトデータ保存を許可してください'
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    Settings.save (file:///mnt/data/audit/baseline/js/settings/store.js:58:62)
+    Settings.load (file:///mnt/data/audit/baseline/js/settings/store.js:53:29)
+    TestContext.<anonymous> (file:///mnt/data/audit/baseline/tests/audit.test.js:125:47)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: A queued event lookup does not start new traffic after its view is disposed
+not ok 26 - A queued event lookup does not start new traffic after its view is disposed
+  ---
+  duration_ms: 61.510279
+  type: 'test'
+  location: '/mnt/data/audit/baseline/tests/audit.test.js:127:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    1 !== 0
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 0
+  actual: 1
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/data/audit/baseline/tests/audit.test.js:129:103)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: Event lookup failures remain retryable errors rather than false not-found results
+not ok 27 - Event lookup failures remain retryable errors rather than false not-found results
+  ---
+  duration_ms: 61.556528
+  type: 'test'
+  location: '/mnt/data/audit/baseline/tests/audit.test.js:131:1'
+  failureType: 'testCodeFailure'
+  error: 'Missing expected rejection.'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  operator: 'rejects'
+  stack: |-
+    async TestContext.<anonymous> (file:///mnt/data/audit/baseline/tests/audit.test.js:133:2)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: A late CLOSE from an old socket does not fail a replacement socket request
+not ok 28 - A late CLOSE from an old socket does not fail a replacement socket request
+  ---
+  duration_ms: 11.155989
+  type: 'test'
+  location: '/mnt/data/audit/baseline/tests/audit.test.js:135:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The expression evaluated to a falsy value:
+    
+      assert.ok(Array.isArray(result))
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/data/audit/baseline/tests/audit.test.js:142:9)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: Invalid signed contact response is not a confirmed empty public list
+not ok 29 - Invalid signed contact response is not a confirmed empty public list
+  ---
+  duration_ms: 4.610987
+  type: 'test'
+  location: '/mnt/data/audit/baseline/tests/audit.test.js:144:1'
+  failureType: 'testCodeFailure'
+  error: 'Missing expected rejection.'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  operator: 'rejects'
+  stack: |-
+    async TestContext.<anonymous> (file:///mnt/data/audit/baseline/tests/audit.test.js:148:2)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: Public relay edits preserve the newer signed current-view list over stale relay reads
+not ok 30 - Public relay edits preserve the newer signed current-view list over stale relay reads
+  ---
+  duration_ms: 1.216968
+  type: 'test'
+  location: '/mnt/data/audit/baseline/tests/audit.test.js:150:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    false !== true
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/data/audit/baseline/tests/audit.test.js:154:9)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: Account switching during public relay preflight cannot sign the previous account edit
+ok 31 - Account switching during public relay preflight cannot sign the previous account edit
+  ---
+  duration_ms: 0.53947
+  type: 'test'
+  ...
+# Subtest: Rejected signing is not stored as an unsigned outbox item and the next write can proceed
+not ok 32 - Rejected signing is not stored as an unsigned outbox item and the next write can proceed
+  ---
+  duration_ms: 0.262815
+  type: 'test'
+  location: '/mnt/data/audit/baseline/tests/audit.test.js:160:1'
+  failureType: 'testCodeFailure'
+  error: "Cannot read properties of undefined (reading 'size')"
+  code: 'ERR_TEST_FAILURE'
+  name: 'TypeError'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/data/audit/baseline/tests/audit.test.js:161:200)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: Profile editing rejects malformed latest JSON instead of erasing fields: {broken
+not ok 33 - Profile editing rejects malformed latest JSON instead of erasing fields: {broken
+  ---
+  duration_ms: 1.511481
+  type: 'test'
+  location: '/mnt/data/audit/baseline/tests/audit.test.js:163:51'
+  failureType: 'testCodeFailure'
+  error: 'Missing expected rejection.'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  operator: 'rejects'
+  stack: |-
+    async TestContext.<anonymous> (file:///mnt/data/audit/baseline/tests/audit.test.js:164:65)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: Profile editing rejects malformed latest JSON instead of erasing fields: null
+not ok 34 - Profile editing rejects malformed latest JSON instead of erasing fields: null
+  ---
+  duration_ms: 0.517447
+  type: 'test'
+  location: '/mnt/data/audit/baseline/tests/audit.test.js:163:51'
+  failureType: 'testCodeFailure'
+  error: 'Missing expected rejection.'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  operator: 'rejects'
+  stack: |-
+    async TestContext.<anonymous> (file:///mnt/data/audit/baseline/tests/audit.test.js:164:65)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: Profile editing rejects malformed latest JSON instead of erasing fields: []
+ok 35 - Profile editing rejects malformed latest JSON instead of erasing fields: []
+  ---
+  duration_ms: 0.396105
+  type: 'test'
+  ...
+# Subtest: Profile editing rejects malformed latest JSON instead of erasing fields: 42
+ok 36 - Profile editing rejects malformed latest JSON instead of erasing fields: 42
+  ---
+  duration_ms: 0.119489
+  type: 'test'
+  ...
+# Subtest: Worker RPC synchronous send failure removes its pending request and timer
+not ok 37 - Worker RPC synchronous send failure removes its pending request and timer
+  ---
+  duration_ms: 4.582574
+  type: 'test'
+  location: '/mnt/data/audit/baseline/tests/network-client.test.js:17:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    1 !== 0
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 0
+  actual: 1
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/data/audit/baseline/tests/network-client.test.js:18:133)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# Subtest: Worker crash rejects in-flight requests immediately without replaying a send
+not ok 38 - Worker crash rejects in-flight requests immediately without replaying a send
+  ---
+  duration_ms: 5.670548
+  type: 'test'
+  location: '/mnt/data/audit/baseline/tests/network-client.test.js:20:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    false !== true
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/data/audit/baseline/tests/network-client.test.js:22:86)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: Worker deserialization error rejects all pending requests and enables manual fallback
+not ok 39 - Worker deserialization error rejects all pending requests and enables manual fallback
+  ---
+  duration_ms: 1.357799
+  type: 'test'
+  location: '/mnt/data/audit/baseline/tests/network-client.test.js:25:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    2 !== 0
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 0
+  actual: 2
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/data/audit/baseline/tests/network-client.test.js:27:42)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: Malformed worker messages cannot throw an uncaught handler exception
+not ok 40 - Malformed worker messages cannot throw an uncaught handler exception
+  ---
+  duration_ms: 1.110438
+  type: 'test'
+  location: '/mnt/data/audit/baseline/tests/network-client.test.js:30:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Got unwanted exception.
+    Actual message: "Cannot read properties of null (reading 'id')"
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  actual:
+  error: "Cannot read properties of null (reading 'id')"
+  name: 'TypeError'
+  stack: |-
+    worker.port.onmessage (file:///mnt/data/audit/baseline/js/network/client.js:9:86)
+    file:///mnt/data/audit/baseline/tests/network-client.test.js:31:70
+    getActual (node:assert:531:5)
+    Function.doesNotThrow (node:assert:697:32)
+    TestContext.<anonymous> (file:///mnt/data/audit/baseline/tests/network-client.test.js:31:41)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  operator: 'doesNotThrow'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/data/audit/baseline/tests/network-client.test.js:31:41)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: A late old-worker response cannot resolve a failed request or revive a dead worker
+not ok 41 - A late old-worker response cannot resolve a failed request or revive a dead worker
+  ---
+  duration_ms: 0.844278
+  type: 'test'
+  location: '/mnt/data/audit/baseline/tests/network-client.test.js:33:1'
+  failureType: 'testCodeFailure'
+  error: 'Missing expected rejection.'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  operator: 'rejects'
+  stack: |-
+    async TestContext.<anonymous> (file:///mnt/data/audit/baseline/tests/network-client.test.js:35:104)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: Unavailable SharedWorker falls back without opening unsolicited relay sockets
+ok 42 - Unavailable SharedWorker falls back without opening unsolicited relay sockets
+  ---
+  duration_ms: 0.438799
+  type: 'test'
+  ...
+# Subtest: Back follows anchor-created routes, not only Router.go calls
+not ok 43 - Back follows anchor-created routes, not only Router.go calls
+  ---
+  duration_ms: 2.967317
+  type: 'test'
+  location: '/mnt/data/audit/baseline/tests/router-history.test.js:14:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + '#/global'
+    - '#/home'
+         ^
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: '#/home'
+  actual: '#/global'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/data/audit/baseline/tests/router-history.test.js:15:144)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# Subtest: Native back then forward then header back retains accurate history
+ok 44 - Native back then forward then header back retains accurate history
+  ---
+  duration_ms: 0.600932
+  type: 'test'
+  ...
+# Subtest: Reloading a route retains the within-app back target and foreign state
+not ok 45 - Reloading a route retains the within-app back target and foreign state
+  ---
+  duration_ms: 0.89857
+  type: 'test'
+  location: '/mnt/data/audit/baseline/tests/router-history.test.js:20:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + '#/global'
+    - '#/home'
+         ^
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: '#/home'
+  actual: '#/global'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/data/audit/baseline/tests/router-history.test.js:21:228)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: New navigation after native back discards forward entries without a wrong back depth
+ok 46 - New navigation after native back discards forward entries without a wrong back depth
+  ---
+  duration_ms: 0.622085
+  type: 'test'
+  ...
+# Subtest: Opening a deep link directly does not navigate back out of the app
+ok 47 - Opening a deep link directly does not navigate back out of the app
+  ---
+  duration_ms: 0.702965
+  type: 'test'
+  ...
+1..47
+# tests 47
+# suites 0
+# pass 8
+# fail 39
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 261.228038
