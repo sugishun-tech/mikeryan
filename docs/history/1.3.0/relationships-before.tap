@@ -1,0 +1,97 @@
+TAP version 13
+# Subtest: Discovered signed follow survives an empty author lookup
+not ok 1 - Discovered signed follow survives an empty author lookup
+  ---
+  duration_ms: 2.0506
+  type: 'test'
+  location: '/mnt/data/fix122/mikeryan/tests/relationships.test.js:21:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    false !== true
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/data/fix122/mikeryan/tests/relationships.test.js:24:9)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# Subtest: Newer discovered follow wins over an older direct lookup without the owner
+not ok 2 - Newer discovered follow wins over an older direct lookup without the owner
+  ---
+  duration_ms: 0.335416
+  type: 'test'
+  location: '/mnt/data/fix122/mikeryan/tests/relationships.test.js:26:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    false !== true
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/data/fix122/mikeryan/tests/relationships.test.js:28:9)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: A failed author lookup cannot erase a signed positive candidate
+not ok 3 - A failed author lookup cannot erase a signed positive candidate
+  ---
+  duration_ms: 0.168334
+  type: 'test'
+  location: '/mnt/data/fix122/mikeryan/tests/relationships.test.js:30:1'
+  failureType: 'testCodeFailure'
+  error: 'offline'
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    repo.replacement (file:///mnt/data/fix122/mikeryan/tests/relationships.test.js:18:119)
+    async Promise.all (index 0)
+    async Social.followingBack (file:///mnt/data/fix122/mikeryan/js/social/service.js:99:20)
+    async TestContext.<anonymous> (file:///mnt/data/fix122/mikeryan/tests/relationships.test.js:32:13)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: A silent empty multi-author contact response must be isolated per author
+not ok 4 - A silent empty multi-author contact response must be isolated per author
+  ---
+  duration_ms: 0.362236
+  type: 'test'
+  location: '/mnt/data/fix122/mikeryan/tests/relationships.test.js:35:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    0 !== 2
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 2
+  actual: 0
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/data/fix122/mikeryan/tests/relationships.test.js:37:9)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+1..4
+# tests 4
+# suites 0
+# pass 0
+# fail 4
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 72.720204

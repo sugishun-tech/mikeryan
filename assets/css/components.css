@@ -30,7 +30,7 @@
 .post-image{display:block;width:auto;height:auto;max-width:100%;max-height:520px;object-fit:contain}
 .external-player{display:block;width:100%;max-width:100%;min-width:0;border:0}
 .youtube-player{aspect-ratio:16/9;height:auto;min-height:200px;max-height:520px}
-.x-player{max-height:1000px}.embed-close{font-size:12px;padding:0!important}
+.embed-close{font-size:12px;padding:0!important}
 .embedded-post{border-bottom:0!important;padding:12px!important;gap:9px!important;cursor:pointer;content-visibility:visible!important}
 .embedded-post .avatar{width:36px;height:36px}.embedded-post .post-text{font-size:14px}
 .embedded-post .post-header{flex-wrap:wrap}.embedded-post .post-actions{margin-bottom:0}

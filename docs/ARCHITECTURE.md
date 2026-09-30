@@ -1,4 +1,4 @@
-# 設計 · 1.3.0
+# 設計 · 1.3.2
 
 ## 画面アクセスと読み取りの分離
 
@@ -94,12 +94,13 @@ NIP-01 / 02 / 65は2026-09-29、NIP-05は既存資料で2026-09-24参照。実�
 
 `ContentResolver` は画面世代・設定リレー範囲をキーに最大512個のPromiseを共有する。noteとneventで同じIDを二重取得せず、neventのauthor/kind制約は呼び出しごとに照合する。原本JSONはラッパーが署名済みでも信用せず、内側イベントのIDと署名を検証する。取得できなかった結果は当該読み込み内だけ共有し、次の明示読み込みでは再試行できる。永続保存はしない。naddrはkind・author・#dを指定してRepository.addressで取得し、一致する最新版を選ぶ。リレーヒントは保存設定の代わりに使わない。
 
-`ui/embeds.js` は埋め込みごとに15秒の期限、リンク、失敗状態、後片付けを持つ。Nostr参照の取得はユーザーの明示読み込みで投稿を作る時点に含め、スクロールからリレー取得を開始しない。画像・外部フレームだけIntersectionObserverで可視領域付近まで初期化を遅延する。画像自体にもloading=lazyを指定。同じ画像URL・YouTube ID・X status IDは画面内で一つだけ初期化し、後続をリンクにする。外部画像のファイルサイズを制限するものではなく、描画サイズと初期化数を制限する。
+`ui/embeds.js` は埋め込みごとに15秒の期限、リンク、失敗状態、後片付けを持つ。Nostr参照の取得はユーザーの明示読み込みで投稿を作る時点に含め、スクロールからリレー取得を開始しない。画像・外部フレームだけIntersectionObserverで可視領域付近まで初期化を遅延する。画像自体にもloading=lazyを指定。同じ画像URL・YouTube IDは画面内で一つだけ初期化し、後続をリンクにする。外部画像のファイルサイズを制限するものではなく、描画サイズと初期化数を制限する。
 
-Xはassets/embeds/x.htmlのsandboxで公式widgets.createTweetを実行する。allow-same-originを付けず、親と別の不透明オリジンにする。メッセージのsource、origin=null、インスタンストークンを照合し、高さを最大1000pxへ制限する。作成できない場合はリンク。X側のCSP・Cookie・広告ブロッカー等で失敗することも正常なフォールバックとして扱う。
+X/TwitterのページURLは通常リンクのみとし、imetaのMIME指定でも画像化しない。埋め込み候補から除外するため、後続の対応候補を妨げない。X用スクリプト・iframe・postMessage処理・確認ページは削除済み。pbs.twimg.com等の直接画像URLは一般の画像として扱う。
 
 YouTubeは許可されたホストと11文字のIDからyoutube-nocookie.comのURLを構築する。外部JavaScriptをアカウント画面へ入れず、有限のpostMessage互換ハンドシェイクでonReady/onErrorを受ける。sourceと正確なoriginを検証し、loadイベントだけを成功の証拠にしない。500ms間隔・最大20回のメッセージ送信はブラウザー内通知であり、リレーへのポーリングではない。ただし、このメッセージ形式は公開JavaScript APIそのものではないため、プロバイダー変更や通知が得られない環境では15秒でリンクに戻る。実サービスでの互換性は今回の実行環境では未検証。Refererはoriginだけを送る。準備後もonErrorを監視し、手動で閉じることもできる。
 
 URLリンクは許可プロトコルのみ、画像はHTTPSのみ。任意URLからHTMLやiframeを作らない。長い本文は1ウィンドウ約64,000文字・128リンクで置き換え表示し、続きを押しても前ウィンドウのDOMを蓄積しない。通常のURLをウィンドウ境界で切らない。qタグのリンクも最大128件。
 
 参照仕様: [NIP-21](https://github.com/nostr-protocol/nips/blob/master/21.md)、[NIP-19](https://github.com/nostr-protocol/nips/blob/master/19.md)、[NIP-18](https://github.com/nostr-protocol/nips/blob/master/18.md)、[NIP-92](https://github.com/nostr-protocol/nips/blob/master/92.md)、[YouTube公式のプレイヤー仕様・エラー](https://developers.google.com/youtube/iframe_api_reference)。
+

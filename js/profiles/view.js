@@ -1,14 +1,14 @@
-import { relayTab } from './relays-view.js?v=1.3.0';
-import { editProfileDialog } from './editor.js?v=1.3.0';
+import { relayTab } from './relays-view.js?v=1.3.2';
+import { editProfileDialog } from './editor.js?v=1.3.2';
 export { editProfileDialog };
-import { FollowerDirectory } from '../social/followers.js?v=1.3.0';
-import { FeedView } from '../feed/view.js?v=1.3.0';
-import { pubkeys } from '../social/service.js?v=1.3.0';
-import { el, avatar, button, busy, empty, loading, richText, copy } from '../ui/dom.js?v=1.3.0';
-import { profileHref } from '../core/router.js?v=1.3.0';
-import { encodeKey } from '../core/nip19.js?v=1.3.0';
-import { validProfile } from './cache.js?v=1.3.0';
-import { safeURL, latest } from '../core/utils.js?v=1.3.0';
+import { FollowerDirectory } from '../social/followers.js?v=1.3.2';
+import { FeedView } from '../feed/view.js?v=1.3.2';
+import { pubkeys } from '../social/service.js?v=1.3.2';
+import { el, avatar, button, busy, empty, loading, richText, copy } from '../ui/dom.js?v=1.3.2';
+import { profileHref } from '../core/router.js?v=1.3.2';
+import { encodeKey } from '../core/nip19.js?v=1.3.2';
+import { validProfile } from './cache.js?v=1.3.2';
+import { safeURL, latest } from '../core/utils.js?v=1.3.2';
 export class ProfileView {
   constructor(app,route,host){this.app=app;this.route=route;this.host=host;this.owner=route.pubkey;this.offset=0;this.listOperation=null;this.listVersion=0;this.loadedUsers=new Set();this.list=el('div',{class:'profile-tab-content'});}
   async init(){

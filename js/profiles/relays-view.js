@@ -1,5 +1,5 @@
-import { el, button, field, empty, toast } from '../ui/dom.js?v=1.3.0';
-import { normalizeRelay } from '../core/utils.js?v=1.3.0';
+import { el, button, field, empty, toast } from '../ui/dom.js?v=1.3.2';
+import { normalizeRelay } from '../core/utils.js?v=1.3.2';
 
 export function relayTab(app, owner, host) {
   const own=owner===app.session.pubkey, rows=el('div',{class:'public-relays'});

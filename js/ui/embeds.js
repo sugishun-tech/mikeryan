@@ -1,7 +1,7 @@
-import { el, button } from './dom.js?v=1.3.0';
-import { ContentResolver } from '../content/resolver.js?v=1.3.0';
-import { CONTENT_LIMITS, referenceHref, referenceURI } from '../content/references.js?v=1.3.0';
-import { threadHref } from '../core/router.js?v=1.3.0';
+import { el, button } from './dom.js?v=1.3.2';
+import { ContentResolver } from '../content/resolver.js?v=1.3.2';
+import { CONTENT_LIMITS, referenceHref, referenceURI } from '../content/references.js?v=1.3.2';
+import { threadHref } from '../core/router.js?v=1.3.2';
 
 let serial=0;
 const readMessage=data=>{
@@ -40,7 +40,7 @@ export class Embeds {
     const ref=embed.reference;
     const href=ref ? referenceHref(ref) : embed.href || (embed.event ? threadHref(embed.event.id) : '');
     const label=ref ? ref.uri || referenceURI(ref) : embed.raw || embed.href || 'リポストのイベントを開く';
-    const linkText=ref ? (ref.type==='profile'?'プロフィールを開く':'参照先の投稿を開く') : ({image:'画像を開く',youtube:'YouTubeで動画を開く',x:'Xで投稿を開く'}[embed.type] || label);
+    const linkText=ref ? (ref.type==='profile'?'プロフィールを開く':'参照先の投稿を開く') : ({image:'画像を開く',youtube:'YouTubeで動画を開く'}[embed.type] || label);
     const link=href ? el('a',{class:'embed-source',href,title:label,...(!href.startsWith('#')?{target:'_blank',rel:'noopener noreferrer nofollow'}:{})},linkText) : null;
     const footer=el('div',{class:'embed-footer'},status,link);
     host.append(visual,footer);
@@ -129,24 +129,6 @@ export class Embeds {
           interval=setInterval(handshake,500);cleanups.push(()=>clearInterval(interval));
           listen(document,'securitypolicyviolation',event=>{if (event.violatedDirective?.startsWith('frame-src') && event.blockedURI?.startsWith(origin)) fail();});
           visual.append(frame);frame.src=url.href;deadline();
-          cleanups.push(()=>{frame.removeAttribute('src');frame.remove();});
-        } else if (embed.type==='x') {
-          if (host.getBoundingClientRect().width<250) { fail('この表示幅ではリンクからXの投稿を開いてください');return; }
-          const token='mikeryan-x-'+(++serial);
-          const frame=el('iframe',{class:'external-player x-player',title:'Xの投稿',height:240,referrerPolicy:'strict-origin-when-cross-origin'});
-          // Opaque-origin sandbox: X scripts cannot read parent DOM, localStorage
-          // or window.nostr, even though our bridge HTML is a local resource.
-          frame.setAttribute('sandbox','allow-scripts allow-popups allow-popups-to-escape-sandbox');
-          const url=new URL('../../assets/embeds/x.html',import.meta.url);
-          url.search=new URLSearchParams({id:embed.id,token,theme:this.app.settings.value.theme==='dark'?'dark':'light'}).toString();
-          listen(window,'message',event=>{
-            if (!alive() || event.source!==frame.contentWindow || event.origin!=='null') return;
-            const data=readMessage(event.data);
-            if (data?.source!=='mikeryan-x-embed' || data.token!==token) return;
-            if (data.status==='error') fail('Xの投稿を埋め込めませんでした。リンクから開いてください');
-            else if (data.status==='ready') {if (Number.isFinite(data.height)) frame.height=String(Math.min(1000,Math.max(200,Math.ceil(data.height))));ready();}
-          });
-          listen(frame,'error',()=>fail());visual.append(frame);frame.src=url.href;deadline();
           cleanups.push(()=>{frame.removeAttribute('src');frame.remove();});
         }
         const close=button('埋め込みを閉じる',()=>fail('リンクから開いてください'),'text-button embed-close');footer.append(close);

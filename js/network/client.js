@@ -1,5 +1,5 @@
-import { Storage } from '../core/storage.js?v=1.3.0';
-import { RelayPool } from './pool.js?v=1.3.0';
+import { Storage } from '../core/storage.js?v=1.3.2';
+import { RelayPool } from './pool.js?v=1.3.2';
 export class NetworkClient {
   constructor() { this.worker = null; this.localPool = null; this.pending = new Map(); this.counter = 0; this.mode = 'starting'; this.ready = this.init(); }
   fallback(error, worker = this.worker) {
@@ -15,7 +15,7 @@ export class NetworkClient {
   async init() {
     if (typeof SharedWorker !== 'undefined') {
       try {
-        const worker = this.worker = new SharedWorker(new URL('./shared-worker.js?v=1.3.0', import.meta.url), { type: 'module', name: 'mikeryan-1.3.0' });
+        const worker = this.worker = new SharedWorker(new URL('./shared-worker.js?v=1.3.2', import.meta.url), { type: 'module', name: 'mikeryan-1.3.2' });
         worker.onerror = event => { event?.preventDefault?.(); this.fallback(new Error('共有通信処理が停止しました。操作を再試行してください'), worker); };
         worker.port.onmessageerror = () => this.fallback(new Error('共有通信処理の応答を読み取れませんでした。操作を再試行してください'), worker);
         worker.port.onmessage = ({ data }) => {

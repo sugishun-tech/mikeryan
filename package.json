@@ -1,6 +1,6 @@
 {
   "name": "mikeryan",
-  "version": "1.3.0",
+  "version": "1.3.2",
   "private": true,
   "type": "module",
   "description": "A single-site, low-traffic Nostr client for GitHub Pages",

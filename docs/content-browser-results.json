@@ -1,7 +1,7 @@
 {
-  "mode": "Native DOM/modules + real opaque X sandbox; mocked relay/storage/navigation/SHA/images/X widgets/YouTube messages. Main CSP and public providers NOT exercised.",
+  "mode": "Native DOM/modules; X/Twitter ordinary links with no widget/frame. Mocked relay/storage/navigation/SHA/images/YouTube messages. Main CSP and public providers NOT exercised.",
   "browser": "144.0.7559.96",
-  "passed": 99,
+  "passed": 118,
   "failed": 0,
   "checks": [
     {
@@ -297,67 +297,143 @@
       "passed": true
     },
     {
-      "name": "x: one isolated X card and retained links",
+      "name": "x: original URLs remain ordinary links",
       "passed": true
     },
     {
-      "name": "x: sandbox blocks parent DOM and NIP-07 access",
+      "name": "x: no rich container, placeholder or iframe",
       "passed": true
     },
     {
-      "name": "twitter: one isolated X card and retained links",
+      "name": "x: no embed jobs or media initialization",
       "passed": true
     },
     {
-      "name": "twitter: sandbox blocks parent DOM and NIP-07 access",
+      "name": "x: no X script or request",
       "passed": true
     },
     {
-      "name": "xMultiple: one isolated X card and retained links",
+      "name": "x: external links retain tab and security attributes",
       "passed": true
     },
     {
-      "name": "xMultiple: sandbox blocks parent DOM and NIP-07 access",
+      "name": "twitter: original URLs remain ordinary links",
       "passed": true
     },
     {
-      "name": "Multiple X links initialize one bridge only",
+      "name": "twitter: no rich container, placeholder or iframe",
       "passed": true
     },
     {
-      "name": "No provider JavaScript inserted into account document",
+      "name": "twitter: no embed jobs or media initialization",
       "passed": true
     },
     {
-      "name": "X error: iframe removed with normal link fallback",
+      "name": "twitter: no X script or request",
       "passed": true
     },
     {
-      "name": "X empty: iframe removed with normal link fallback",
+      "name": "twitter: external links retain tab and security attributes",
       "passed": true
     },
     {
-      "name": "X scriptError: iframe removed with normal link fallback",
+      "name": "xMultiple: original URLs remain ordinary links",
       "passed": true
     },
     {
-      "name": "X hang: iframe removed with normal link fallback",
+      "name": "xMultiple: no rich container, placeholder or iframe",
       "passed": true
     },
     {
-      "name": "X rejects wrong source and token",
+      "name": "xMultiple: no embed jobs or media initialization",
       "passed": true
     },
     {
-      "name": "X requested height is capped at 1000px",
+      "name": "xMultiple: no X script or request",
       "passed": true
     },
     {
-      "name": "Existing X card does not overflow 320px viewport",
+      "name": "xMultiple: external links retain tab and security attributes",
       "passed": true
     },
     {
-      "name": "Below X minimum card width, no embed is attempted",
+      "name": "X /photo/1: link only",
+      "passed": true
+    },
+    {
+      "name": "X /video/1: link only",
+      "passed": true
+    },
+    {
+      "name": "X ?s=20#reply: link only",
+      "passed": true
+    },
+    {
+      "name": "Multiple X posts do not allocate duplicate-media jobs",
+      "passed": true
+    },
+    {
+      "name": "Nested X URL stays an ordinary link",
+      "passed": true
+    },
+    {
+      "name": "X before image: later supported candidate owns the sole slot",
+      "passed": true
+    },
+    {
+      "name": "X before image: original X link retained and no X frame",
+      "passed": true
+    },
+    {
+      "name": "X before youtube: later supported candidate owns the sole slot",
+      "passed": true
+    },
+    {
+      "name": "X before youtube: original X link retained and no X frame",
+      "passed": true
+    },
+    {
+      "name": "X before ref_note: later supported candidate owns the sole slot",
+      "passed": true
+    },
+    {
+      "name": "X before ref_note: original X link retained and no X frame",
+      "passed": true
+    },
+    {
+      "name": "X before ref_nprofile: later supported candidate owns the sole slot",
+      "passed": true
+    },
+    {
+      "name": "X before ref_nprofile: original X link retained and no X frame",
+      "passed": true
+    },
+    {
+      "name": "X before ref_naddr: later supported candidate owns the sole slot",
+      "passed": true
+    },
+    {
+      "name": "X before ref_naddr: original X link retained and no X frame",
+      "passed": true
+    },
+    {
+      "name": "X before quote: later supported candidate owns the sole slot",
+      "passed": true
+    },
+    {
+      "name": "X before quote: original X link retained and no X frame",
+      "passed": true
+    },
+    {
+      "name": "imeta cannot force an X page to load as an image",
+      "passed": true
+    },
+    {
+      "name": "Ordinary X links wrap without overflow at 390px",
+      "passed": true
+    },
+    {
+      "name": "Ordinary X links wrap without overflow at 280px",
       "passed": true
     },
     {

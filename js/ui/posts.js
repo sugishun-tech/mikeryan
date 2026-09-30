@@ -1,9 +1,9 @@
-import { el, avatar, button, busy, icon, richText, copy } from './dom.js?v=1.3.0';
-import { cleanClient, parentId, shortKey, isHex } from '../core/utils.js?v=1.3.0';
-import { profileHref, threadHref } from '../core/router.js?v=1.3.0';
-import { encodeKey } from '../core/nip19.js?v=1.3.0';
-import { contentPlan, referenceHref, referenceURI, repostReference } from '../content/references.js?v=1.3.0';
-import { Embeds } from './embeds.js?v=1.3.0';
+import { el, avatar, button, busy, icon, richText, copy } from './dom.js?v=1.3.2';
+import { cleanClient, parentId, shortKey, isHex } from '../core/utils.js?v=1.3.2';
+import { profileHref, threadHref } from '../core/router.js?v=1.3.2';
+import { encodeKey } from '../core/nip19.js?v=1.3.2';
+import { contentPlan, referenceHref, referenceURI, repostReference } from '../content/references.js?v=1.3.2';
+import { Embeds } from './embeds.js?v=1.3.2';
 export class Posts {
   constructor(app){this.app=app;this.embeds=new Embeds(app,(event,options)=>this.render(event,options));}
   reset(){this.embeds.reset();}

@@ -1,5 +1,5 @@
-"""Rich-content browser regression: real DOM/native modules and opaque X sandbox.
-Public network, YouTube messages, X widgets, images, relays/storage/navigation/SHA
+"""Rich-content browser regression: real DOM/native modules and link-only X/Twitter.
+Public network, YouTube messages, images, relays/storage/navigation/SHA
 are explicit fixtures. The URL-restricted runner cannot validate live CSP/providers.
 Run: python3 tests/browser_content.py
 """
@@ -13,9 +13,8 @@ from fixture_signer import sign
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'tests/output'; OUT.mkdir(exist_ok=True)
 
-ADAPTER=r'''({png,bridge})=>{
- window.__media={images:[],frames:[],mode:'ready',probe:[],youtube:[]};
- window.addEventListener('message',e=>{if(e.data?.source==='sandbox-probe')__media.probe.push({origin:e.origin,...e.data});});
+ADAPTER=r'''({png})=>{
+ window.__media={images:[],frames:[],mode:'ready',youtube:[]};
  const imageSrc=Object.getOwnPropertyDescriptor(HTMLImageElement.prototype,'src');
  Object.defineProperty(HTMLImageElement.prototype,'src',{...imageSrc,set(value){
    if(String(value).startsWith('https://media.example/')){
@@ -36,33 +35,12 @@ ADAPTER=r'''({png,bridge})=>{
      };
      setTimeout(()=>frame.dispatchEvent(new Event('load')),0);return;
    }
-   if(u.pathname.endsWith('/assets/embeds/x.html')){
-     // Run the actual bridge inside a REAL opaque sandbox. Only the provider's
-     // script loader/createTweet and location query are fixtures; no remote JS.
-     const setup=`(()=>{const mode=${JSON.stringify(mode)};let parentReadable=false,nostrReadable=false;
-       try{parentReadable=!!parent.document;}catch{}try{nostrReadable=!!parent.nostr;}catch{}
-       parent.postMessage({source:'sandbox-probe',parentReadable,nostrReadable},'*');
-       const append=document.head.append.bind(document.head);
-       document.head.append=(node)=>{if(node.tagName!=='SCRIPT')return append(node);
-         if(mode==='hang')return;
-         window.twttr={widgets:{createTweet:async(id,root,options)=>{
-           if(mode==='error')throw Error('provider rejected');if(mode==='empty')return undefined;
-           const content=document.createElement('iframe');content.title='fixture X post';content.height=320;
-           root.append(content);return content;
-         }}};
-         queueMicrotask(()=>mode==='scriptError'?node.onerror?.():node.onload?.());
-       };
-     })();`;
-     const actual=bridge.replace('new URLSearchParams(location.search)','new URLSearchParams('+JSON.stringify(u.search)+')');
-     this.srcdoc='<!doctype html><html><head><meta charset="utf-8"><style>body{margin:0}iframe{border:0;max-width:100%}</style></head><body><main id="tweet"></main><script>'+setup+actual+'<\/script></body></html>';
-     return;
-   }
    frameSrc.set.call(this,value);
  }});
 }'''
 
 async def main():
- f=json.loads((ROOT/'tests/fixtures/rich-content.json').read_text());checks=[];errors=[]
+ f=json.loads((ROOT/'tests/fixtures/rich-content.json').read_text());checks=[];errors=[];requests=[]
  data={'keys':f['keys'],'events':list(f['events'].values())}
  settings=dict(relays=['ws://127.0.0.1:9876/'],readRelayCount=1,requestGapMs=800,batchSize=30,
    muteContentPatterns=[],muteDisplayNamePatterns=[],mutedPubkeys=[],hideIncompleteProfiles=False,
@@ -81,10 +59,10 @@ async def main():
   await context.expose_function('testGetKey',lambda:data['keys']['alice'])
   await context.expose_function('testSign',sign)
   await context.expose_function('testDigest',lambda a:list(hashlib.sha256(bytes(a)).digest()))
-  page=await context.new_page();page.on('pageerror',lambda e:errors.append(str(e)))
+  page=await context.new_page();page.on('pageerror',lambda e:errors.append(str(e)));page.on('request',lambda request:requests.append(request.url))
   await page.route('**/*',lambda route:route.abort())
   await page.set_content(html());await page.evaluate(MOCK,dict(data=data,settings=settings,saved={}))
-  await page.evaluate(ADAPTER,dict(png=png,bridge=(ROOT/'js/content/x-frame.js').read_text()))
+  await page.evaluate(ADAPTER,dict(png=png))
   await page.evaluate('''()=>{window.fetch=window.__testFetch;
    Object.defineProperty(window,'SharedWorker',{value:undefined,configurable:true});
    Object.defineProperty(window,'crypto',{value:{subtle:{digest:async(alg,bytes)=>Uint8Array.from(await testDigest(Array.from(new Uint8Array(bytes)))).buffer}},configurable:true});}''')
@@ -95,13 +73,14 @@ async def main():
    const stage=document.createElement('div');stage.id='rich-stage';stage.className='timeline';
    document.querySelector('#view').replaceChildren(stage);
    window.__show=({names,mode='ready',timeout=2000,ancestors=[],depth=0})=>{
-     __app.posts.reset();stage.replaceChildren();__media.images=[];__media.frames=[];__media.youtube=[];__media.probe=[];__media.mode=mode;
+     __app.posts.reset();stage.replaceChildren();__media.images=[];__media.frames=[];__media.youtube=[];__media.mode=mode;
      __app.posts.embeds.timeout=timeout;__app.repo.events.clear();__app.repo.beginView();__messages.length=0;
      for(const name of names){const event=typeof name==='string'?__rich.events[name]:name;stage.append(__app.posts.render(event,{depth,ancestors:new Set(ancestors)}));}
      scrollTo(0,0);
    };
   }''',f)
   async def show(names,**kw):
+   requests.clear()
    await page.evaluate('__show',dict(names=names if isinstance(names,list) else [names],**kw))
   async def settle(state='ready'):
    await page.wait_for_function('(state)=>document.querySelector("#rich-stage .content-embed")?.dataset.state===state',arg=state)
@@ -180,22 +159,39 @@ async def main():
    await show('youtube');await settle();await page.get_by_role('button',name='埋め込みを閉じる').click();await settle('failed');check('Player can be manually closed while keeping link',await count('iframe')==0)
   await case('YouTube',youtube)
 
-  async def x():
+  async def x_links():
+   x_url=f['events']['x']['content'].split()[-1]
    for name in ['x','twitter','xMultiple']:
-    await show(name);await settle();check(name+': one isolated X card and retained links',await count('.x-player')==1 and await count('.embed-source')==1)
-    check(name+': sandbox blocks parent DOM and NIP-07 access',await value('__media.probe.some(p=>p.origin==="null"&&!p.parentReadable&&!p.nostrReadable)'))
-   check('Multiple X links initialize one bridge only',await value('__media.frames.length')==1 and await count('.post-text a')==2)
-   check('No provider JavaScript inserted into account document',await value('!document.querySelector("script[src*=twitter],script[src*=youtube]")'))
-   for mode in ['error','empty','scriptError','hang']:
-    await show('x',mode=mode,timeout=400);await settle('failed');check('X '+mode+': iframe removed with normal link fallback',await count('.x-player')==0 and await count('.embed-source')==1)
-   await show('x',mode='hang',timeout=2000);await page.wait_for_selector('.x-player');await page.evaluate('''()=>{const f=document.querySelector('.x-player'),u=new URL(__media.frames[0]);
-     window.dispatchEvent(new MessageEvent('message',{source:window,origin:'null',data:{source:'mikeryan-x-embed',token:u.searchParams.get('token'),status:'ready',height:500}}));
-     window.dispatchEvent(new MessageEvent('message',{source:f.contentWindow,origin:'null',data:{source:'mikeryan-x-embed',token:'wrong',status:'ready',height:500}}));
-   }''');check('X rejects wrong source and token',await count('[data-state=pending]')==1)
-   await page.evaluate('''()=>{const f=document.querySelector('.x-player'),u=new URL(__media.frames[0]);window.dispatchEvent(new MessageEvent('message',{source:f.contentWindow,origin:'null',data:{source:'mikeryan-x-embed',token:u.searchParams.get('token'),status:'ready',height:1e9}}));}''');await settle();check('X requested height is capped at 1000px',await page.locator('.x-player').get_attribute('height')=='1000')
-   await show('x');await settle();await page.set_viewport_size({'width':320,'height':844});await page.wait_for_timeout(50);check('Existing X card does not overflow 320px viewport',await value('document.documentElement.scrollWidth<=innerWidth'));await show('x');await settle('failed');check('Below X minimum card width, no embed is attempted',await count('.x-player')==0)
+    await show(name);await page.wait_for_timeout(80)
+    links=await page.locator('#rich-stage .post-text a').evaluate_all('(nodes)=>nodes.map(n=>n.getAttribute("href"))')
+    check(name+': original URLs remain ordinary links',links==[part for part in f['events'][name]['content'].split() if part.startswith(('https://','http://'))])
+    check(name+': no rich container, placeholder or iframe',await count('.content-embed,iframe')==0)
+    check(name+': no embed jobs or media initialization',await value('__app.posts.embeds.jobs.size+__media.frames.length+__media.images.length')==0)
+    check(name+': no X script or request',not any('platform.x.com' in u or 'platform.twitter.com' in u or 'syndication.' in u for u in requests) and await value('!document.querySelector("script[src*=widgets],script[src*=twitter],script[src*=platform]")'))
+    check(name+': external links retain tab and security attributes',await page.locator('#rich-stage .post-text a').evaluate_all('(nodes)=>nodes.every(n=>n.target==="_blank"&&n.relList.contains("noopener")&&n.relList.contains("noreferrer"))'))
+   for suffix in ['/photo/1','/video/1','?s=20#reply']:
+    event={**f['events']['x'],'content':x_url+suffix}
+    await show([event]);await page.wait_for_timeout(40)
+    check('X '+suffix+': link only',await count('.content-embed,iframe')==0 and await page.locator('#rich-stage .post-text a').get_attribute('href')==event['content'])
+   await show(['x','twitter','xMultiple']);await page.wait_for_timeout(50)
+   check('Multiple X posts do not allocate duplicate-media jobs',await count('.post-text a')==4 and await value('__app.posts.embeds.owners.size+__app.posts.embeds.jobs.size')==0)
+   await show('x',depth=1);await page.wait_for_timeout(50)
+   check('Nested X URL stays an ordinary link',await count('.post-text a')==1 and await count('.content-embed,iframe')==0)
+   for name,selector in [('image','.post-image'),('youtube','.youtube-player'),('ref_note','.embedded-post'),('ref_nprofile','.user-row'),('ref_naddr','.embedded-post'),('quote','.embedded-post')]:
+    event={**f['events'][name],'content':x_url+' '+f['events'][name]['content']}
+    await show([event]);await settle()
+    check('X before '+name+': later supported candidate owns the sole slot',await count('.content-embed')==1 and await count(selector)==1)
+    check('X before '+name+': original X link retained and no X frame',await page.locator('#rich-stage .post-text a[href^="https://x.com/"]').count()==1 and not any('/assets/embeds/x.html' in u for u in await value('__media.frames')))
+   event={**f['events']['x'],'tags':[['imeta','url '+x_url,'m image/png']]}
+   await show([event]);await page.wait_for_timeout(50)
+   check('imeta cannot force an X page to load as an image',await count('.content-embed,img.post-image,iframe')==0 and await value('__media.images.length')==0)
+   for width in [390,280]:
+    await page.set_viewport_size({'width':width,'height':844});await show('xMultiple');await page.wait_for_timeout(60)
+    check('Ordinary X links wrap without overflow at '+str(width)+'px',await value('document.documentElement.scrollWidth<=innerWidth') and await count('.content-embed')==0)
+   await page.screenshot(path=str(OUT/'x-links-mobile.png'))
    await page.set_viewport_size({'width':1200,'height':1000})
-  await case('X',x)
+   await show('xMultiple');await page.screenshot(path=str(OUT/'x-links-desktop.png'))
+  await case('X/Twitter ordinary links',x_links)
 
   async def mixed():
    await show('mixed');await settle();check('Mixed NIP-21/image/X/YouTube/q uses first body image only',await count('.content-embed')==1 and await count('.post-image')==1 and await count('.quote-label')==1 and await count('.post-text a')==4)
@@ -211,7 +207,7 @@ async def main():
    check('Fetched posts, images and embed results are never persisted',await value('[...__saved.keys()].every(k=>!/(event:|query:|embed:|media:)/.test(k))'))
   await case('Mixed content and bounds',mixed)
   check('No uncaught parent-page JavaScript errors',not errors,errors)
-  result={'mode':'Native DOM/modules + real opaque X sandbox; mocked relay/storage/navigation/SHA/images/X widgets/YouTube messages. Main CSP and public providers NOT exercised.',
+  result={'mode':'Native DOM/modules; X/Twitter ordinary links with no widget/frame. Mocked relay/storage/navigation/SHA/images/YouTube messages. Main CSP and public providers NOT exercised.',
     'browser':browser.version,'passed':sum(c['passed'] for c in checks),'failed':sum(not c['passed'] for c in checks),'checks':checks,'errors':errors}
   (OUT/'content-browser-results.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
   await browser.close()

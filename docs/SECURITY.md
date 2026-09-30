@@ -35,8 +35,7 @@ includes a real user key supplied by this project.
 
 Event content, names, descriptions, relay strings and NIP-05 errors are built
 as DOM text. No untrusted `innerHTML`, `eval`, or arbitrary URL-based code
-loading is used. No provider script executes in the account document. X widgets
-are an optional remote dependency confined to a separate opaque sandbox. Remote images are HTTPS-only;
+loading is used. No provider script executes in the account document. X/Twitter pages are ordinary links, with no widget script or frame dependency. Remote images are HTTPS-only;
 links use allowed protocols and `noopener` / `noreferrer`. NIP-05 fetches
 omit credentials and referrers and reject redirects.
 
@@ -88,24 +87,22 @@ limits. A confirmed OK means that relay accepted the event, not perpetual
 retention or universal propagation. Paid/authenticated relays and other
 restrictions may require user action. No restriction-evasion mechanism exists.
 
-The current execution environment blocks browser URL navigation. Unit tests
-and native-module/offline-adapted DOM tests ran; real browser SharedWorker,
-extension interoperability, GitHub deployment and public-relay acceptance
-remain integration checks for a normal browser environment.
+This release was checked with Node and native-module/offline-adapted DOM tests.
+Live HTTP CSP, browser SharedWorker, extension interoperability, GitHub deployment
+and public-relay acceptance were not part of this removal verification.
 
 ## Large public lists
 
 Public list kinds 3, 10000 and 10002 are bounded at 4 MiB of serialized UTF-8 and 50,000 tags. Other events retain the 256 KiB / 10,000-tag limits. Incoming frames are bounded at 8 MiB before parsing. Oversize public lists and frames fail the read instead of being treated as a successful empty list. Signatures and event IDs are still verified; these larger limits do not permit unsigned or malformed data. A verification-provider exception settles the request as incomplete instead of leaving the queue pending. No missing-row fix disables mute or display filters.
 
 
-## Rich embeds (1.3.0)
+## Rich embeds (1.3.2)
 
-The main page retains script-src self. X widgets run in a local iframe with
-allow-scripts but WITHOUT allow-same-origin. The child cannot read the account
-DOM, localStorage, or NIP-07 object. The real opaque sandbox was exercised in
-Chromium with a mock widget. Production CSP and the live X script were not.
-Source window, opaque origin and per-frame token are checked. Child-requested
-height is capped. Popup permission does not permit replacing the parent page.
+The main page retains script-src self. X/Twitter card rendering and its local
+iframe/diagnostic assets have been removed. frame-src permits only the existing
+YouTube player origin, not same-origin frames. Merely displaying an X/Twitter
+page link does not contact the X widget service. Direct media URLs continue to
+follow the ordinary image-loading rules.
 
 YouTube uses a direct cross-origin privacy-enhanced iframe. The sandbox permits
 its own origin, scripts and presentation; this is NOT a same-origin local script

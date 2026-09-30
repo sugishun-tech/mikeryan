@@ -1,6 +1,6 @@
-import { Emitter, isHex, sleep, nowSeconds } from '../core/utils.js?v=1.3.0';
-import { local } from '../core/storage.js?v=1.3.0';
-import { verifyEvent } from '../core/crypto.js?v=1.3.0';
+import { Emitter, isHex, sleep, nowSeconds } from '../core/utils.js?v=1.3.2';
+import { local } from '../core/storage.js?v=1.3.2';
+import { verifyEvent } from '../core/crypto.js?v=1.3.2';
 export class Session extends Emitter {
   constructor() {
     super(); this.pubkey = null; this.connected = false; this.epoch = 0;

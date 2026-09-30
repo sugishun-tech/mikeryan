@@ -1,5 +1,27 @@
 # Changelog
 
+## 1.3.2 · 2026-09-30
+
+- Remove X/Twitter card embedding, provider script loading, iframe bridge, dedicated CSS and diagnostics. X/Twitter page URLs remain ordinary links with their original spelling.
+- Do not reserve a rich-content slot for X/Twitter links, including imeta overrides. Later image, NIP-21, YouTube or q references remain eligible under the existing one-slot policy. Direct media hosts such as pbs.twimg.com still support image rendering.
+- Remove obsolete X embed tests and replace them with ordinary-link, no-widget/no-frame, mixed-content and depth regressions. Preserve the other content tests.
+- Remove the same-origin frame CSP allowance used by the deleted bridge; retain the YouTube player origin. Refresh entry assets, module imports and SharedWorker version to 1.3.2.
+- Preserve default.json, moderation, accounts, storage formats, relays and all other features. See docs/MIGRATION.md for files to remove when copying over an older deployment.
+
+## 1.3.1 · 2026-09-30
+
+### X embedded posts
+
+- Load the official `platform.x.com/widgets.js` endpoint; permit both X/Twitter platform and syndication hosts in the isolated child CSP.
+- Install and wait for `twttr.ready` before invoking the factory once. Do not confuse script load with API readiness.
+- Measure the returned element rather than requiring an iframe in its light DOM. Wait for nonzero height with a deadline, handle missing ResizeObserver, and ignore unrelated global errors.
+- Retain ordinary links on failure, source/origin/token validation, opaque sandbox isolation, duplicate suppression and one-slot/depth-one limits. Reject invalid readiness heights.
+- Accept the documented 220px minimum; recognize status URLs with photo/video suffixes. Version the bridge URL and static modules as 1.3.1.
+- Add `docs/x-embed-check.html`, using the production renderer without account, mute, relay or storage access. No external request before explicit submission.
+- Tests executed: Node 295 passed; content DOM 103, X bridge/CSP 31, diagnostic UI 8 passed. The same X suite against 1.3.0 failed 16 of 31 checks.
+- Live unadapted browser test attempted but blocked by `ERR_BLOCKED_BY_ADMINISTRATOR` before navigation. Real X rendering is **not verified**; mock success is not counted as live success. See `docs/TEST_RESULTS.md`.
+- Keep default.json, persisted settings and account state unchanged.
+
 ## 1.3.0 (2026-09-30)
 
 ### 投稿本文・埋め込み

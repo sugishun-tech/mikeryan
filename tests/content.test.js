@@ -75,8 +75,9 @@ test('Multiple image links select exactly the first',()=>assert.equal(contentPla
 for(const name of ['youtube','youtubeWatch','youtubeShorts','youtubeMultiple'])test(`YouTube ${name}: one valid ID, no nested player`,()=>{
   const embed=contentPlan(e[name]).embed;assert.equal(embed.type,'youtube');assert.equal(embed.id,'M7lc1UVf-VE');assert.equal(contentPlan(e[name],{depth:1}).embed,null);
 });
-for(const name of ['x','twitter','xMultiple'])test(`X ${name}: first status and no nested card`,()=>{
-  assert.equal(contentPlan(e[name]).embed.id,'1234567890123456789');assert.equal(contentPlan(e[name],{depth:1}).embed,null);
+for(const name of ['x','twitter','xMultiple'])test(`X ${name}: ordinary links at every depth`,()=>{
+  assert.equal(contentPlan(e[name]).embed,null);assert.equal(contentPlan(e[name],{depth:1}).embed,null);
+  for (const {raw} of contentLinks(e[name].content)) assert.equal(linkHref(raw),raw);
 });
 for(const url of ['https://youtube.com.evil.example/watch?v=M7lc1UVf-VE','https://youtu.be/a','https://youtube.com/watch?v=M7lc1UVf-VE.bad','https://x.com/a/status/1/trailing','https://x.com.evil.example/a/status/123','https://evil.example/video.mp4','javascript:alert(1)','data:image/png;base64,xxx','https://u:p@x.com/a/status/1','https://x.com:444/a/status/123','https://x.com/home'])test(`No arbitrary iframe or unsafe URL: ${url}`,()=>assert.equal(webReference(url),null));
 test('q-only references are quotes and not legacy replies',()=>{

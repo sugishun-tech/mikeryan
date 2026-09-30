@@ -1,6 +1,6 @@
 /** Pure content parsing and a single rich-slot policy. Never performs I/O. */
-import { decodeKey, encodeKey, encodeAddress } from '../core/nip19.js?v=1.3.0';
-import { isHex, safeURL } from '../core/utils.js?v=1.3.0';
+import { decodeKey, encodeKey, encodeAddress } from '../core/nip19.js?v=1.3.2';
+import { isHex, safeURL } from '../core/utils.js?v=1.3.2';
 
 export const CONTENT_LIMITS = Object.freeze({links:128, text:64000, reference:5006, memo:512, timeout:15000});
 const TYPES = /^(?:npub|nprofile|note|nevent|naddr)1[0-9a-z]+$/i;
@@ -122,10 +122,9 @@ export function webReference(raw, metadata=new Map(), {images=true}={}) {
   const url=new URL(href);
   // Nonstandard ports are allowed for HTTPS image hosts, never providers.
   const host=url.hostname.toLowerCase();
-  if (!url.port && ['x.com','www.x.com','twitter.com','www.twitter.com','mobile.twitter.com','mobile.x.com'].includes(host)) {
-    const match=/^\/(?:[A-Za-z0-9_]{1,15}|i\/web)\/status\/([1-9]\d{0,19})\/?$/.exec(url.pathname);
-    if (match) return {type:'x',id:match[1],href:`https://x.com/i/web/status/${match[1]}`,raw};
-  }
+  // X/Twitter pages remain ordinary links, even when imeta labels them as images.
+  // Direct image hosts such as pbs.twimg.com still use the normal image renderer.
+  if (['x.com','www.x.com','twitter.com','www.twitter.com','mobile.twitter.com','mobile.x.com'].includes(host)) return null;
   let id;
   if (!url.port && ['youtube.com','www.youtube.com','m.youtube.com'].includes(host)) {
     if (url.pathname==='/watch') id=url.searchParams.get('v');

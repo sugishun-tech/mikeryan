@@ -1,8 +1,8 @@
-import { matchesReference, referenceKey } from '../content/references.js?v=1.3.0';
-import { Emitter, chunks, compareEvents, isHex, latest, matchesFilter, parseJSON, sortEvents, stableJSON, unique } from './utils.js?v=1.3.0';
-import { LIMITS } from './config.js?v=1.3.0';
-import { ProfileCache, validProfile } from '../profiles/cache.js?v=1.3.0';
-import { compactLatestFilters } from '../network/profile-batch.js?v=1.3.0';
+import { matchesReference, referenceKey } from '../content/references.js?v=1.3.2';
+import { Emitter, chunks, compareEvents, isHex, latest, matchesFilter, parseJSON, sortEvents, stableJSON, unique } from './utils.js?v=1.3.2';
+import { LIMITS } from './config.js?v=1.3.2';
+import { ProfileCache, validProfile } from '../profiles/cache.js?v=1.3.2';
+import { compactLatestFilters } from '../network/profile-batch.js?v=1.3.2';
 
 const emptyResult = () => ({events: [], complete: true, errors: []});
 const relayScope = relays => stableJSON(unique(relays).sort());
