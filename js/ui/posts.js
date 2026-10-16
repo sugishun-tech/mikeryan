@@ -1,9 +1,9 @@
-import { el, avatar, button, busy, icon, richText, copy } from './dom.js?v=1.3.2';
-import { cleanClient, parentId, shortKey, isHex } from '../core/utils.js?v=1.3.2';
-import { profileHref, threadHref } from '../core/router.js?v=1.3.2';
-import { encodeKey } from '../core/nip19.js?v=1.3.2';
-import { contentPlan, referenceHref, referenceURI, repostReference } from '../content/references.js?v=1.3.2';
-import { Embeds } from './embeds.js?v=1.3.2';
+import { el, avatar, button, busy, icon, richText, copy } from './dom.js?v=1.3.3';
+import { cleanClient, parentId, shortKey, isHex } from '../core/utils.js?v=1.3.3';
+import { profileHref, threadHref } from '../core/router.js?v=1.3.3';
+import { encodeKey } from '../core/nip19.js?v=1.3.3';
+import { contentPlan, referenceHref, referenceURI, repostReference } from '../content/references.js?v=1.3.3';
+import { Embeds } from './embeds.js?v=1.3.3';
 export class Posts {
   constructor(app){this.app=app;this.embeds=new Embeds(app,(event,options)=>this.render(event,options));}
   reset(){this.embeds.reset();}
@@ -25,10 +25,11 @@ export class Posts {
       card.classList.add('repost-card');
       const header=el('div',{class:'repost-header'},icon('repost',17),el('a',{href:profileHref(event.pubkey),class:'identity-link'},app.identity.mount(event.pubkey,{handle:false})),el('span',{},'がリポスト'));
       card.append(header);
-      if(depth>=1){
+      const plan=contentPlan(event,{depth});
+      if(!plan.embed){
         const reference=repostReference(event);
         card.append(el('div',{class:'post-body post-unavailable'},'これ以上の埋め込みは行いません。',el('a',{href:reference?referenceHref(reference):threadHref(event.id)},'元の投稿を開く')));
-      }else card.append(this.embeds.mount(contentPlan(event).embed,{ancestors:branch,notification}));
+      }else card.append(this.embeds.mount(plan.embed,{depth,ancestors:branch,notification}));
       return card;
     }
     const imageLink=el('a',{href:profileHref(event.pubkey),class:'avatar-link','aria-label':'プロフィールを開く'},avatar(profile,'avatar',app.settings.value.loadImages));
@@ -47,7 +48,7 @@ export class Posts {
         for(const reference of plan.quotes){const href=referenceHref(reference);if(href)quotes.append(el('a',{href,title:reference.uri||referenceURI(reference)},reference.type==='address'?'アドレス指定の投稿':shortKey(reference.id)));}
         body.append(quotes);
       }
-      if(plan.embed)body.append(this.embeds.mount(plan.embed,{ancestors:branch,notification}));
+      if(plan.embed)body.append(this.embeds.mount(plan.embed,{depth,ancestors:branch,notification}));
       const client=cleanClient(event);if(client)body.append(el('div',{class:'client-label'},'via '+client));
       const actions=el('div',{class:'post-actions'});
       actions.append(el('a',{href:threadHref(event.id),class:'icon-button reply-action',title:'返信・スレッドを開く','aria-label':'返信・スレッドを開く'},icon('reply',19)));

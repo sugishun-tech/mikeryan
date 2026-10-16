@@ -1,8 +1,8 @@
 /** Pure content parsing and a single rich-slot policy. Never performs I/O. */
-import { decodeKey, encodeKey, encodeAddress } from '../core/nip19.js?v=1.3.2';
-import { isHex, safeURL } from '../core/utils.js?v=1.3.2';
+import { decodeKey, encodeKey, encodeAddress } from '../core/nip19.js?v=1.3.3';
+import { isHex, safeURL } from '../core/utils.js?v=1.3.3';
 
-export const CONTENT_LIMITS = Object.freeze({links:128, text:64000, reference:5006, memo:512, timeout:15000});
+export const CONTENT_LIMITS = Object.freeze({maxDepth:2, links:128, text:64000, reference:5006, memo:512, timeout:15000});
 const TYPES = /^(?:npub|nprofile|note|nevent|naddr)1[0-9a-z]+$/i;
 const IMAGES = /\.(?:jpe?g|png|webp|gif|avif|apng|bmp)$/i;
 const IMAGE_MIMES = new Set(['image/jpeg','image/jpg','image/png','image/webp','image/gif','image/avif','image/apng','image/bmp']);
@@ -137,13 +137,14 @@ export function webReference(raw, metadata=new Map(), {images=true}={}) {
   }
   return null;
 }
-/** One slot across ALL content types. Body order wins; q-only quotes come last.
+/** One slot per post across ALL content types; the top-level post is depth 0.
+ * Allow two nested levels, never two siblings in the same post. Body order wins; q-only quotes come last.
  * Only the first syntactic NIP-21 occurrence is eligible, even if invalid.
  * A failed winner is not replaced by a later candidate (no cascading requests).
  */
 export function contentPlan(event, {depth=0, images=true}={}) {
   const quotes=quoteReferences(event);
-  if (depth>=1) return {embed:null,quotes};
+  if (depth>=CONTENT_LIMITS.maxDepth) return {embed:null,quotes};
   if ([6,16].includes(event.kind)) return {embed:{type:'repost',event,reference:repostReference(event)},quotes:[]};
   const metadata=imageMetadata(event); let firstNostr=true;
   for (const token of contentLinks(event.content)) {

@@ -1,4 +1,4 @@
-import { el, button, busy, field, toast } from '../ui/dom.js?v=1.3.2';
+import { el, button, busy, field, toast } from '../ui/dom.js?v=1.3.3';
 
 const PROFILE_FIELDS = {
   display_name: '表示名',

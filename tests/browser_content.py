@@ -10,6 +10,7 @@ from playwright.async_api import async_playwright
 from browser_offline import html, MOCK
 from browser_navigation import LOADER
 from fixture_signer import sign
+from fixture_content import bech32
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'tests/output'; OUT.mkdir(exist_ok=True)
 
@@ -69,6 +70,19 @@ async def main():
   await page.evaluate(LOADER,dict(sources=sources,avatar=avatar,relaxGap=True))
   await page.wait_for_selector('.feed-toolbar')
   check('No relay REQ on startup, despite mixed rich-content fixtures',await page.evaluate('__messages.filter(m=>m[0]==="REQ").length')==0)
+  check('Right-side search form, input and button are removed',await page.locator('#search-form,#search-input,#search-button,.right-column input').count()==0)
+  check('Right-side documentation links remain',await page.locator('.right-column .right-footer a').count()==2)
+  check('Brand and browser tab use the Japanese application name',await page.locator('.brand span').inner_text()=='マイク・ライアン' and (await page.title()).endswith(' / マイク・ライアン'))
+  check('Japanese brand stays on one line within its sidebar',await page.locator('.brand').evaluate('''brand=>{const label=brand.querySelector('span'),box=label.getBoundingClientRect();
+   return getComputedStyle(brand).whiteSpace==='nowrap' && box.right<=brand.getBoundingClientRect().right && box.height<=36;}'''))
+  await page.screenshot(path=str(OUT/'ui-desktop.png'))
+  await page.set_viewport_size({'width':390,'height':844})
+  await page.locator('#mobile-search-button').click()
+  check('Mobile search still opens and accepts input',await page.get_by_role('dialog').is_visible() and await page.get_by_role('dialog').locator('input').count()==1)
+  await page.get_by_role('dialog').get_by_role('button',name='閉じる').click()
+  check('Opening mobile search does not fetch posts',await page.evaluate('__messages.filter(m=>m[0]==="REQ").length')==0)
+  await page.screenshot(path=str(OUT/'ui-mobile.png'))
+  await page.set_viewport_size({'width':1200,'height':1000})
   await page.evaluate('''async f=>{window.__rich=f; await __app.repo.profiles(Object.values(f.keys));
    const stage=document.createElement('div');stage.id='rich-stage';stage.className='timeline';
    document.querySelector('#view').replaceChildren(stage);
@@ -83,9 +97,12 @@ async def main():
    requests.clear()
    await page.evaluate('__show',dict(names=names if isinstance(names,list) else [names],**kw))
   async def settle(state='ready'):
-   await page.wait_for_function('(state)=>document.querySelector("#rich-stage .content-embed")?.dataset.state===state',arg=state)
+   await page.wait_for_function('''state=>{const nodes=[...document.querySelectorAll('#rich-stage .content-embed')];
+    return nodes.length && nodes[0].dataset.state===state && nodes.every(n=>n.dataset.state!=='pending');}''',arg=state)
   async def value(js):return await page.evaluate(js)
   async def count(selector):return await page.locator('#rich-stage '+selector).count()
+  async def root_slots():return await page.locator('#rich-stage > .post > .content-embed,#rich-stage > .post > .post-body > .content-embed').count()
+  async def requested(name):return await page.evaluate('(id)=>__messages.some(m=>m[0]==="REQ"&&m.slice(2).some(f=>f.ids?.includes(id)))',f['events'][name]['id'])
   async def case(name,fn):
    try:await fn()
    except Exception as e:check(name+' completed',False,e)
@@ -93,35 +110,69 @@ async def main():
   async def nostr():
    for name in ['note','nevent','npub','nprofile','naddr']:
     await show('ref_'+name);await settle()
-    check(name+': exactly one rich slot',await count('.content-embed')==1)
+    check(name+': exactly one rich slot per post, at most two levels',await root_slots()==1 and await count('.content-embed')==(1 if name in ['npub','nprofile'] else 2))
     check(name+': original URI remains a clickable internal link',await count('.post-text a[href^="#/"]')>=1)
-    check(name+': renders existing '+('profile' if name in ['npub','nprofile'] else 'post')+' component',await count('.user-row' if name in ['npub','nprofile'] else '.embedded-post')==1)
-   check('naddr resolves latest matching identifier, not other article',await page.locator(".embedded-post .post-text").inner_text()==f["events"]["article"]["content"])
+    check(name+': renders existing '+('profile' if name in ['npub','nprofile'] else 'post')+' component',await count('.user-row' if name in ['npub','nprofile'] else '.embedded-post')==(1 if name in ['npub','nprofile'] else 2))
+   check('naddr resolves latest matching identifier, not other article',await page.locator(".embedded-post .post-text").first.inner_text()==f["events"]["article"]["content"])
    await show('multiple');await settle()
-   check('Multiple NIP-21 references remain links; one is rich',await count('.content-embed')==1 and await count('.post-text > .rich-text-window > a')>=4)
-   check('Nested Nostr/image/video are links only',await count('.embedded-post .post-text a')==3 and await count('.embedded-post .content-embed')==0)
-   check('Depth-two event was never requested',await page.evaluate('(id)=>!__messages.some(m=>m[0]==="REQ"&&m.slice(2).some(f=>f.ids?.includes(id)))',f['events']['deep']['id']))
-   await show(['ref_note','ref_nevent']);await page.wait_for_function('document.querySelectorAll("#rich-stage [data-state=ready]").length===2')
+   check('Multiple NIP-21 references remain links; one per post is rich',await root_slots()==1 and await count('.content-embed')==2 and await count('.post-text > .rich-text-window > a')>=4)
+   check('Second-level Nostr expands; sibling image/video stay links',await count('.embedded-post .content-embed')==1 and await count('.embedded-post .embedded-post .content-embed')==0 and await value('__media.images.length+__media.frames.length')==0)
+   check('Second-level event is requested; third-level event is not',await requested('deep') and not await requested('beyond'))
+   await show(['ref_note','ref_nevent']);await page.wait_for_function('document.querySelectorAll("#rich-stage [data-state=ready]").length===4')
    check('Concurrent note/nevent references share one relay ID read',await page.evaluate('(id)=>__messages.filter(m=>m[0]==="REQ"&&m.slice(2).some(f=>f.ids?.includes(id))).length',f['events']['original']['id'])==1)
+   check('Concurrent nested references also share one second-level read',await page.evaluate('(id)=>__messages.filter(m=>m[0]==="REQ"&&m.slice(2).some(f=>f.ids?.includes(id))).length',f['events']['deep']['id'])==1)
    check('Unconfigured relay hints never open sockets',await value('__sockets.every(s=>s.url==="ws://127.0.0.1:9876/")'))
    await show('missing');await settle('failed');check('Missing note keeps text and ordinary link',await count('.post-text a')==1 and await count('.embed-source')==1 and await count('.embedded-post')==0)
    await show('invalidFirst');await page.wait_for_timeout(50);check('Invalid first NIP-21 does not promote the second NIP-21',await count('.content-embed')==0 and await count('.post-text a')==2)
    await show('ref_note',ancestors=[f['events']['original']['id']]);await settle('failed');check('Ancestor cycle becomes a link, without recursion',await count('.embedded-post')==0)
-   await show('ref_note',depth=1);await page.wait_for_timeout(50);check('Depth-one cards do not start any embeds or relay reads',await count('.content-embed')==0 and await value('__messages.length')==0)
+   await show('ref_note',depth=1);await settle();check('Depth-one cards can create exactly one final embed',await count('.content-embed')==1 and await count('.embedded-post')==1 and not await requested('deep'))
+   await show('ref_note',depth=2);await page.wait_for_timeout(50);check('Depth-two cards do not start embeds or relay reads',await count('.content-embed')==0 and await value('__messages.length')==0)
   await case('Nostr references',nostr)
 
   async def reposts():
    for name in ['repostJSON','repostEmpty','repostMalformed','repostForged','generic','genericEmpty','genericNested']:
     await show(name);await settle()
-    check(name+': one original card with reposter attribution',await count('.repost-header')>=1 and await count('.content-embed')==1 and await count('.embedded-post')==1)
+    check(name+': one original with attribution and a second nested level',await count('.repost-header')>=1 and await root_slots()==1 and await count('.content-embed')==2 and await count('.embedded-post')==2)
     if name=='repostJSON':check('Verified inline original avoids ID fetch',not await page.evaluate('(id)=>__messages.some(m=>m[0]==="REQ"&&m.slice(2).some(f=>f.ids?.includes(id)))',f['events']['original']['id']))
     if name=='repostForged':check('Forged inner content never displayed as authentic author',not await value('document.querySelector("#rich-stage").textContent.includes("偽造された内容")'))
-    if name=='genericNested':check('Generic repost of repost stops at one expansion',await count('.embedded-post .content-embed')==0)
+    if name=='genericNested':check('Generic repost of repost stops after two expansions',await count('.embedded-post .content-embed')==1 and await count('.embedded-post .embedded-post .content-embed')==0 and not await requested('deep'))
    await show('repostMissing');await settle('failed');check('Unavailable original retains repost header and target link',await count('.repost-header')==1 and await count('.embed-source')==1 and '投稿を取得できません' in await page.locator('#rich-stage').inner_text())
    for name in ['quote','quoteAddress','quoteReply']:
-    await show(name);await settle();check(name+': quote is labelled and uses single rich slot',await count('.quote-label')>=1 and await count('.content-embed')==1)
+    await show(name);await settle();check(name+': quote is labelled and uses a single root slot',await count('.quote-label')>=1 and await root_slots()==1 and await count('.content-embed')==2)
     check(name+': real reply distinction',await count('.post:not(.embedded-post) > .post-body > .reply-preview')==(1 if name=='quoteReply' else 0))
   await case('Reposts and quotes',reposts)
+
+  async def depth_boundaries():
+   def wrapper(name):
+    return sign(dict(kind=1,tags=[],created_at=1792100000,content='参照 '+ 'nostr:'+bech32('note',bytes.fromhex(f['events'][name]['id']))))
+   for name,selector in [('images','.post-image'),('youtubeMultiple','.youtube-player'),('ref_nprofile','.user-row')]:
+    await show([wrapper(name)]);await settle()
+    check(name+': content inside the first embedded post renders at depth two',await root_slots()==1 and await count('.content-embed')==2 and await count(selector)==1)
+    check(name+': no second sibling slot appears',await value('''[...document.querySelectorAll('#rich-stage .post')].every(p=>
+     [...p.querySelectorAll('.content-embed')].filter(e=>e.closest('.post')===p).length<=1)'''))
+    for width in [390,320]:
+     await page.set_viewport_size({'width':width,'height':844});await page.wait_for_timeout(40)
+     check(name+': nested layout fits '+str(width)+'px',await value('document.documentElement.scrollWidth<=innerWidth'))
+    await page.set_viewport_size({'width':1200,'height':1000})
+   for name in ['images','youtubeMultiple','ref_note','quote','repostJSON','genericNested']:
+    await show(name,depth=2);await page.wait_for_timeout(40)
+    check(name+': depth two never starts third-level relay/media work',await count('.content-embed')==0 and await value('__messages.length+__media.images.length+__media.frames.length+__app.posts.embeds.jobs.size')==0)
+   for name in ['quote','repostJSON']:
+    await show([wrapper(name)]);await settle()
+    check(name+': nested quote/repost obeys the same depth limit',await count('.embedded-post')==2 and await count('.content-embed')==2 and not await requested('deep'))
+   await show([wrapper('missing')]);await settle()
+   check('Failed nested lookup leaves the first card and links intact',await count('.embedded-post')==1 and await count('[data-state=failed]')==1 and await count('.embed-source')==2)
+   await show([wrapper('invalidFirst')]);await settle()
+   check('Invalid first nested Nostr URI never promotes its sibling',await count('.content-embed')==1 and not await requested('original'))
+   await show('ref_note',ancestors=[f['events']['deep']['id']]);await settle()
+   check('Second-level ancestor cycle is stopped with a link',await count('.embedded-post')==1 and await count('[data-state=failed]')==1 and not await requested('beyond'))
+   await show('multiple');await settle()
+   for width in [1200,390,320]:
+    await page.set_viewport_size({'width':width,'height':844});await page.wait_for_timeout(40)
+    check('Two nested post cards fit '+str(width)+'px',await value('document.documentElement.scrollWidth<=innerWidth'))
+    if width in [1200,390]:await page.screenshot(path=str(OUT/('depth-two-desktop.png' if width==1200 else 'depth-two-mobile.png')))
+   await page.set_viewport_size({'width':1200,'height':1000})
+  await case('Depth-two boundaries and unchanged width',depth_boundaries)
 
   async def images():
    for name in ['image','imeta','images']:
@@ -180,7 +231,7 @@ async def main():
    for name,selector in [('image','.post-image'),('youtube','.youtube-player'),('ref_note','.embedded-post'),('ref_nprofile','.user-row'),('ref_naddr','.embedded-post'),('quote','.embedded-post')]:
     event={**f['events'][name],'content':x_url+' '+f['events'][name]['content']}
     await show([event]);await settle()
-    check('X before '+name+': later supported candidate owns the sole slot',await count('.content-embed')==1 and await count(selector)==1)
+    check('X before '+name+': later supported candidate owns the sole root slot',await root_slots()==1 and await count(selector)==(2 if selector=='.embedded-post' else 1))
     check('X before '+name+': original X link retained and no X frame',await page.locator('#rich-stage .post-text a[href^="https://x.com/"]').count()==1 and not any('/assets/embeds/x.html' in u for u in await value('__media.frames')))
    event={**f['events']['x'],'tags':[['imeta','url '+x_url,'m image/png']]}
    await show([event]);await page.wait_for_timeout(50)
@@ -195,14 +246,14 @@ async def main():
 
   async def mixed():
    await show('mixed');await settle();check('Mixed NIP-21/image/X/YouTube/q uses first body image only',await count('.content-embed')==1 and await count('.post-image')==1 and await count('.quote-label')==1 and await count('.post-text a')==4)
-   await show('mixedNostrFirst');await settle();check('Nostr-first mixed content allocates no media or nested frames',await count('.content-embed')==1 and await count('.embedded-post')==1 and await value('__media.frames.length+__media.images.length')==0)
+   await show('mixedNostrFirst');await settle();check('Nostr-first mixed content expands twice without media or extra siblings',await count('.content-embed')==2 and await root_slots()==1 and await count('.embedded-post')==2 and await value('__media.frames.length+__media.images.length')==0)
    await show('hostile');await page.wait_for_timeout(50);check('Hostile markup is literal; untrusted video domains and nsec are not embedded',await count('script,iframe,.content-embed')==0 and not await value('window.__pwned'))
    await show([{'id':'a'*64,'pubkey':None,'created_at':0,'kind':1,'content':None,'tags':None},'image']);await settle();check('Malformed sibling cannot prevent normal image post rendering',await count('.post-unavailable')==1 and await count('.post-image')==1)
    long={'id':'b'*64,'pubkey':f['keys']['alice'],'created_at':1790722800,'kind':1,'tags':[],'content':' '.join('https://example.org/'+str(i) for i in range(5000))}
    await show([long]);check('Thousands of links are paged to at most 128 link nodes',await count('.post-text a')==128)
    await page.get_by_role('button',name='本文の続きを表示').click();check('Long text continuation keeps links clickable without accumulating DOM',await count('.post-text a')==128 and await page.get_by_role('button',name='先頭へ').count()==1)
    await show('youtube',mode='hang');await page.wait_for_selector('.youtube-player');await page.evaluate('__app.posts.reset()');check('View reset disposes pending embed jobs and iframes',await value('__app.posts.embeds.jobs.size')==0 and await count('iframe')==0)
-   await show(['repostJSON','ref_naddr','ref_nprofile']);await page.wait_for_function('document.querySelectorAll("#rich-stage [data-state=ready]").length===3');await page.screenshot(path=str(OUT/'rich-cards-desktop.png'))
+   await show(['repostJSON','ref_naddr','ref_nprofile']);await page.wait_for_function('document.querySelectorAll("#rich-stage [data-state=ready]").length===5');await page.screenshot(path=str(OUT/'rich-cards-desktop.png'))
    await page.set_viewport_size({'width':390,'height':844});await page.screenshot(path=str(OUT/'rich-cards-mobile.png'));check('Repost/address/profile cards fit mobile width',await value('document.documentElement.scrollWidth<=innerWidth'))
    check('Fetched posts, images and embed results are never persisted',await value('[...__saved.keys()].every(k=>!/(event:|query:|embed:|media:)/.test(k))'))
   await case('Mixed content and bounds',mixed)

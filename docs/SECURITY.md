@@ -96,7 +96,7 @@ and public-relay acceptance were not part of this removal verification.
 Public list kinds 3, 10000 and 10002 are bounded at 4 MiB of serialized UTF-8 and 50,000 tags. Other events retain the 256 KiB / 10,000-tag limits. Incoming frames are bounded at 8 MiB before parsing. Oversize public lists and frames fail the read instead of being treated as a successful empty list. Signatures and event IDs are still verified; these larger limits do not permit unsigned or malformed data. A verification-provider exception settles the request as incomplete instead of leaving the queue pending. No missing-row fix disables mute or display filters.
 
 
-## Rich embeds (1.3.2)
+## Rich embeds (1.3.3)
 
 The main page retains script-src self. X/Twitter card rendering and its local
 iframe/diagnostic assets have been removed. frame-src permits only the existing
@@ -116,7 +116,7 @@ caching is outside the app's promise not to persist fetched posts and media.
 Image display limits do not cap the remote resource's byte size.
 
 Repost JSON is verified independently of its wrapper signature. Unverified,
-mismatching, recursive or oversized data is never rendered as an authenticated
-original. Referenced events use configured relays only. One slot, one depth,
+mismatching, cyclic or oversized data is never rendered as an authenticated
+original. Referenced events use configured relays only. One direct slot per post, at most two nested levels,
 bounded memo and text/link pagination limit automatic expansion. Timers,
 listeners and frame jobs are disposed when their owner disappears.

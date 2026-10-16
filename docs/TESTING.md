@@ -1,4 +1,4 @@
-# テスト方法 · 1.3.2
+# テスト方法 · 1.3.3
 
 ## 今回実行した検査
 
@@ -11,7 +11,7 @@ python3 tests/browser_content.py
 npm run build
 ```
 
-Nodeは310件、本文のブラウザー試験は118項目です。現在版の結果と範囲は [検証結果](./TEST_RESULTS.md) に記載しています。テスト数は旧X表示試験を含めず、現在のソースを実行した件数です。
+Nodeは335件、本文・UIのブラウザー試験は152項目です。現在版の結果と範囲は [検証結果](./TEST_RESULTS.md) に記載しています。テスト数は旧X表示試験を含めず、現在のソースを実行した件数です。
 
 ブラウザー試験の依存関係はPlaywright、cryptography、Pillowです。Chromiumのパスは必要に応じて指定してください。
 
@@ -22,17 +22,19 @@ CHROMIUM_PATH=/usr/bin/chromium python3 tests/browser_content.py
 node --test tests/x-links.test.js
 # 本文解析・参照取得の試験のみ
 node --test tests/content.test.js
+# 今回の画面表示・深度・幅の回帰試験
+node --test tests/ui-depth.test.js
 ```
 
 `browser_content.py` は実DOM・ネイティブES modulesを使います。通信・保存・履歴・署名拡張・SHA計算、画像の取得、YouTubeの通知は明示的なテストアダプターを使います。X widgetsやX専用フレームの模擬実装はありません。X/Twitterリンクを表示してもiframeや埋め込みジョブが作成されないこと、元のリンクと安全属性が残ること、後続の画像・Nostr・YouTube・q引用を妨げないことを検査します。
 
 ブラウザー試験ではミュートを無効にした一時設定を使います。ユーザーの保存設定、配布するdefault.json、実アカウントは変更しません。画像生成用のPillowはテストだけの依存です。
 
-NIP-21の5形式、画像・NIP-92、YouTube、kind:6/16とqタグ、正常・失敗・複数・ネスト・混在・重複抑制・DOM上限・モバイル・後片付けの既存試験も実行します。結果は `tests/output/content-browser-results.json`、スクリーンショットは `tests/output/` に出力します。CSP違反イベントの注入はCSPの実適用確認ではありません。公開リレー・実サービスの画像取得・YouTubeの実再生は検証していません。
+NIP-21の5形式、画像・NIP-92、YouTube、kind:6/16とqタグ、正常・失敗・複数・ネスト・混在・重複抑制・DOM上限・モバイル・後片付けの既存試験も実行します。結果は `tests/output/content-browser-results.json`、スクリーンショットは `tests/output/` に出力します。CSP違反イベントの注入はCSPの実適用確認ではありません。公開リレー・実サービスの画像取得・YouTubeの実再生は検証していません。通常のローカルHTTP起動も試みましたが、環境のERR_BLOCKED_BY_ADMINISTRATORでアプリ実行前に遮断されました。
 
 ## その他の既存スイート
 
-以下のスイートも引き続き同梱しますが、1.3.2の変更では再実行していません。過去結果を今回の合格数に加算しません。
+以下のスイートも引き続き同梱しますが、1.3.3の変更では再実行していません。過去結果を今回の合格数に加算しません。
 
 ```sh
 MIKERYAN_TEST_FAST=1 CHROMIUM_PATH=/usr/bin/chromium python3 tests/browser_persistence.py

@@ -27,7 +27,7 @@ for(const [name,type] of [['note','event'],['nevent','event'],['npub','profile']
     assert.match(linkHref(f.uris[name]),/^#\/(profile|thread|address)\//);
     assert.equal(nostrReference(f.uris[name].toUpperCase()).type,type);
   });
-  test(`NIP-21 ${name}: depth 1 cannot start another rich reference`,()=>assert.equal(contentPlan(e['ref_'+name],{depth:1}).embed,null));
+  test(`NIP-21 ${name}: depth 2 cannot start another rich reference`,()=>assert.equal(contentPlan(e['ref_'+name],{depth:2}).embed,null));
   test(`NIP-21 ${name}: retrieval failure is contained and coalesced`,async()=>{
     const {resolver,calls}=repoFixture({missing:true});const ref=nostrReference(f.uris[name]);
     assert.deepEqual(await Promise.all([resolver.resolve(ref),resolver.resolve(ref)]),[null,null]);assert.equal(calls.length,1);
@@ -59,12 +59,12 @@ test('Lexer removes sentence punctuation without breaking balanced URL paths or 
 });
 test('First body candidate wins across Nostr, image, X, YouTube and q',()=>{
   assert.equal(contentPlan(e.mixed).embed.type,'image');assert.equal(contentPlan(e.mixedNostrFirst).embed.type,'nostr');
-  assert.equal(contentPlan(e.mixed).quotes.length,1);assert.equal(contentPlan(e.mixed,{depth:1}).embed,null);
+  assert.equal(contentPlan(e.mixed).quotes.length,1);assert.equal(contentPlan(e.mixed,{depth:2}).embed,null);
 });
 for(const extension of ['jpg','JPEG','png','webp','gif','avif','apng','bmp'])test(`Direct image ${extension}: query safe, HTTPS only, depth and settings limits`,()=>{
   const url=`https://media.example/a.${extension}?v=1`;
   assert.equal(webReference(url).type,'image');assert.equal(webReference(url.replace('https:','http:')),null);
-  assert.equal(contentPlan(make(url),{images:false}).embed,null);assert.equal(contentPlan(make(url),{depth:1}).embed,null);
+  assert.equal(contentPlan(make(url),{images:false}).embed,null);assert.equal(contentPlan(make(url),{depth:2}).embed,null);
 });
 test('NIP-92 m/dim/alt allow extensionless images without arbitrary imeta-only loading',()=>{
   const plan=contentPlan(e.imeta);assert.equal(plan.embed.type,'image');assert.equal(plan.embed.width,3000);assert.equal(plan.embed.height,1000);assert.equal(plan.embed.alt,'青空の写真');
@@ -72,11 +72,11 @@ test('NIP-92 m/dim/alt allow extensionless images without arbitrary imeta-only l
   assert.equal(imageMetadata(make('',[['imeta','url javascript:alert(1)','m image/png']])).size,0);
 });
 test('Multiple image links select exactly the first',()=>assert.equal(contentPlan(e.images).embed.href,'https://media.example/photo.JPG?size=1000'));
-for(const name of ['youtube','youtubeWatch','youtubeShorts','youtubeMultiple'])test(`YouTube ${name}: one valid ID, no nested player`,()=>{
-  const embed=contentPlan(e[name]).embed;assert.equal(embed.type,'youtube');assert.equal(embed.id,'M7lc1UVf-VE');assert.equal(contentPlan(e[name],{depth:1}).embed,null);
+for(const name of ['youtube','youtubeWatch','youtubeShorts','youtubeMultiple'])test(`YouTube ${name}: one valid ID, no player beyond depth 2`,()=>{
+  const embed=contentPlan(e[name]).embed;assert.equal(embed.type,'youtube');assert.equal(embed.id,'M7lc1UVf-VE');assert.equal(contentPlan(e[name],{depth:2}).embed,null);
 });
 for(const name of ['x','twitter','xMultiple'])test(`X ${name}: ordinary links at every depth`,()=>{
-  assert.equal(contentPlan(e[name]).embed,null);assert.equal(contentPlan(e[name],{depth:1}).embed,null);
+  assert.equal(contentPlan(e[name]).embed,null);assert.equal(contentPlan(e[name],{depth:2}).embed,null);
   for (const {raw} of contentLinks(e[name].content)) assert.equal(linkHref(raw),raw);
 });
 for(const url of ['https://youtube.com.evil.example/watch?v=M7lc1UVf-VE','https://youtu.be/a','https://youtube.com/watch?v=M7lc1UVf-VE.bad','https://x.com/a/status/1/trailing','https://x.com.evil.example/a/status/123','https://evil.example/video.mp4','javascript:alert(1)','data:image/png;base64,xxx','https://u:p@x.com/a/status/1','https://x.com:444/a/status/123','https://x.com/home'])test(`No arbitrary iframe or unsafe URL: ${url}`,()=>assert.equal(webReference(url),null));
@@ -87,7 +87,7 @@ test('q-only references are quotes and not legacy replies',()=>{
 });
 test('Reposts have no reply parent and their original consumes the sole slot',()=>{
   for(const name of ['repostJSON','repostEmpty','generic','genericEmpty','genericNested']){
-    assert.equal(parentId(e[name]),null);assert.equal(contentPlan(e[name]).embed.type,'repost');assert.equal(contentPlan(e[name],{depth:1}).embed,null);
+    assert.equal(parentId(e[name]),null);assert.equal(contentPlan(e[name]).embed.type,'repost');assert.equal(contentPlan(e[name],{depth:2}).embed,null);
   }
 });
 for(const name of ['repostJSON','generic','genericNested'])test(`Repost ${name}: verifies and uses JSON without event fetch`,async()=>{

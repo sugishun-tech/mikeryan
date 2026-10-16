@@ -1,9 +1,9 @@
-import { RelayConnection } from './relay.js?v=1.3.2';
-import { LIMITS } from '../core/config.js?v=1.3.2';
-import { canonicalFilters, chunks, normalizeRelay, sortEvents, stableJSON, unique } from '../core/utils.js?v=1.3.2';
-import { missingProfileFilters, missingReplacementFilters } from './profile-batch.js?v=1.3.2';
-import { readPage } from './page.js?v=1.3.2';
-import { verifyEvent } from '../core/crypto.js?v=1.3.2';
+import { RelayConnection } from './relay.js?v=1.3.3';
+import { LIMITS } from '../core/config.js?v=1.3.3';
+import { canonicalFilters, chunks, normalizeRelay, sortEvents, stableJSON, unique } from '../core/utils.js?v=1.3.3';
+import { missingProfileFilters, missingReplacementFilters } from './profile-batch.js?v=1.3.3';
+import { readPage } from './page.js?v=1.3.3';
+import { verifyEvent } from '../core/crypto.js?v=1.3.3';
 
 export class RelayPool {
   constructor(storage, options = {}) { this.storage = storage; this.options = options; this.connections = new Map(); this.inflight = new Map(); this.coalesced = 0; }

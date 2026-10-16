@@ -1,7 +1,7 @@
-import { el, button } from './dom.js?v=1.3.2';
-import { ContentResolver } from '../content/resolver.js?v=1.3.2';
-import { CONTENT_LIMITS, referenceHref, referenceURI } from '../content/references.js?v=1.3.2';
-import { threadHref } from '../core/router.js?v=1.3.2';
+import { el, button } from './dom.js?v=1.3.3';
+import { ContentResolver } from '../content/resolver.js?v=1.3.3';
+import { CONTENT_LIMITS, referenceHref, referenceURI } from '../content/references.js?v=1.3.3';
+import { threadHref } from '../core/router.js?v=1.3.3';
 
 let serial=0;
 const readMessage=data=>{
@@ -34,7 +34,7 @@ export class Embeds {
   }
   /** Start a new explicit read. Pending requests remain coalesced by Repository. */
   beginRead() { this.resolver.reset(); }
-  mount(embed,{ancestors=new Set(),notification=false}={}) {
+  mount(embed,{depth=0,ancestors=new Set(),notification=false}={}) {
     const host=el('div',{class:`content-embed embed-${embed.type}`,dataset:{embed:embed.type,state:'pending'}});
     const visual=el('div',{class:'embed-content'}),status=el('span',{class:'embed-status',role:'status'},'読み込み中…');
     const ref=embed.reference;
@@ -87,7 +87,7 @@ export class Embeds {
             try { await this.app.repo.profiles([result.pubkey]); } catch { /* Show hex identity if unavailable. */ }
             if (!alive()) return;
             if (this.app.moderation?.muted(result,this.app.repo.peekProfile(result.pubkey),{notification})) { fail('表示・ミュート条件により元の投稿を非表示にしました'); return; }
-            visual.append(this.renderPost(result,{depth:1,embedded:true,ancestors,notification}));
+            visual.append(this.renderPost(result,{depth:depth+1,embedded:true,ancestors,notification}));
             if (embed.type==='repost' && link) { link.href=threadHref(result.id);link.textContent='元の投稿を開く'; }
           }
           ready();job.cancel();return;

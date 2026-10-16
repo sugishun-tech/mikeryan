@@ -1,7 +1,7 @@
 # Sources and notices
 
 The original mynostr and mynostr_profile projects are by sugishun-tech.
-Their MIT license is preserved in LICENSE. mikeryan is a modular rewrite.
+Their MIT license is preserved in LICENSE. マイク・ライアン is a modular rewrite.
 No third-party JavaScript package or remote CDN script is bundled or loaded.
 
 ## BIP-340 test vectors

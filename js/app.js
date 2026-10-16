@@ -1,21 +1,22 @@
-import { nostrReference, referenceHref } from './content/references.js?v=1.3.2';
-import { Storage } from './core/storage.js?v=1.3.2';
-import { Settings } from './settings/store.js?v=1.3.2';
-import { NetworkClient } from './network/client.js?v=1.3.2';
-import { Session } from './auth/session.js?v=1.3.2';
-import { Repository } from './core/repository.js?v=1.3.2';
-import { Nip05 } from './profiles/nip05.js?v=1.3.2';
-import { Social } from './social/service.js?v=1.3.2';
-import { Moderation } from './feed/moderation.js?v=1.3.2';
-import { Identity } from './ui/identity.js?v=1.3.2';
-import { Posts } from './ui/posts.js?v=1.3.2';
-import { Router, profileHref, threadHref } from './core/router.js?v=1.3.2';
-import { FeedView, feedFilters, composer } from './feed/view.js?v=1.3.2';
-import { ProfileView } from './profiles/view.js?v=1.3.2';
-import { settingsView } from './settings/view.js?v=1.3.2';
-import { el, button, busy, icon, avatar, loading, empty, toast } from './ui/dom.js?v=1.3.2';
-import { parentId, stableJSON, matchesFilter } from './core/utils.js?v=1.3.2';
-import { decodeKey } from './core/nip19.js?v=1.3.2';
+import { APP_NAME } from './core/config.js?v=1.3.3';
+import { nostrReference, referenceHref } from './content/references.js?v=1.3.3';
+import { Storage } from './core/storage.js?v=1.3.3';
+import { Settings } from './settings/store.js?v=1.3.3';
+import { NetworkClient } from './network/client.js?v=1.3.3';
+import { Session } from './auth/session.js?v=1.3.3';
+import { Repository } from './core/repository.js?v=1.3.3';
+import { Nip05 } from './profiles/nip05.js?v=1.3.3';
+import { Social } from './social/service.js?v=1.3.3';
+import { Moderation } from './feed/moderation.js?v=1.3.3';
+import { Identity } from './ui/identity.js?v=1.3.3';
+import { Posts } from './ui/posts.js?v=1.3.3';
+import { Router, profileHref, threadHref } from './core/router.js?v=1.3.3';
+import { FeedView, feedFilters, composer } from './feed/view.js?v=1.3.3';
+import { ProfileView } from './profiles/view.js?v=1.3.3';
+import { settingsView } from './settings/view.js?v=1.3.3';
+import { el, button, busy, icon, avatar, loading, empty, toast } from './ui/dom.js?v=1.3.3';
+import { parentId, stableJSON, matchesFilter } from './core/utils.js?v=1.3.3';
+import { decodeKey } from './core/nip19.js?v=1.3.3';
 class App {
   async start(){
     this.settings=new Settings();await this.settings.load();this.storage=new Storage();
@@ -32,12 +33,8 @@ class App {
     for(const [view,label,name]of [['home','ホーム','home'],['global','グローバル','globe'],['notifications','通知','bell'],['me','プロフィール','user'],['settings','設定','settings']])nav.append(el('a',{href:'#/'+view,class:'nav-item',dataset:{view}},icon(name),el('span',{},label)));
     const back=document.getElementById('back-button');back.append(icon('back',21));back.addEventListener('click',()=>this.router.back());
     document.getElementById('compose-shortcut').addEventListener('click',async()=>{if(!this.session.pubkey){try{await this.login();}catch(e){toast(e.message,true);}return;}if(!document.querySelector('.composer textarea')){this.router.go('#/home');return;}document.querySelector('.composer textarea')?.focus();window.scrollTo({top:0,behavior:'smooth'});});
-    document.getElementById('search-button').append(icon('search',20));
     document.getElementById('mobile-search-button').append(icon('search',20));
     document.getElementById('mobile-search-button').addEventListener('click',()=>this.searchDialog());
-    document.getElementById('search-form').addEventListener('submit',e=>{e.preventDefault();const b=document.getElementById('search-button');void busy(b,async()=>{const input=document.getElementById('search-input').value.trim();if(!input)return;
-      await this.search(input);
-    });});
     this.session.on('change',()=>{for(const dialog of document.querySelectorAll('dialog[data-profile-editor]'))dialog.close();this.repo.resetSession();this.accountKey=null;this.updateAccount();void this.render(this.router.route??{view:'global'});});
     this.social.on('following',()=>this.identity.updateFollows());this.social.on('followBusy',()=>this.identity.updateFollows());
     this.social.on('like',()=>this.posts.updateLikes());this.social.on('likes',()=>this.posts.updateLikes());
@@ -81,8 +78,8 @@ class App {
   }
   async render(route){
     const token=++this.routeToken;window.scrollTo(0,0);this.onPosted=null;this.activeFeed?.dispose();this.activeFeed=null;this.identity.reset();this.posts.reset();this.repo.beginView(this.session.pubkey);this.social.beginView();this.accountKey=null;this.accountReady=Promise.resolve();const outer=document.getElementById('view'),host=el('section',{class:'view-section'});outer.replaceChildren(host);host.append(loading());
-    document.title=`${({global:'グローバル',home:'ホーム',notifications:'通知',profile:'プロフィール',me:'プロフィール',settings:'設定',thread:'スレッド',address:'スレッド'})[route.view]} / mikeryan`;
-    document.getElementById('page-title').textContent=({global:'グローバル',home:'ホーム',notifications:'通知',profile:'プロフィール',me:'プロフィール',settings:'設定',thread:'スレッド',address:'スレッド'})[route.view]??'mikeryan';
+    document.title=`${({global:'グローバル',home:'ホーム',notifications:'通知',profile:'プロフィール',me:'プロフィール',settings:'設定',thread:'スレッド',address:'スレッド'})[route.view]} / ${APP_NAME}`;
+    document.getElementById('page-title').textContent=({global:'グローバル',home:'ホーム',notifications:'通知',profile:'プロフィール',me:'プロフィール',settings:'設定',thread:'スレッド',address:'スレッド'})[route.view]??APP_NAME;
     for(const a of document.querySelectorAll('.nav-item'))a.classList.toggle('active',a.dataset.view===route.view||(route.view==='profile'&&route.pubkey===this.session.pubkey&&a.dataset.view==='me'));
     try{
       if(route.view==='settings'){host.replaceChildren();await settingsView(this,host);return;}

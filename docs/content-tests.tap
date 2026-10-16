@@ -2,429 +2,753 @@ TAP version 13
 # Subtest: NIP-21 note: decoding, winner, clickable route
 ok 1 - NIP-21 note: decoding, winner, clickable route
   ---
-  duration_ms: 2.455328
+  duration_ms: 3.733136
   type: 'test'
   ...
-# Subtest: NIP-21 note: depth 1 cannot start another rich reference
-ok 2 - NIP-21 note: depth 1 cannot start another rich reference
+# Subtest: NIP-21 note: depth 2 cannot start another rich reference
+ok 2 - NIP-21 note: depth 2 cannot start another rich reference
   ---
-  duration_ms: 0.199611
+  duration_ms: 0.214197
   type: 'test'
   ...
 # Subtest: NIP-21 note: retrieval failure is contained and coalesced
 ok 3 - NIP-21 note: retrieval failure is contained and coalesced
   ---
-  duration_ms: 7.855429
+  duration_ms: 12.96976
   type: 'test'
   ...
 # Subtest: NIP-21 nevent: decoding, winner, clickable route
 ok 4 - NIP-21 nevent: decoding, winner, clickable route
   ---
-  duration_ms: 0.708798
+  duration_ms: 1.062863
   type: 'test'
   ...
-# Subtest: NIP-21 nevent: depth 1 cannot start another rich reference
-ok 5 - NIP-21 nevent: depth 1 cannot start another rich reference
+# Subtest: NIP-21 nevent: depth 2 cannot start another rich reference
+ok 5 - NIP-21 nevent: depth 2 cannot start another rich reference
   ---
-  duration_ms: 0.130186
+  duration_ms: 0.321887
   type: 'test'
   ...
 # Subtest: NIP-21 nevent: retrieval failure is contained and coalesced
 ok 6 - NIP-21 nevent: retrieval failure is contained and coalesced
   ---
-  duration_ms: 0.738953
+  duration_ms: 2.239275
   type: 'test'
   ...
 # Subtest: NIP-21 npub: decoding, winner, clickable route
 ok 7 - NIP-21 npub: decoding, winner, clickable route
   ---
-  duration_ms: 0.321244
+  duration_ms: 0.291622
   type: 'test'
   ...
-# Subtest: NIP-21 npub: depth 1 cannot start another rich reference
-ok 8 - NIP-21 npub: depth 1 cannot start another rich reference
+# Subtest: NIP-21 npub: depth 2 cannot start another rich reference
+ok 8 - NIP-21 npub: depth 2 cannot start another rich reference
   ---
-  duration_ms: 0.065589
+  duration_ms: 0.066799
   type: 'test'
   ...
 # Subtest: NIP-21 npub: retrieval failure is contained and coalesced
 ok 9 - NIP-21 npub: retrieval failure is contained and coalesced
   ---
-  duration_ms: 0.455526
+  duration_ms: 0.402636
   type: 'test'
   ...
 # Subtest: NIP-21 nprofile: decoding, winner, clickable route
 ok 10 - NIP-21 nprofile: decoding, winner, clickable route
   ---
-  duration_ms: 0.598271
+  duration_ms: 1.081912
   type: 'test'
   ...
-# Subtest: NIP-21 nprofile: depth 1 cannot start another rich reference
-ok 11 - NIP-21 nprofile: depth 1 cannot start another rich reference
+# Subtest: NIP-21 nprofile: depth 2 cannot start another rich reference
+ok 11 - NIP-21 nprofile: depth 2 cannot start another rich reference
   ---
-  duration_ms: 0.113411
+  duration_ms: 0.167358
   type: 'test'
   ...
 # Subtest: NIP-21 nprofile: retrieval failure is contained and coalesced
 ok 12 - NIP-21 nprofile: retrieval failure is contained and coalesced
   ---
-  duration_ms: 0.155894
+  duration_ms: 0.318752
   type: 'test'
   ...
 # Subtest: NIP-21 naddr: decoding, winner, clickable route
 ok 13 - NIP-21 naddr: decoding, winner, clickable route
   ---
-  duration_ms: 0.268013
+  duration_ms: 0.495063
   type: 'test'
   ...
-# Subtest: NIP-21 naddr: depth 1 cannot start another rich reference
-ok 14 - NIP-21 naddr: depth 1 cannot start another rich reference
+# Subtest: NIP-21 naddr: depth 2 cannot start another rich reference
+ok 14 - NIP-21 naddr: depth 2 cannot start another rich reference
   ---
-  duration_ms: 0.057267
+  duration_ms: 0.124194
   type: 'test'
   ...
 # Subtest: NIP-21 naddr: retrieval failure is contained and coalesced
 ok 15 - NIP-21 naddr: retrieval failure is contained and coalesced
   ---
-  duration_ms: 0.183406
+  duration_ms: 0.355777
   type: 'test'
   ...
 # Subtest: NIP-19 naddr coordinate includes UTF-8 identifier, pubkey, kind and is reversible
 ok 16 - NIP-19 naddr coordinate includes UTF-8 identifier, pubkey, kind and is reversible
   ---
-  duration_ms: 0.826144
+  duration_ms: 1.12191
   type: 'test'
   ...
 # Subtest: NIP-19 nevent retains optional author/kind/relay hints
 ok 17 - NIP-19 nevent retains optional author/kind/relay hints
   ---
-  duration_ms: 0.278149
+  duration_ms: 0.396587
   type: 'test'
   ...
 # Subtest: naddr local routes survive parse and reconstruction
 ok 18 - naddr local routes survive parse and reconstruction
   ---
-  duration_ms: 0.420654
+  duration_ms: 0.752565
   type: 'test'
   ...
 # Subtest: Invalid checksum, secrets, overlong and mixed-case NIP-21 never become embeds
 ok 19 - Invalid checksum, secrets, overlong and mixed-case NIP-21 never become embeds
   ---
-  duration_ms: 0.339521
+  duration_ms: 0.496445
   type: 'test'
   ...
 # Subtest: First NIP-21 only; all later links preserved by lexer
 ok 20 - First NIP-21 only; all later links preserved by lexer
   ---
-  duration_ms: 0.207001
+  duration_ms: 0.306994
   type: 'test'
   ...
 # Subtest: Lexer removes sentence punctuation without breaking balanced URL paths or losing offsets
 ok 21 - Lexer removes sentence punctuation without breaking balanced URL paths or losing offsets
   ---
-  duration_ms: 0.144518
+  duration_ms: 0.211683
   type: 'test'
   ...
 # Subtest: First body candidate wins across Nostr, image, X, YouTube and q
 ok 22 - First body candidate wins across Nostr, image, X, YouTube and q
   ---
-  duration_ms: 0.815548
+  duration_ms: 1.216261
   type: 'test'
   ...
 # Subtest: Direct image jpg: query safe, HTTPS only, depth and settings limits
 ok 23 - Direct image jpg: query safe, HTTPS only, depth and settings limits
   ---
-  duration_ms: 0.183146
+  duration_ms: 0.313124
   type: 'test'
   ...
 # Subtest: Direct image JPEG: query safe, HTTPS only, depth and settings limits
 ok 24 - Direct image JPEG: query safe, HTTPS only, depth and settings limits
   ---
-  duration_ms: 0.147953
+  duration_ms: 0.252604
   type: 'test'
   ...
 # Subtest: Direct image png: query safe, HTTPS only, depth and settings limits
 ok 25 - Direct image png: query safe, HTTPS only, depth and settings limits
   ---
-  duration_ms: 0.117908
+  duration_ms: 0.172295
   type: 'test'
   ...
 # Subtest: Direct image webp: query safe, HTTPS only, depth and settings limits
 ok 26 - Direct image webp: query safe, HTTPS only, depth and settings limits
   ---
-  duration_ms: 0.085749
+  duration_ms: 0.146136
   type: 'test'
   ...
 # Subtest: Direct image gif: query safe, HTTPS only, depth and settings limits
 ok 27 - Direct image gif: query safe, HTTPS only, depth and settings limits
   ---
-  duration_ms: 0.109194
+  duration_ms: 0.238392
   type: 'test'
   ...
 # Subtest: Direct image avif: query safe, HTTPS only, depth and settings limits
 ok 28 - Direct image avif: query safe, HTTPS only, depth and settings limits
   ---
-  duration_ms: 0.069424
+  duration_ms: 0.137173
   type: 'test'
   ...
 # Subtest: Direct image apng: query safe, HTTPS only, depth and settings limits
 ok 29 - Direct image apng: query safe, HTTPS only, depth and settings limits
   ---
-  duration_ms: 0.05989
+  duration_ms: 0.186206
   type: 'test'
   ...
 # Subtest: Direct image bmp: query safe, HTTPS only, depth and settings limits
 ok 30 - Direct image bmp: query safe, HTTPS only, depth and settings limits
   ---
-  duration_ms: 0.056364
+  duration_ms: 0.140188
   type: 'test'
   ...
 # Subtest: NIP-92 m/dim/alt allow extensionless images without arbitrary imeta-only loading
 ok 31 - NIP-92 m/dim/alt allow extensionless images without arbitrary imeta-only loading
   ---
-  duration_ms: 0.249475
+  duration_ms: 0.430047
   type: 'test'
   ...
 # Subtest: Multiple image links select exactly the first
 ok 32 - Multiple image links select exactly the first
   ---
-  duration_ms: 0.090156
+  duration_ms: 0.142591
   type: 'test'
   ...
-# Subtest: YouTube youtube: one valid ID, no nested player
-ok 33 - YouTube youtube: one valid ID, no nested player
+# Subtest: YouTube youtube: one valid ID, no player beyond depth 2
+ok 33 - YouTube youtube: one valid ID, no player beyond depth 2
   ---
-  duration_ms: 0.170146
+  duration_ms: 0.866753
   type: 'test'
   ...
-# Subtest: YouTube youtubeWatch: one valid ID, no nested player
-ok 34 - YouTube youtubeWatch: one valid ID, no nested player
+# Subtest: YouTube youtubeWatch: one valid ID, no player beyond depth 2
+ok 34 - YouTube youtubeWatch: one valid ID, no player beyond depth 2
   ---
-  duration_ms: 0.760195
+  duration_ms: 0.266104
   type: 'test'
   ...
-# Subtest: YouTube youtubeShorts: one valid ID, no nested player
-ok 35 - YouTube youtubeShorts: one valid ID, no nested player
+# Subtest: YouTube youtubeShorts: one valid ID, no player beyond depth 2
+ok 35 - YouTube youtubeShorts: one valid ID, no player beyond depth 2
   ---
-  duration_ms: 0.111077
+  duration_ms: 0.130283
   type: 'test'
   ...
-# Subtest: YouTube youtubeMultiple: one valid ID, no nested player
-ok 36 - YouTube youtubeMultiple: one valid ID, no nested player
+# Subtest: YouTube youtubeMultiple: one valid ID, no player beyond depth 2
+ok 36 - YouTube youtubeMultiple: one valid ID, no player beyond depth 2
   ---
-  duration_ms: 0.110366
+  duration_ms: 0.112797
   type: 'test'
   ...
 # Subtest: X x: ordinary links at every depth
 ok 37 - X x: ordinary links at every depth
   ---
-  duration_ms: 0.108073
+  duration_ms: 0.186586
   type: 'test'
   ...
 # Subtest: X twitter: ordinary links at every depth
 ok 38 - X twitter: ordinary links at every depth
   ---
-  duration_ms: 0.056355
+  duration_ms: 0.113057
   type: 'test'
   ...
 # Subtest: X xMultiple: ordinary links at every depth
 ok 39 - X xMultiple: ordinary links at every depth
   ---
-  duration_ms: 0.056154
+  duration_ms: 0.129252
   type: 'test'
   ...
 # Subtest: No arbitrary iframe or unsafe URL: https://youtube.com.evil.example/watch?v=M7lc1UVf-VE
 ok 40 - No arbitrary iframe or unsafe URL: https://youtube.com.evil.example/watch?v=M7lc1UVf-VE
   ---
-  duration_ms: 0.107442
+  duration_ms: 0.157534
   type: 'test'
   ...
 # Subtest: No arbitrary iframe or unsafe URL: https://youtu.be/a
 ok 41 - No arbitrary iframe or unsafe URL: https://youtu.be/a
   ---
-  duration_ms: 0.047421
+  duration_ms: 0.077144
   type: 'test'
   ...
 # Subtest: No arbitrary iframe or unsafe URL: https://youtube.com/watch?v=M7lc1UVf-VE.bad
 ok 42 - No arbitrary iframe or unsafe URL: https://youtube.com/watch?v=M7lc1UVf-VE.bad
   ---
-  duration_ms: 0.051578
+  duration_ms: 0.091556
   type: 'test'
   ...
 # Subtest: No arbitrary iframe or unsafe URL: https://x.com/a/status/1/trailing
 ok 43 - No arbitrary iframe or unsafe URL: https://x.com/a/status/1/trailing
   ---
-  duration_ms: 0.072289
+  duration_ms: 0.073148
   type: 'test'
   ...
 # Subtest: No arbitrary iframe or unsafe URL: https://x.com.evil.example/a/status/123
 ok 44 - No arbitrary iframe or unsafe URL: https://x.com.evil.example/a/status/123
   ---
-  duration_ms: 0.044386
+  duration_ms: 0.068531
   type: 'test'
   ...
 # Subtest: No arbitrary iframe or unsafe URL: https://evil.example/video.mp4
 ok 45 - No arbitrary iframe or unsafe URL: https://evil.example/video.mp4
   ---
-  duration_ms: 0.032719
+  duration_ms: 0.106168
   type: 'test'
   ...
 # Subtest: No arbitrary iframe or unsafe URL: javascript:alert(1)
 ok 46 - No arbitrary iframe or unsafe URL: javascript:alert(1)
   ---
-  duration_ms: 0.029585
+  duration_ms: 0.062282
   type: 'test'
   ...
 # Subtest: No arbitrary iframe or unsafe URL: data:image/png;base64,xxx
 ok 47 - No arbitrary iframe or unsafe URL: data:image/png;base64,xxx
   ---
-  duration_ms: 0.027842
+  duration_ms: 0.053549
   type: 'test'
   ...
 # Subtest: No arbitrary iframe or unsafe URL: https://u:p@x.com/a/status/1
 ok 48 - No arbitrary iframe or unsafe URL: https://u:p@x.com/a/status/1
   ---
-  duration_ms: 0.040762
+  duration_ms: 0.064585
   type: 'test'
   ...
 # Subtest: No arbitrary iframe or unsafe URL: https://x.com:444/a/status/123
 ok 49 - No arbitrary iframe or unsafe URL: https://x.com:444/a/status/123
   ---
-  duration_ms: 0.034512
+  duration_ms: 0.055282
   type: 'test'
   ...
 # Subtest: No arbitrary iframe or unsafe URL: https://x.com/home
 ok 50 - No arbitrary iframe or unsafe URL: https://x.com/home
   ---
-  duration_ms: 0.051838
+  duration_ms: 0.053459
   type: 'test'
   ...
 # Subtest: q-only references are quotes and not legacy replies
 ok 51 - q-only references are quotes and not legacy replies
   ---
-  duration_ms: 0.459322
+  duration_ms: 0.707307
   type: 'test'
   ...
 # Subtest: Reposts have no reply parent and their original consumes the sole slot
 ok 52 - Reposts have no reply parent and their original consumes the sole slot
   ---
-  duration_ms: 0.413673
+  duration_ms: 0.575111
   type: 'test'
   ...
 # Subtest: Repost repostJSON: verifies and uses JSON without event fetch
 ok 53 - Repost repostJSON: verifies and uses JSON without event fetch
   ---
-  duration_ms: 18.417442
+  duration_ms: 25.729879
   type: 'test'
   ...
 # Subtest: Repost generic: verifies and uses JSON without event fetch
 ok 54 - Repost generic: verifies and uses JSON without event fetch
   ---
-  duration_ms: 4.377241
+  duration_ms: 4.53903
   type: 'test'
   ...
 # Subtest: Repost genericNested: verifies and uses JSON without event fetch
 ok 55 - Repost genericNested: verifies and uses JSON without event fetch
   ---
-  duration_ms: 4.051129
+  duration_ms: 3.73568
   type: 'test'
   ...
 # Subtest: Repost repostEmpty: safely fetches its exact tagged original
 ok 56 - Repost repostEmpty: safely fetches its exact tagged original
   ---
-  duration_ms: 1.663955
+  duration_ms: 1.622792
   type: 'test'
   ...
 # Subtest: Repost repostMalformed: safely fetches its exact tagged original
 ok 57 - Repost repostMalformed: safely fetches its exact tagged original
   ---
-  duration_ms: 1.684907
+  duration_ms: 1.714958
   type: 'test'
   ...
 # Subtest: Repost repostForged: safely fetches its exact tagged original
 ok 58 - Repost repostForged: safely fetches its exact tagged original
   ---
-  duration_ms: 1.711016
+  duration_ms: 1.895947
   type: 'test'
   ...
 # Subtest: Repost genericEmpty: safely fetches its exact tagged original
 ok 59 - Repost genericEmpty: safely fetches its exact tagged original
   ---
-  duration_ms: 0.169085
+  duration_ms: 0.169251
   type: 'test'
   ...
 # Subtest: Forged embedded JSON is not trusted even when wrapper was signed
 ok 60 - Forged embedded JSON is not trusted even when wrapper was signed
   ---
-  duration_ms: 1.797646
+  duration_ms: 1.787577
   type: 'test'
   ...
 # Subtest: Repost missing and network-failure cases resolve to null, never reject
 ok 61 - Repost missing and network-failure cases resolve to null, never reject
   ---
-  duration_ms: 2.793897
+  duration_ms: 3.196802
   type: 'test'
   ...
 # Subtest: NIP-18 inner event ID/kind constraints reject mismatching content
 ok 62 - NIP-18 inner event ID/kind constraints reject mismatching content
   ---
-  duration_ms: 1.599218
+  duration_ms: 1.62798
   type: 'test'
   ...
 # Subtest: Self-repost returns null without recursive resolution
 ok 63 - Self-repost returns null without recursive resolution
   ---
-  duration_ms: 0.229616
+  duration_ms: 0.188839
   type: 'test'
   ...
 # Subtest: NIP-21 duplicates and note/nevent aliases share a single fetch
 ok 64 - NIP-21 duplicates and note/nevent aliases share a single fetch
   ---
-  duration_ms: 1.723605
+  duration_ms: 4.47215
   type: 'test'
   ...
 # Subtest: nevent constraints are applied per caller even after a shared ID fetch
 ok 65 - nevent constraints are applied per caller even after a shared ID fetch
   ---
-  duration_ms: 1.442873
+  duration_ms: 1.522113
   type: 'test'
   ...
 # Subtest: Current-view events are reused, never fetched twice from relay
 ok 66 - Current-view events are reused, never fetched twice from relay
   ---
-  duration_ms: 0.145248
+  duration_ms: 0.156071
   type: 'test'
   ...
 # Subtest: View changes invalidate settled and late results; relay hints do not add connections
 ok 67 - View changes invalidate settled and late results; relay hints do not add connections
   ---
-  duration_ms: 5.75766
+  duration_ms: 2.762495
   type: 'test'
   ...
 # Subtest: Single-flight memo is bounded and explicit read reset allows retry
 ok 68 - Single-flight memo is bounded and explicit read reset allows retry
   ---
-  duration_ms: 576.655348
+  duration_ms: 574.671826
   type: 'test'
   ...
 # Subtest: Address fetch sends exact kind/author/d filter and selects newest matching version
 ok 69 - Address fetch sends exact kind/author/d filter and selects newest matching version
   ---
-  duration_ms: 61.451543
+  duration_ms: 62.652847
   type: 'test'
   ...
 # Subtest: Global, home and notifications include repost kinds in actual feed filters
 ok 70 - Global, home and notifications include repost kinds in actual feed filters
   ---
-  duration_ms: 0.252711
+  duration_ms: 0.36448
   type: 'test'
   ...
-1..70
-# tests 70
+# Subtest: Application display name changes without renaming stored data
+ok 71 - Application display name changes without renaming stored data
+  ---
+  duration_ms: 2.186467
+  type: 'test'
+  ...
+# Subtest: Right search is deleted with its handlers; mobile search is preserved
+ok 72 - Right search is deleted with its handlers; mobile search is preserved
+  ---
+  duration_ms: 0.308837
+  type: 'test'
+  ...
+# Subtest: Maximum embed depth is two and not a per-post width setting
+ok 73 - Maximum embed depth is two and not a per-post width setting
+  ---
+  duration_ms: 0.123393
+  type: 'test'
+  ...
+# Subtest: ref_note: depths zero and one select the same sole candidate; two and above stop
+ok 74 - ref_note: depths zero and one select the same sole candidate; two and above stop
+  ---
+  duration_ms: 2.888481
+  type: 'test'
+  ...
+# Subtest: ref_nevent: depths zero and one select the same sole candidate; two and above stop
+ok 75 - ref_nevent: depths zero and one select the same sole candidate; two and above stop
+  ---
+  duration_ms: 0.609742
+  type: 'test'
+  ...
+# Subtest: ref_npub: depths zero and one select the same sole candidate; two and above stop
+ok 76 - ref_npub: depths zero and one select the same sole candidate; two and above stop
+  ---
+  duration_ms: 0.277371
+  type: 'test'
+  ...
+# Subtest: ref_nprofile: depths zero and one select the same sole candidate; two and above stop
+ok 77 - ref_nprofile: depths zero and one select the same sole candidate; two and above stop
+  ---
+  duration_ms: 0.271502
+  type: 'test'
+  ...
+# Subtest: ref_naddr: depths zero and one select the same sole candidate; two and above stop
+ok 78 - ref_naddr: depths zero and one select the same sole candidate; two and above stop
+  ---
+  duration_ms: 0.400873
+  type: 'test'
+  ...
+# Subtest: image: depths zero and one select the same sole candidate; two and above stop
+ok 79 - image: depths zero and one select the same sole candidate; two and above stop
+  ---
+  duration_ms: 0.591405
+  type: 'test'
+  ...
+# Subtest: imeta: depths zero and one select the same sole candidate; two and above stop
+ok 80 - imeta: depths zero and one select the same sole candidate; two and above stop
+  ---
+  duration_ms: 0.505319
+  type: 'test'
+  ...
+# Subtest: images: depths zero and one select the same sole candidate; two and above stop
+ok 81 - images: depths zero and one select the same sole candidate; two and above stop
+  ---
+  duration_ms: 0.338411
+  type: 'test'
+  ...
+# Subtest: youtubeMultiple: depths zero and one select the same sole candidate; two and above stop
+ok 82 - youtubeMultiple: depths zero and one select the same sole candidate; two and above stop
+  ---
+  duration_ms: 0.203261
+  type: 'test'
+  ...
+# Subtest: quote: depths zero and one select the same sole candidate; two and above stop
+ok 83 - quote: depths zero and one select the same sole candidate; two and above stop
+  ---
+  duration_ms: 1.345742
+  type: 'test'
+  ...
+# Subtest: quoteAddress: depths zero and one select the same sole candidate; two and above stop
+ok 84 - quoteAddress: depths zero and one select the same sole candidate; two and above stop
+  ---
+  duration_ms: 0.863027
+  type: 'test'
+  ...
+# Subtest: repostJSON: depths zero and one select the same sole candidate; two and above stop
+ok 85 - repostJSON: depths zero and one select the same sole candidate; two and above stop
+  ---
+  duration_ms: 0.221238
+  type: 'test'
+  ...
+# Subtest: generic: depths zero and one select the same sole candidate; two and above stop
+ok 86 - generic: depths zero and one select the same sole candidate; two and above stop
+  ---
+  duration_ms: 0.20214
+  type: 'test'
+  ...
+# Subtest: genericNested: depths zero and one select the same sole candidate; two and above stop
+ok 87 - genericNested: depths zero and one select the same sole candidate; two and above stop
+  ---
+  duration_ms: 0.11508
+  type: 'test'
+  ...
+# Subtest: mixed: depths zero and one select the same sole candidate; two and above stop
+ok 88 - mixed: depths zero and one select the same sole candidate; two and above stop
+  ---
+  duration_ms: 0.318321
+  type: 'test'
+  ...
+# Subtest: mixedNostrFirst: depths zero and one select the same sole candidate; two and above stop
+ok 89 - mixedNostrFirst: depths zero and one select the same sole candidate; two and above stop
+  ---
+  duration_ms: 0.33065
+  type: 'test'
+  ...
+# Subtest: multiple: added depth never consumes additional sibling links
+ok 90 - multiple: added depth never consumes additional sibling links
+  ---
+  duration_ms: 0.696941
+  type: 'test'
+  ...
+# Subtest: images: added depth never consumes additional sibling links
+ok 91 - images: added depth never consumes additional sibling links
+  ---
+  duration_ms: 0.115812
+  type: 'test'
+  ...
+# Subtest: youtubeMultiple: added depth never consumes additional sibling links
+ok 92 - youtubeMultiple: added depth never consumes additional sibling links
+  ---
+  duration_ms: 0.151384
+  type: 'test'
+  ...
+# Subtest: mixed: added depth never consumes additional sibling links
+ok 93 - mixed: added depth never consumes additional sibling links
+  ---
+  duration_ms: 0.177453
+  type: 'test'
+  ...
+# Subtest: mixedNostrFirst: added depth never consumes additional sibling links
+ok 94 - mixedNostrFirst: added depth never consumes additional sibling links
+  ---
+  duration_ms: 0.191424
+  type: 'test'
+  ...
+# Subtest: Invalid first Nostr URI and disabled images remain enforced at depth one
+ok 95 - Invalid first Nostr URI and disabled images remain enforced at depth one
+  ---
+  duration_ms: 0.160017
+  type: 'test'
+  ...
+# Subtest: X/Twitter x.com remains an unchanged ordinary link
+ok 96 - X/Twitter x.com remains an unchanged ordinary link
+  ---
+  duration_ms: 7.15282
+  type: 'test'
+  ...
+# Subtest: X/Twitter www.x.com remains an unchanged ordinary link
+ok 97 - X/Twitter www.x.com remains an unchanged ordinary link
+  ---
+  duration_ms: 0.396807
+  type: 'test'
+  ...
+# Subtest: X/Twitter mobile.x.com remains an unchanged ordinary link
+ok 98 - X/Twitter mobile.x.com remains an unchanged ordinary link
+  ---
+  duration_ms: 0.328256
+  type: 'test'
+  ...
+# Subtest: X/Twitter twitter.com remains an unchanged ordinary link
+ok 99 - X/Twitter twitter.com remains an unchanged ordinary link
+  ---
+  duration_ms: 0.1894
+  type: 'test'
+  ...
+# Subtest: X/Twitter www.twitter.com remains an unchanged ordinary link
+ok 100 - X/Twitter www.twitter.com remains an unchanged ordinary link
+  ---
+  duration_ms: 0.317941
+  type: 'test'
+  ...
+# Subtest: X/Twitter mobile.twitter.com remains an unchanged ordinary link
+ok 101 - X/Twitter mobile.twitter.com remains an unchanged ordinary link
+  ---
+  duration_ms: 0.184884
+  type: 'test'
+  ...
+# Subtest: X share suffix (none) never creates an embed
+ok 102 - X share suffix (none) never creates an embed
+  ---
+  duration_ms: 0.266385
+  type: 'test'
+  ...
+# Subtest: X share suffix / never creates an embed
+ok 103 - X share suffix / never creates an embed
+  ---
+  duration_ms: 0.150472
+  type: 'test'
+  ...
+# Subtest: X share suffix /photo/1 never creates an embed
+ok 104 - X share suffix /photo/1 never creates an embed
+  ---
+  duration_ms: 0.42539
+  type: 'test'
+  ...
+# Subtest: X share suffix /video/1 never creates an embed
+ok 105 - X share suffix /video/1 never creates an embed
+  ---
+  duration_ms: 0.452039
+  type: 'test'
+  ...
+# Subtest: X share suffix /photo/4?s=20 never creates an embed
+ok 106 - X share suffix /photo/4?s=20 never creates an embed
+  ---
+  duration_ms: 0.210822
+  type: 'test'
+  ...
+# Subtest: X share suffix ?s=20&t=tracking never creates an embed
+ok 107 - X share suffix ?s=20&t=tracking never creates an embed
+  ---
+  duration_ms: 0.159936
+  type: 'test'
+  ...
+# Subtest: X URL stays link-only: http://twitter.com/a/status/123
+ok 108 - X URL stays link-only: http://twitter.com/a/status/123
+  ---
+  duration_ms: 0.145756
+  type: 'test'
+  ...
+# Subtest: X URL stays link-only: https://x.com/i/web/status/123
+ok 109 - X URL stays link-only: https://x.com/i/web/status/123
+  ---
+  duration_ms: 0.090904
+  type: 'test'
+  ...
+# Subtest: X URL stays link-only: https://x.com/home
+ok 110 - X URL stays link-only: https://x.com/home
+  ---
+  duration_ms: 0.086208
+  type: 'test'
+  ...
+# Subtest: X URL stays link-only: https://x.com/a/status/123/unrecognized
+ok 111 - X URL stays link-only: https://x.com/a/status/123/unrecognized
+  ---
+  duration_ms: 0.115531
+  type: 'test'
+  ...
+# Subtest: X URL stays link-only: https://x.com:9000/a/status/123
+ok 112 - X URL stays link-only: https://x.com:9000/a/status/123
+  ---
+  duration_ms: 0.100159
+  type: 'test'
+  ...
+# Subtest: Multiple and duplicate X URLs all remain links without consuming a rich slot
+ok 113 - Multiple and duplicate X URLs all remain links without consuming a rich slot
+  ---
+  duration_ms: 0.878801
+  type: 'test'
+  ...
+# Subtest: Leading X links leave the slot available for https://media.example/photo.png
+ok 114 - Leading X links leave the slot available for https://media.example/photo.png
+  ---
+  duration_ms: 0.362086
+  type: 'test'
+  ...
+# Subtest: Leading X links leave the slot available for https://youtu.be/M7lc1UVf-VE
+ok 115 - Leading X links leave the slot available for https://youtu.be/M7lc1UVf-VE
+  ---
+  duration_ms: 0.229389
+  type: 'test'
+  ...
+# Subtest: Leading X links leave the slot available for nostr:note14untwwd442932dcsqqp0zet550h095jpaqh9w22tyrgncf6qmdlst77m0x
+ok 116 - Leading X links leave the slot available for nostr:note14untwwd442932dcsqqp0zet550h095jpaqh9w22tyrgncf6qmdlst77m0x
+  ---
+  duration_ms: 0.868396
+  type: 'test'
+  ...
+# Subtest: Leading X links leave the slot available for nostr:npub1ujfahuwppkq0xkq7fyzfxzc5qnxxcyuspms8tpr5l222h6xye5fsccv64k
+ok 117 - Leading X links leave the slot available for nostr:npub1ujfahuwppkq0xkq7fyzfxzc5qnxxcyuspms8tpr5l222h6xye5fsccv64k
+  ---
+  duration_ms: 0.320485
+  type: 'test'
+  ...
+# Subtest: Leading X links leave the slot available for nostr:naddr1qqgkzun5d93kcef6u6t6te5u4n5248szyrjf8kl3cyxcpu6creysfyctzszvcmqnjq8wqavywnaff2lgcnx3xqcyqqq823c48eejl
+ok 118 - Leading X links leave the slot available for nostr:naddr1qqgkzun5d93kcef6u6t6te5u4n5248szyrjf8kl3cyxcpu6creysfyctzszvcmqnjq8wqavywnaff2lgcnx3xqcyqqq823c48eejl
+  ---
+  duration_ms: 1.298863
+  type: 'test'
+  ...
+# Subtest: X links do not suppress q-only quote references
+ok 119 - X links do not suppress q-only quote references
+  ---
+  duration_ms: 0.583073
+  type: 'test'
+  ...
+# Subtest: Image settings and first-candidate policy are unchanged with an X prefix
+ok 120 - Image settings and first-candidate policy are unchanged with an X prefix
+  ---
+  duration_ms: 0.36476
+  type: 'test'
+  ...
+# Subtest: imeta cannot turn an X/Twitter page URL into an image request
+ok 121 - imeta cannot turn an X/Twitter page URL into an image request
+  ---
+  duration_ms: 0.392931
+  type: 'test'
+  ...
+# Subtest: Direct X-hosted media is still a normal image, including NIP-92 metadata
+ok 122 - Direct X-hosted media is still a normal image, including NIP-92 metadata
+  ---
+  duration_ms: 0.266574
+  type: 'test'
+  ...
+# Subtest: X widget, frame and diagnostic assets are absent
+ok 123 - X widget, frame and diagnostic assets are absent
+  ---
+  duration_ms: 4.028473
+  type: 'test'
+  ...
+# Subtest: Entry and all shipped module import versions match the release
+ok 124 - Entry and all shipped module import versions match the release
+  ---
+  duration_ms: 2.712716
+  type: 'test'
+  ...
+1..124
+# tests 124
 # suites 0
-# pass 70
+# pass 124
 # fail 0
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 783.711459
+# duration_ms 798.069957

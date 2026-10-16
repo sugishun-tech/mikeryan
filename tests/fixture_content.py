@@ -32,9 +32,11 @@ def content_fixtures():
         events[name]=e;return e
     for i,(name,key) in enumerate([('alice',3),('bob',4),('carol',5)]):
         add(name+'Profile',json.dumps(dict(name=name,display_name={'alice':'アリス','bob':'ボブ','carol':'キャロル'}[name],about='プロフィール紹介文'),ensure_ascii=False),kind=0,key=key)
-    deep=add('deep','最大深度を超えて取得してはいけない投稿',key=5)
+    beyond=add('beyond','3段目のため取得してはいけない投稿',key=5)
+    beyond_uri='nostr:'+bech32('note',bytes.fromhex(beyond['id']))
+    deep=add('deep',f'2段目の投稿。これ以降はリンクのみ。{beyond_uri} https://media.example/too-deep.png https://youtu.be/abcdefghijk',key=5)
     deep_uri='nostr:'+bech32('note',bytes.fromhex(deep['id']))
-    original=add('original',f'元の投稿です。入れ子はリンクのみ。{deep_uri} https://media.example/nested.jpg https://youtu.be/M7lc1UVf-VE',key=4)
+    original=add('original',f'元の投稿です。次の1件も埋め込みます。{deep_uri} https://media.example/nested.jpg https://youtu.be/M7lc1UVf-VE',key=4)
     original_uri='nostr:'+bech32('note',bytes.fromhex(original['id']))
     add('oldArticle','旧記事',30023,[['d','article:日本語'],['title','旧版']],4,time-20)
     article=add('article','最新版の記事。'+deep_uri,30023,[['d','article:日本語'],['title','記事']],4)

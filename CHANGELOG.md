@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.3.3 · 2026-10-16
+
+- 右側の検索フォームと専用のイベント処理・CSSを削除。モバイルのヘッダー検索と右側のドキュメントリンクは維持。
+- 元投稿を深さ0とし、埋め込みを最大2段まで展開。親のdepthを子へdepth+1で渡し、NIP-21・画像・YouTube・引用・リポストに同じ上限を適用。各投稿から直接展開する件数は従来どおり1件。3段目の自動取得・媒体読み込みを抑止し、リンクを残す。
+- 画面・タブ・ドキュメント・新規投稿のclientタグ・設定ダウンロード名を「マイク・ライアン」に変更。サイドバー内で名前が1行に収まるよう調整。保存キー・履歴キー・パッケージ名・配布ディレクトリは互換性のため維持。
+- 入口・CSS参照・JSインポート・SharedWorkerの版を1.3.3へ統一。default.json、保存済み設定、ミュート、ログイン、下書き、プロフィールの形式は変更しない。
+- Node 335件、模擬通信によるブラウザー152項目、構文・参照検査を通過。2段目の表示、3段目の取得抑止、幅1の維持、循環、失敗時のリンク、モバイル幅、検索削除を検証。通常のHTTP起動試験は環境のERR_BLOCKED_BY_ADMINISTRATORで開始前に遮断され、実リレー・実YouTube・HTTP CSPは未検証。詳細はdocs/TEST_RESULTS.md。
+
 ## 1.3.2 · 2026-09-30
 
 - Remove X/Twitter card embedding, provider script loading, iframe bridge, dedicated CSS and diagnostics. X/Twitter page URLs remain ordinary links with their original spelling.

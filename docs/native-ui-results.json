@@ -1,0 +1,7 @@
+{
+  "mode": "Native local HTTP UI check",
+  "error": "Page.goto: net::ERR_BLOCKED_BY_ADMINISTRATOR at http://127.0.0.1:36047/\nCall log:\n  - navigating to \"http://127.0.0.1:36047/\", waiting until \"networkidle\"\n",
+  "checks": [],
+  "passed": 0,
+  "failed": 1
+}

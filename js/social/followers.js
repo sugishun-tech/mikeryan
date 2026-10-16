@@ -1,6 +1,6 @@
-import { EventPager } from '../feed/pagination.js?v=1.3.2';
-import { latest, sortEvents, unique } from '../core/utils.js?v=1.3.2';
-import { pubkeys } from './service.js?v=1.3.2';
+import { EventPager } from '../feed/pagination.js?v=1.3.3';
+import { latest, sortEvents, unique } from '../core/utils.js?v=1.3.3';
+import { pubkeys } from './service.js?v=1.3.3';
 
 /** One manual follower directory, discarded on refresh/navigation.
  * Relay cursors are independent: an offline relay may not suppress another

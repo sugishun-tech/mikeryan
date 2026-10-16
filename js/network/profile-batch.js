@@ -1,5 +1,5 @@
-import { LIMITS } from '../core/config.js?v=1.3.2';
-import { canonicalFilters, chunks, isHex, unique } from '../core/utils.js?v=1.3.2';
+import { LIMITS } from '../core/config.js?v=1.3.3';
+import { canonicalFilters, chunks, isHex, unique } from '../core/utils.js?v=1.3.3';
 
 /** Only unbounded-in-time, one-latest-per-author kind:0 reads may be combined.
  * Never combine ordinary event filters: their limit applies to the whole filter.

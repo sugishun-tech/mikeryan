@@ -86,11 +86,11 @@ NIP-01 / 02 / 65は2026-09-29、NIP-05は既存資料で2026-09-24参照。実�
 - NIP-65: https://github.com/nostr-protocol/nips/blob/master/65.md
 
 
-## 一つの埋め込み枠と非再帰レンダリング
+## 各投稿1枠・最大2段の埋め込み
 
 `content/references.js` はI/Oをせず、URI・URL・imeta・q・リポストタグを解析する。`contentPlan` が投稿全体の1枠を選び、本文順を優先する。NIP-21では最初の構文上のURIだけを候補にする。不正な最初のURIを飛ばして次のNIP-21をリッチ表示しない。本文に候補がなければqタグを使用する。元の文字列とすべての通常リンクを残す。
 
-`Posts.render` に投稿単位の例外境界を置き、埋め込みは同じレンダラーへdepth:1を渡す。リポスト原本も同じ枠を消費する。depth:1は媒体も再リポストも展開しない。祖先ID集合で循環も拒否する。リポストUIはラッパーの投稿者をヘッダーに表示し、原本の既存カードとその操作を再利用する。npub/nprofileはIdentity.userRowを使用する。
+`Posts.render` に投稿単位の例外境界を置く。親投稿のdepthを`Embeds.mount`へ渡し、子投稿は同じレンダラーへdepth+1を渡す。元投稿はdepth:0で、`CONTENT_LIMITS.maxDepth`は2。depth:0/1の各投稿は直接の子を1枠だけ展開でき、depth:2では参照・画像・動画・再リポストをそれ以上展開しない。リポスト原本も1段を消費し、`contentPlan`の共通制限に従う。祖先ID集合で循環も拒否する。リポストUIはラッパーの投稿者をヘッダーに表示し、原本の既存カードとその操作を再利用する。npub/nprofileはIdentity.userRowを使用する。
 
 `ContentResolver` は画面世代・設定リレー範囲をキーに最大512個のPromiseを共有する。noteとneventで同じIDを二重取得せず、neventのauthor/kind制約は呼び出しごとに照合する。原本JSONはラッパーが署名済みでも信用せず、内側イベントのIDと署名を検証する。取得できなかった結果は当該読み込み内だけ共有し、次の明示読み込みでは再試行できる。永続保存はしない。naddrはkind・author・#dを指定してRepository.addressで取得し、一致する最新版を選ぶ。リレーヒントは保存設定の代わりに使わない。
 

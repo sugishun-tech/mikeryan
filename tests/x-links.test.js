@@ -44,7 +44,7 @@ for (const [url,type] of [
   test(`Leading X links leave the slot available for ${url}`,()=>{
     const event=make(`${x} https://twitter.com/example/status/123 ${url}`);
     assert.equal(contentPlan(event).embed.type,type);
-    assert.equal(contentPlan(event,{depth:1}).embed,null);
+    assert.equal(contentPlan(event,{depth:2}).embed,null);
     assert.equal([...contentLinks(event.content)].length,3);
   });
 }
@@ -58,7 +58,7 @@ test('Image settings and first-candidate policy are unchanged with an X prefix',
   const event=make(`${x} https://media.example/photo.png https://youtu.be/M7lc1UVf-VE ${fixture.uris.note}`);
   assert.equal(contentPlan(event).embed.type,'image');
   assert.equal(contentPlan(event,{images:false}).embed.type,'youtube');
-  assert.equal(contentPlan(event,{depth:1}).embed,null);
+  assert.equal(contentPlan(event,{depth:2}).embed,null);
 });
 test('imeta cannot turn an X/Twitter page URL into an image request',()=>{
   for (const url of [x,'https://twitter.com/example/status/123','https://x.com/example/photo.png']) {
