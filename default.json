@@ -1,7 +1,6 @@
 {
   "relays": [
     "wss://relay-jp.nostr.wirednet.jp/",
-    "wss://yabu.me/"
   ],
   "batchSize": 30,
   "muteDisplayNamePatterns": [],
