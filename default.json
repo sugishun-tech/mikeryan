@@ -1,6 +1,6 @@
 {
   "relays": [
-    "wss://relay-jp.nostr.wirednet.jp/",
+    "wss://relay-jp.nostr.wirednet.jp/"
   ],
   "batchSize": 30,
   "muteDisplayNamePatterns": [],
