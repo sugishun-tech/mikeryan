@@ -8,32 +8,40 @@ const fixture=JSON.parse(read('tests/fixtures/rich-content.json'));
 const make=(content,tags=[])=>({kind:1,content,tags});
 const x='https://x.com/example/status/1234567890123456789';
 for (const host of ['x.com','www.x.com','mobile.x.com','twitter.com','www.twitter.com','mobile.twitter.com']) {
-  test(`X/Twitter ${host} remains an unchanged ordinary link`,()=>{
+  test(`X/Twitter ${host} embeds within the existing depth limit and keeps its link`,()=>{
     const url=`https://${host}/example/status/1234567890123456789?s=20#reply`;
-    assert.equal(webReference(url),null);
-    assert.equal(contentPlan(make(url)).embed,null);
-    assert.equal(contentPlan(make(url),{depth:1}).embed,null);
+    const expected={type:'x',id:'1234567890123456789',href:url,raw:url};
+    assert.deepEqual(webReference(url),expected);
+    assert.deepEqual(contentPlan(make(url)).embed,expected);
+    assert.deepEqual(contentPlan(make(url),{depth:1}).embed,expected);
+    for (const depth of [2,3,100]) assert.equal(contentPlan(make(url),{depth}).embed,null);
     assert.equal(linkHref(url),url);
   });
 }
 for (const suffix of ['', '/', '/photo/1', '/video/1', '/photo/4?s=20', '?s=20&t=tracking']) {
-  test(`X share suffix ${suffix||'(none)'} never creates an embed`,()=>{
+  test(`X share suffix ${suffix||'(none)'} selects the same post ID`,()=>{
     const url=x+suffix;
-    assert.equal(webReference(url),null);
-    assert.equal(contentPlan(make(url)).embed,null);
+    assert.equal(webReference(url).id,'1234567890123456789');
+    assert.equal(contentPlan(make(url)).embed.type,'x');
     assert.equal(linkHref(url),url);
   });
 }
-for (const url of ['http://twitter.com/a/status/123','https://x.com/i/web/status/123','https://x.com/home','https://x.com/a/status/123/unrecognized','https://x.com:9000/a/status/123']) {
+test('HTTP and username-free X post URLs select the same string ID',()=>{
+  for (const url of ['http://twitter.com/a/status/123','https://x.com/i/web/status/123','https://x.com/i/status/123']) {
+    assert.deepEqual(webReference(url),{type:'x',id:'123',href:url,raw:url});
+    assert.equal(linkHref(url),url);
+  }
+});
+for (const url of ['https://x.com/home','https://x.com/a/status/123/unrecognized','https://x.com:9000/a/status/123','https://x.com/a/status/not-an-id','https://x.com/a/status/0','https://x.com/a/status/123456789012345678901']) {
   test(`X URL stays link-only: ${url}`,()=>{
     assert.equal(contentPlan(make(url)).embed,null);
     assert.equal(linkHref(url),url);
   });
 }
-test('Multiple and duplicate X URLs all remain links without consuming a rich slot',()=>{
-  const urls=[x,'https://twitter.com/example/status/1234567890123456789',x];
+test('Multiple and duplicate X URLs consume only the first rich slot and retain all links',()=>{
+  const urls=[x,'https://twitter.com/example/status/9876543210987654321',x];
   const event=make(urls.join(' '));
-  assert.equal(contentPlan(event).embed,null);
+  assert.deepEqual(contentPlan(event).embed,webReference(x));
   assert.deepEqual([...contentLinks(event.content)].map(t=>linkHref(t.raw)),urls);
 });
 for (const [url,type] of [
@@ -41,30 +49,35 @@ for (const [url,type] of [
   ['https://youtu.be/M7lc1UVf-VE','youtube'],
   [fixture.uris.note,'nostr'],[fixture.uris.npub,'nostr'],[fixture.uris.naddr,'nostr']
 ]) {
-  test(`Leading X links leave the slot available for ${url}`,()=>{
+  test(`X and ${type} share the first-candidate slot: ${url}`,()=>{
     const event=make(`${x} https://twitter.com/example/status/123 ${url}`);
-    assert.equal(contentPlan(event).embed.type,type);
+    assert.deepEqual(contentPlan(event).embed,webReference(x));
+    assert.equal(contentPlan(make(`${url} ${x}`)).embed.type,type);
     assert.equal(contentPlan(event,{depth:2}).embed,null);
     assert.equal([...contentLinks(event.content)].length,3);
   });
 }
-test('X links do not suppress q-only quote references',()=>{
+test('A body X post consumes the slot before q-only quotes while retaining their links',()=>{
   const event=make(x,[['q',fixture.events.original.id]]);
   const plan=contentPlan(event);
-  assert.equal(plan.embed.type,'nostr');assert.equal(plan.embed.reference.id,fixture.events.original.id);
+  assert.deepEqual(plan.embed,webReference(x));
+  assert.equal(plan.quotes[0].id,fixture.events.original.id);
   assert.equal(plan.quotes.length,1);
 });
-test('Image settings and first-candidate policy are unchanged with an X prefix',()=>{
+test('Image settings skip images, not X, under the same first-candidate policy',()=>{
   const event=make(`${x} https://media.example/photo.png https://youtu.be/M7lc1UVf-VE ${fixture.uris.note}`);
-  assert.equal(contentPlan(event).embed.type,'image');
-  assert.equal(contentPlan(event,{images:false}).embed.type,'youtube');
+  assert.equal(contentPlan(event).embed.type,'x');
+  assert.equal(contentPlan(event,{images:false}).embed.type,'x');
+  const imageFirst=make(`https://media.example/photo.png ${x} https://youtu.be/M7lc1UVf-VE`);
+  assert.equal(contentPlan(imageFirst).embed.type,'image');
+  assert.equal(contentPlan(imageFirst,{images:false}).embed.type,'x');
   assert.equal(contentPlan(event,{depth:2}).embed,null);
 });
 test('imeta cannot turn an X/Twitter page URL into an image request',()=>{
-  for (const url of [x,'https://twitter.com/example/status/123','https://x.com/example/photo.png']) {
+  for (const [url,type] of [[x,'x'],['https://twitter.com/example/status/123','x'],['https://x.com/example/photo.png',undefined]]) {
     const event=make(url,[['imeta','url '+url,'m image/png']]);
-    assert.equal(webReference(url,imageMetadata(event)),null);
-    assert.equal(contentPlan(event).embed,null);
+    assert.equal(webReference(url,imageMetadata(event))?.type,type);
+    assert.equal(contentPlan(event).embed?.type,type);
     assert.equal(linkHref(url),url);
   }
 });
@@ -75,15 +88,12 @@ test('Direct X-hosted media is still a normal image, including NIP-92 metadata',
   const embed=contentPlan(event).embed;
   assert.equal(embed.type,'image');assert.equal(embed.href,url);assert.equal(embed.width,640);
 });
-test('X widget, frame and diagnostic assets are absent',()=>{
-  for (const path of ['assets/embeds/x.html','assets/embeds/x.css','js/content/x-frame.js','js/content/x-diagnostics.js','docs/x-embed-check.html','docs/x-embed-check.css']) assert.equal(fs.existsSync(new URL(path,root)),false,path);
-  const walk=dir=>fs.readdirSync(dir,{withFileTypes:true}).flatMap(d=>d.isDirectory()?walk(new URL(d.name+'/',dir)):new URL(d.name,dir));
-  for (const file of [...walk(new URL('js/',root)),...walk(new URL('assets/',root))].filter(u=>/\.(?:js|css|html)$/.test(u.pathname))) {
-    assert.doesNotMatch(fs.readFileSync(file,'utf8'),/widgets\.js|createTweet|twttr|mikeryan-x-embed|x-player|x-frame\.js|assets\/embeds\/x\.html/,file.pathname);
-  }
+test('X uses an official cross-origin frame without widgets in the account document',()=>{
+  for (const path of ['assets/embeds/x.html','assets/embeds/x.css','js/content/x-frame.js']) assert.equal(fs.existsSync(new URL(path,root)),false,path);
+  for (const path of ['index.html','js/ui/embeds.js']) assert.doesNotMatch(read(path),/https:\/\/platform\.(?:x|twitter)\.com\/widgets\.js/);
+  assert.ok(read('js/ui/embeds.js').includes('https://platform.twitter.com'));
   assert.ok(read('index.html').includes("script-src 'self';"));
-  assert.ok(read('index.html').includes('frame-src https://www.youtube-nocookie.com;'));
-  assert.ok(!read('index.html').includes("frame-src 'self'"));
+  assert.ok(read('index.html').includes('frame-src https://www.youtube-nocookie.com https://platform.twitter.com;'));
 });
 test('Entry and all shipped module import versions match the release',()=>{
   const version=JSON.parse(read('package.json')).version;

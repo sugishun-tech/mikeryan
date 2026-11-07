@@ -40,7 +40,7 @@ export class Embeds {
     const ref=embed.reference;
     const href=ref ? referenceHref(ref) : embed.href || (embed.event ? threadHref(embed.event.id) : '');
     const label=ref ? ref.uri || referenceURI(ref) : embed.raw || embed.href || 'リポストのイベントを開く';
-    const linkText=ref ? (ref.type==='profile'?'プロフィールを開く':'参照先の投稿を開く') : ({image:'画像を開く',youtube:'YouTubeで動画を開く'}[embed.type] || label);
+    const linkText=ref ? (ref.type==='profile'?'プロフィールを開く':'参照先の投稿を開く') : ({image:'画像を開く',youtube:'YouTubeで動画を開く',x:'Xで投稿を開く'}[embed.type] || label);
     const link=href ? el('a',{class:'embed-source',href,title:label,...(!href.startsWith('#')?{target:'_blank',rel:'noopener noreferrer nofollow'}:{})},linkText) : null;
     const footer=el('div',{class:'embed-footer'},status,link);
     host.append(visual,footer);
@@ -130,6 +130,30 @@ export class Embeds {
           listen(document,'securitypolicyviolation',event=>{if (event.violatedDirective?.startsWith('frame-src') && event.blockedURI?.startsWith(origin)) fail();});
           visual.append(frame);frame.src=url.href;deadline();
           cleanups.push(()=>{frame.removeAttribute('src');frame.remove();});
+        }
+        if (embed.type==='x') {
+          const origin='https://platform.twitter.com',url=new URL('/embed/Tweet.html',origin);
+          url.search=new URLSearchParams({id:embed.id,embedId:'mikeryan-x-'+(++serial),dnt:'true',lang:'ja',hideThread:'true'}).toString();
+          const frame=el('iframe',{class:'external-player x-player',title:'Xの投稿',height:300,referrerPolicy:'no-referrer',allow:'fullscreen; encrypted-media; picture-in-picture',allowFullscreen:true});
+          frame.setAttribute('sandbox','allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox');
+          let rendered=false,height=0;
+          // The official frame emits the same bounded RPC notifications used by widgets.js.
+          listen(window,'message',event=>{
+            if (!alive() || event.source!==frame.contentWindow || event.origin!==origin) return;
+            const data=readMessage(event.data)?.['twttr.embed'];
+            if (data?.jsonrpc!=='2.0') return;
+            if (data.method==='twttr.private.no_results') { fail(); return; }
+            if (data.method==='twttr.private.rendered') rendered=true;
+            if (data.method==='twttr.private.resize') {
+              const value=data.params?.[0]?.height;
+              if (!Number.isFinite(value) || value<=0) return;
+              height=Math.min(4096,Math.max(100,Math.ceil(value)));frame.height=String(height);
+            }
+            if (rendered && height) ready();
+          });
+          listen(frame,'error',()=>fail());
+          cleanups.push(()=>{frame.removeAttribute('src');frame.remove();});
+          visual.append(frame);frame.src=url.href;deadline();
         }
         const close=button('埋め込みを閉じる',()=>fail('リンクから開いてください'),'text-button embed-close');footer.append(close);
         cleanups.push(()=>close.remove());

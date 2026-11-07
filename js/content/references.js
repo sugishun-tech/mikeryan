@@ -122,9 +122,11 @@ export function webReference(raw, metadata=new Map(), {images=true}={}) {
   const url=new URL(href);
   // Nonstandard ports are allowed for HTTPS image hosts, never providers.
   const host=url.hostname.toLowerCase();
-  // X/Twitter pages remain ordinary links, even when imeta labels them as images.
-  // Direct image hosts such as pbs.twimg.com still use the normal image renderer.
-  if (['x.com','www.x.com','twitter.com','www.twitter.com','mobile.twitter.com','mobile.x.com'].includes(host)) return null;
+  // Only post URLs consume a slot; imeta must not turn other X pages into images.
+  if (['x.com','www.x.com','twitter.com','www.twitter.com','mobile.twitter.com','mobile.x.com'].includes(host)) {
+    const match=!url.port && /^\/(?:[a-zA-Z0-9_]+\/status|i\/web\/status)\/([1-9]\d{0,19})(?:\/(?:photo|video)\/\d+)?\/?$/.exec(url.pathname);
+    return match ? {type:'x',id:match[1],href,raw} : null;
+  }
   let id;
   if (!url.port && ['youtube.com','www.youtube.com','m.youtube.com'].includes(host)) {
     if (url.pathname==='/watch') id=url.searchParams.get('v');

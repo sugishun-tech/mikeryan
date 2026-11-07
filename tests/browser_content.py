@@ -1,5 +1,5 @@
-"""Rich-content browser regression: real DOM/native modules and link-only X/Twitter.
-Public network, YouTube messages, images, relays/storage/navigation/SHA
+"""Rich-content browser regression: real DOM/native modules and X/Twitter parent frames.
+Public network, X/YouTube messages, images, relays/storage/navigation/SHA
 are explicit fixtures. The URL-restricted runner cannot validate live CSP/providers.
 Run: python3 tests/browser_content.py
 """
@@ -35,6 +35,16 @@ ADAPTER=r'''({png})=>{
        })),0);
      };
      setTimeout(()=>frame.dispatchEvent(new Event('load')),0);return;
+   }
+   if(u.origin==='https://platform.twitter.com' && u.pathname==='/embed/Tweet.html'){
+     if(mode!=='hang')setTimeout(()=>{
+       const send=(method,params=[])=>window.dispatchEvent(new MessageEvent('message',{
+         source:frame.contentWindow,origin:u.origin,data:{'twttr.embed':{jsonrpc:'2.0',method,params}}
+       }));
+       if(mode==='error')send('twttr.private.no_results');
+       else {send('twttr.private.resize',[{width:550,height:350}]);send('twttr.private.rendered');}
+     },0);
+     return;
    }
    frameSrc.set.call(this,value);
  }});
@@ -145,7 +155,7 @@ async def main():
   async def depth_boundaries():
    def wrapper(name):
     return sign(dict(kind=1,tags=[],created_at=1792100000,content='参照 '+ 'nostr:'+bech32('note',bytes.fromhex(f['events'][name]['id']))))
-   for name,selector in [('images','.post-image'),('youtubeMultiple','.youtube-player'),('ref_nprofile','.user-row')]:
+   for name,selector in [('images','.post-image'),('youtubeMultiple','.youtube-player'),('xMultiple','.x-player'),('ref_nprofile','.user-row')]:
     await show([wrapper(name)]);await settle()
     check(name+': content inside the first embedded post renders at depth two',await root_slots()==1 and await count('.content-embed')==2 and await count(selector)==1)
     check(name+': no second sibling slot appears',await value('''[...document.querySelectorAll('#rich-stage .post')].every(p=>
@@ -154,7 +164,7 @@ async def main():
      await page.set_viewport_size({'width':width,'height':844});await page.wait_for_timeout(40)
      check(name+': nested layout fits '+str(width)+'px',await value('document.documentElement.scrollWidth<=innerWidth'))
     await page.set_viewport_size({'width':1200,'height':1000})
-   for name in ['images','youtubeMultiple','ref_note','quote','repostJSON','genericNested']:
+   for name in ['images','youtubeMultiple','xMultiple','ref_note','quote','repostJSON','genericNested']:
     await show(name,depth=2);await page.wait_for_timeout(40)
     check(name+': depth two never starts third-level relay/media work',await count('.content-embed')==0 and await value('__messages.length+__media.images.length+__media.frames.length+__app.posts.embeds.jobs.size')==0)
    for name in ['quote','repostJSON']:
@@ -213,36 +223,53 @@ async def main():
   async def x_links():
    x_url=f['events']['x']['content'].split()[-1]
    for name in ['x','twitter','xMultiple']:
-    await show(name);await page.wait_for_timeout(80)
+    await show(name);await settle()
     links=await page.locator('#rich-stage .post-text a').evaluate_all('(nodes)=>nodes.map(n=>n.getAttribute("href"))')
-    check(name+': original URLs remain ordinary links',links==[part for part in f['events'][name]['content'].split() if part.startswith(('https://','http://'))])
-    check(name+': no rich container, placeholder or iframe',await count('.content-embed,iframe')==0)
-    check(name+': no embed jobs or media initialization',await value('__app.posts.embeds.jobs.size+__media.frames.length+__media.images.length')==0)
-    check(name+': no X script or request',not any('platform.x.com' in u or 'platform.twitter.com' in u or 'syndication.' in u for u in requests) and await value('!document.querySelector("script[src*=widgets],script[src*=twitter],script[src*=platform]")'))
+    check(name+': original URLs remain clickable alongside the embed',links==[part for part in f['events'][name]['content'].split() if part.startswith(('https://','http://'))])
+    check(name+': exactly one X frame consumes the root slot',await root_slots()==1 and await count('.content-embed')==1 and await count('.x-player')==1)
+    check(name+': only the first X post initializes media',await value('__media.frames.length')==1 and await value('__media.images.length')==0)
+    check(name+': no widget script executes in the account document',await value('!document.querySelector("script[src*=widgets],script[src*=twitter],script[src*=platform]")'))
     check(name+': external links retain tab and security attributes',await page.locator('#rich-stage .post-text a').evaluate_all('(nodes)=>nodes.every(n=>n.target==="_blank"&&n.relList.contains("noopener")&&n.relList.contains("noreferrer"))'))
+   check('X uses its official cross-origin sandbox and accepts its measured height',await page.locator('.x-player').get_attribute('sandbox')=='allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox' and await page.locator('.x-player').get_attribute('height')=='350' and await value('__media.frames[0].startsWith("https://platform.twitter.com/embed/Tweet.html?")'))
    for suffix in ['/photo/1','/video/1','?s=20#reply']:
     event={**f['events']['x'],'content':x_url+suffix}
-    await show([event]);await page.wait_for_timeout(40)
-    check('X '+suffix+': link only',await count('.content-embed,iframe')==0 and await page.locator('#rich-stage .post-text a').get_attribute('href')==event['content'])
-   await show(['x','twitter','xMultiple']);await page.wait_for_timeout(50)
-   check('Multiple X posts do not allocate duplicate-media jobs',await count('.post-text a')==4 and await value('__app.posts.embeds.owners.size+__app.posts.embeds.jobs.size')==0)
-   await show('x',depth=1);await page.wait_for_timeout(50)
-   check('Nested X URL stays an ordinary link',await count('.post-text a')==1 and await count('.content-embed,iframe')==0)
+    await show([event]);await settle()
+    check('X '+suffix+': embeds while preserving the original link',await count('.x-player')==1 and await page.locator('#rich-stage .post-text a').get_attribute('href')==event['content'])
+   await show(['x','twitter','xMultiple']);await page.wait_for_function('document.querySelectorAll("#rich-stage [data-state=pending]").length===0')
+   check('Duplicate X IDs across URL aliases load once without promoting later links',await count('.post-text a')==4 and await count('.x-player')==1 and await count('[data-state=failed]')==2 and await value('__media.frames.length')==1)
+   await show('x',depth=1);await settle()
+   check('Depth-one X consumes the last permitted embed level',await count('.post-text a')==1 and await count('.content-embed')==1 and await count('.x-player')==1)
+   await show('x',depth=2);await page.wait_for_timeout(40)
+   check('Depth-two X remains a link without media work',await count('.post-text a')==1 and await count('.content-embed,iframe')==0 and await value('__media.frames.length+__app.posts.embeds.jobs.size')==0)
    for name,selector in [('image','.post-image'),('youtube','.youtube-player'),('ref_note','.embedded-post'),('ref_nprofile','.user-row'),('ref_naddr','.embedded-post'),('quote','.embedded-post')]:
     event={**f['events'][name],'content':x_url+' '+f['events'][name]['content']}
     await show([event]);await settle()
-    check('X before '+name+': later supported candidate owns the sole root slot',await root_slots()==1 and await count(selector)==(2 if selector=='.embedded-post' else 1))
-    check('X before '+name+': original X link retained and no X frame',await page.locator('#rich-stage .post-text a[href^="https://x.com/"]').count()==1 and not any('/assets/embeds/x.html' in u for u in await value('__media.frames')))
+    check('X before '+name+': X owns the sole root slot',await root_slots()==1 and await count('.x-player')==1 and await count(selector)==0)
+    check('X before '+name+': original X link retained without loading later candidates',await page.locator('#rich-stage .post-text a[href^="https://x.com/"]').count()==1 and await value('__media.frames.length+__media.images.length')==1 and await value('__messages.length')==0)
    event={**f['events']['x'],'tags':[['imeta','url '+x_url,'m image/png']]}
-   await show([event]);await page.wait_for_timeout(50)
-   check('imeta cannot force an X page to load as an image',await count('.content-embed,img.post-image,iframe')==0 and await value('__media.images.length')==0)
+   await show([event]);await settle()
+   check('imeta keeps X in its own renderer instead of loading it as an image',await count('.x-player')==1 and await count('img.post-image')==0 and await value('__media.images.length')==0)
+   for mode in ['error','hang']:
+    await show('xMultiple',mode=mode,timeout=160);await settle('failed')
+    check('X '+mode+': removes the frame, preserves links and never advances to another candidate',await count('.x-player')==0 and await count('.embed-source')==1 and await count('.post-text a')==2 and await value('__media.frames.length')==1)
+   await show('x',mode='hang',timeout=2000);await page.wait_for_selector('.x-player')
+   await page.evaluate('''()=>{const frame=document.querySelector('.x-player'),origin='https://platform.twitter.com',rpc={jsonrpc:'2.0',method:'twttr.private.resize',params:[{width:550,height:430}]},data={'twttr.embed':rpc};
+    for(const message of [{source:frame.contentWindow,origin:'https://attacker.example',data},{source:window,origin,data},
+      {source:frame.contentWindow,origin,data:{'twttr.embed':{...rpc,jsonrpc:'1.0'}}},{source:frame.contentWindow,origin,data:{'twttr.embed':{...rpc,params:[{width:550,height:0}]}}}])window.dispatchEvent(new MessageEvent('message',message));
+   }''');check('X ignores wrong-origin, wrong-source, invalid-RPC and zero-height notifications',await count('[data-state=pending]')==1)
+   await page.evaluate('''()=>{const frame=document.querySelector('.x-player');window.dispatchEvent(new MessageEvent('message',{source:frame.contentWindow,origin:'https://platform.twitter.com',data:{'twttr.embed':{jsonrpc:'2.0',method:'twttr.private.rendered',params:[]}}}));}''')
+   check('X rendered notification still waits for a valid height',await count('[data-state=pending]')==1)
+   await page.evaluate('''()=>{const frame=document.querySelector('.x-player');window.dispatchEvent(new MessageEvent('message',{source:frame.contentWindow,origin:'https://platform.twitter.com',data:{'twttr.embed':{jsonrpc:'2.0',method:'twttr.private.resize',params:[{width:550,height:430}]}}}));}''')
+   await settle();check('X becomes ready once both rendering and measured height are confirmed',await page.locator('.x-player').get_attribute('height')=='430')
+   await page.get_by_role('button',name='埋め込みを閉じる').click();await settle('failed');check('X can be closed without losing its source link',await count('iframe')==0 and await count('.embed-source')==1 and await value('__app.posts.embeds.jobs.size')==0)
+   await show('x');await settle();await page.evaluate('__app.posts.reset()');check('View reset disposes X frames and pending listeners',await count('iframe')==0 and await value('__app.posts.embeds.jobs.size')==0)
    for width in [390,280]:
-    await page.set_viewport_size({'width':width,'height':844});await show('xMultiple');await page.wait_for_timeout(60)
-    check('Ordinary X links wrap without overflow at '+str(width)+'px',await value('document.documentElement.scrollWidth<=innerWidth') and await count('.content-embed')==0)
+    await page.set_viewport_size({'width':width,'height':844});await show('xMultiple');await settle()
+    check('X frame and links fit without overflow at '+str(width)+'px',await value('document.documentElement.scrollWidth<=innerWidth') and await count('.x-player')==1)
    await page.screenshot(path=str(OUT/'x-links-mobile.png'))
    await page.set_viewport_size({'width':1200,'height':1000})
-   await show('xMultiple');await page.screenshot(path=str(OUT/'x-links-desktop.png'))
-  await case('X/Twitter ordinary links',x_links)
+   await show('xMultiple');await settle();await page.screenshot(path=str(OUT/'x-links-desktop.png'))
+  await case('X/Twitter embeds',x_links)
 
   async def mixed():
    await show('mixed');await settle();check('Mixed NIP-21/image/X/YouTube/q uses first body image only',await count('.content-embed')==1 and await count('.post-image')==1 and await count('.quote-label')==1 and await count('.post-text a')==4)
@@ -258,7 +285,7 @@ async def main():
    check('Fetched posts, images and embed results are never persisted',await value('[...__saved.keys()].every(k=>!/(event:|query:|embed:|media:)/.test(k))'))
   await case('Mixed content and bounds',mixed)
   check('No uncaught parent-page JavaScript errors',not errors,errors)
-  result={'mode':'Native DOM/modules; X/Twitter ordinary links with no widget/frame. Mocked relay/storage/navigation/SHA/images/YouTube messages. Main CSP and public providers NOT exercised.',
+  result={'mode':'Native DOM/modules; X parent renderer and mocked X/YouTube messages, relay/storage/navigation/SHA/images. Main CSP, provider documents and public network NOT exercised.',
     'browser':browser.version,'passed':sum(c['passed'] for c in checks),'failed':sum(not c['passed'] for c in checks),'checks':checks,'errors':errors}
   (OUT/'content-browser-results.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
   await browser.close()

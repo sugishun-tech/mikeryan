@@ -35,7 +35,7 @@ includes a real user key supplied by this project.
 
 Event content, names, descriptions, relay strings and NIP-05 errors are built
 as DOM text. No untrusted `innerHTML`, `eval`, or arbitrary URL-based code
-loading is used. No provider script executes in the account document. X/Twitter pages are ordinary links, with no widget script or frame dependency. Remote images are HTTPS-only;
+loading is used. No provider script executes in the account document. X/Twitter posts use a cross-origin sandbox frame hosted by X. Remote images are HTTPS-only;
 links use allowed protocols and `noopener` / `noreferrer`. NIP-05 fetches
 omit credentials and referrers and reject redirects.
 
@@ -98,11 +98,15 @@ Public list kinds 3, 10000 and 10002 are bounded at 4 MiB of serialized UTF-8 an
 
 ## Rich embeds (1.3.3)
 
-The main page retains script-src self. X/Twitter card rendering and its local
-iframe/diagnostic assets have been removed. frame-src permits only the existing
-YouTube player origin, not same-origin frames. Merely displaying an X/Twitter
-page link does not contact the X widget service. Direct media URLs continue to
-follow the ordinary image-loading rules.
+The main page retains script-src self. frame-src permits the existing YouTube
+origin and platform.twitter.com. X/Twitter posts use the provider's display frame
+directly, without running widgets.js in the account document. The cross-origin
+frame permits scripts, its own origin and user-opened popups. The parent validates
+message source, exact origin, RPC envelope and positive finite height. It waits
+for rendering and size notifications, and falls back to a link on no results or
+timeout. This is a compatibility wire adapter, not a published JavaScript API.
+Existing visibility loading, cleanup and duplicate suppression apply. Direct
+media URLs continue to follow the ordinary image-loading rules.
 
 YouTube uses a direct cross-origin privacy-enhanced iframe. The sandbox permits
 its own origin, scripts and presentation; this is NOT a same-origin local script
