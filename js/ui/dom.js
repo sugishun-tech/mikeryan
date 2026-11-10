@@ -1,6 +1,6 @@
-import { contentLinks, linkHref, CONTENT_LIMITS } from '../content/references.js?v=1.3.3';
-import { safeURL } from '../core/utils.js?v=1.3.3';
-import { FALLBACK_ICON } from '../core/config.js?v=1.3.3';
+import { contentLinks, linkHref, CONTENT_LIMITS } from '../content/references.js?v=1.3.4';
+import { safeURL } from '../core/utils.js?v=1.3.4';
+import { FALLBACK_ICON } from '../core/config.js?v=1.3.4';
 export function el(tag,attributes={},...children){
   const node=document.createElement(tag);
   for(const [key,value]of Object.entries(attributes)){
@@ -25,7 +25,6 @@ const icons={
   repost:'M4 7h14l-4-4m4 4-4 4M20 17H6l4 4m-4-4 4-4M4 7v6m16 4v-6',
   reply:'M21 11a9 8 0 0 1-9 8H6l-4 3 1-7a8 8 0 0 1 9-12 9 8 0 0 1 9 8Z',
   heart:'M12 21 3 12C-2 4 8-1 12 6c4-7 14-2 9 6Z',
-  share:'M12 16V3m-5 5 5-5 5 5M5 13v8h14v-8',
   search:'M19 19l-5-5M16 9A7 7 0 1 1 2 9a7 7 0 0 1 14 0Z',
   back:'M20 12H4m7-7-7 7 7 7',
   check:'m5 12 4 4L19 6',

@@ -1,5 +1,5 @@
-import { LIMITS } from '../core/config.js?v=1.3.3';
-import { compareEvents, matchesFilter, nowSeconds, sortEvents } from '../core/utils.js?v=1.3.3';
+import { LIMITS } from '../core/config.js?v=1.3.4';
+import { compareEvents, matchesFilter, nowSeconds, sortEvents } from '../core/utils.js?v=1.3.4';
 
 /** Manual, viewport-anchored pages. `events` is the current rendered timeline only. */
 export class EventPager {
@@ -110,7 +110,7 @@ export class EventPager {
       high = Math.min(now, low + span); limit = this.size;
     }
     this.search = {anchor: anchor.id, low, high, span, limit};
-    this.warning = '現在位置に近い投稿を探すため、今回の取得を打ち切りました。「上に読み込む」で検索を続けられます。';
+    this.warning = '現在位置に近い投稿を探すため、今回の取得を打ち切りました。「上」で検索を続けられます。';
     return [];
   }
 }

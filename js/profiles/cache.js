@@ -1,6 +1,6 @@
-import { storagePrefix, LIMITS } from '../core/config.js?v=1.3.3';
-import { isHex, parseJSON, compareEvents } from '../core/utils.js?v=1.3.3';
-import { verifyEvent, validEventShape } from '../core/crypto.js?v=1.3.3';
+import { storagePrefix, LIMITS } from '../core/config.js?v=1.3.4';
+import { isHex, parseJSON, compareEvents } from '../core/utils.js?v=1.3.4';
+import { verifyEvent, validEventShape } from '../core/crypto.js?v=1.3.4';
 
 export function validProfile(event) {
   const value = parseJSON(event?.content);

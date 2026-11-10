@@ -55,8 +55,8 @@ async def main():
    await page.get_by_role('button',name=label,exact=True).click();await idle()
   ok('Anonymous initial access: zero REQ, zero NIP-05 HTTP and zero relay sockets',not await reqs() and await http()==0 and await page.evaluate('__sockets.length')==0)
   ok('Initial timeline contains no fetched posts',await page.locator('.timeline>.post').count()==0)
-  ok('All three original manual read controls remain',await page.locator('.feed-toolbar button').all_text_contents()==['下に読み込む','上に読み込む','最新を読み込む'])
-  await read('最新を読み込む')
+  ok('All three original manual read controls remain',await page.locator('.feed-toolbar button').all_text_contents()==['下','上','最新'])
+  await read('最新')
   ok('Explicit cold anonymous read: two REQs and thirty posts',len(await reqs())==2 and await page.locator('.timeline>.post').count()==30)
   await page.wait_for_selector('.nip05-badge.valid')
   ok('Mismatched NIP-05 is displayed as invalid',await page.locator('.nip05-badge.invalid').count()>0)
@@ -66,14 +66,14 @@ async def main():
   rect=await page.locator('.feed-toolbar').bounding_box()
   ok('Desktop three-button toolbar remains sticky',abs(rect['y']-56)<2)
   anchor=await page.evaluate('__app.activeFeed.current("older")');count=await page.locator('.timeline>.post').count()
-  await read('下に読み込む');sent=(await reqs())[n:]
+  await read('下');sent=(await reqs())[n:]
   ok('Down uses the viewport post timestamp and adds at most thirty rows',sent[0][2]['until']==anchor['created_at'] and 0<=await page.locator('.timeline>.post').count()-count<=30)
   ok('Known authors and their verification are reused for the next page',not any(f.get('kinds')==[0] for m in sent for f in m[2:]) and await http()==h)
   upper=await page.evaluate('__app.activeFeed.current("newer")')
   new=sign(dict(kind=1,tags=[],content='現在位置の上に追加した投稿',created_at=upper['created_at']+1),4)
   await page.evaluate('(e)=>__events.push(e)',new)
   top=await page.locator(f'.post[data-event-id="{upper["id"]}"]').evaluate('(e)=>e.getBoundingClientRect().top')
-  await read('上に読み込む')
+  await read('上')
   ok('Up preserves the reading position',abs(top-await page.locator(f'.post[data-event-id="{upper["id"]}"]').evaluate('(e)=>e.getBoundingClientRect().top'))<3)
   for width in (390,320):
    await page.set_viewport_size({'width':width,'height':844});await page.wait_for_timeout(100)
@@ -88,7 +88,7 @@ async def main():
    ok(f'{label} tab does not automatically fetch any data',len(await reqs())==n and await http()==h)
   unknown='f'*64;n=len(await reqs());await nav(f'#/profile/{unknown}/posts','.profile-tabs')
   ok('Uncached profile navigation also waits for explicit acquisition',len(await reqs())==n and '未取得のプロフィール' in await page.locator('.profile-info').inner_text())
-  await nav(f'#/profile/{bob}/posts','.profile-tabs');await read('最新を読み込む')
+  await nav(f'#/profile/{bob}/posts','.profile-tabs');await read('最新')
   post_ids=await page.locator('.timeline>.post').evaluate_all('(rows)=>rows.map(e=>e.dataset.eventId)')
   original=next(e for e in data['events'] if e['kind']==0 and e['pubkey']==bob)
   value=json.loads(original['content']);value['display_name']='保存更新テスト'
@@ -109,19 +109,19 @@ async def main():
   ok('Fresh module instance restores login and profile without network',not await reqs() and await http()==0 and key_calls==1 and await page.locator('#account strong').inner_text()=='アリス')
   await nav(f'#/profile/{bob}/posts','.profile-tabs')
   ok('Profile persisted through complete page replacement',await page.locator('.profile-info .display-name').inner_text()=='保存更新テスト' and not await reqs())
-  n=len(await reqs());h=await http();await read('最新を読み込む')
+  n=len(await reqs());h=await http();await read('最新')
   sent=(await reqs())[n:]
-  ok('Restored profile page fetches posts, a bounded short-page probe and likes, never cached metadata',len(sent)==3 and not any(f.get('kinds')==[0] for m in sent for f in m[2:]) and await http()==h)
+  ok('Restored profile page fetches posts and a bounded short-page probe, without likes or cached metadata',len(sent)==2 and not any(f.get('kinds')==[0] for m in sent for f in m[2:]) and await http()==h)
   for view in ('home','notifications','global'):
    n=len(await reqs());h=await http();await nav('#/'+view,'.feed-toolbar')
    ok(f'{view} navigation does not load posts or account lists',len(await reqs())==n and await http()==h and await page.locator('.timeline>.post').count()==0)
-   await read('最新を読み込む');sent=(await reqs())[n:]
+   await read('最新');sent=(await reqs())[n:]
    ok(f'{view} explicit read uses persisted identities and does not redo NIP-05',not any(f.get('kinds')==[0] for m in sent for f in m[2:]) and await http()==h)
   n=len(await reqs());await nav('#/thread/'+data['root'],'button:text-is("投稿を取得")')
   ok('Thread navigation does not load root, parent or replies',len(await reqs())==n)
   await page.get_by_role('button',name='投稿を取得',exact=True).click();await page.wait_for_selector('.thread-focus');await page.wait_for_selector('.feed-toolbar')
   ok('Thread root read does not automatically load the reply list',await page.locator('.thread-replies .timeline>.post').count()==0)
-  h=await http();n=len(await reqs());await read('最新を読み込む')
+  h=await http();n=len(await reqs());await read('最新')
   ok('Reply authors use persistent profiles',not any(f.get('kinds')==[0] for m in (await reqs())[n:] for f in m[2:]) and await http()==h)
   for tab,label in [('following','フォロー'),('followers','フォロワー'),('mutes','ミュート')]:
    await nav(f'#/profile/{alice}/{tab}',f'button:text-is("{label}を取得")');n=len(await reqs());h=await http()

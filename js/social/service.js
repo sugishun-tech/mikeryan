@@ -1,15 +1,16 @@
-import { relayEntries, relayListTags, changeRelayTags } from '../profiles/relay-list.js?v=1.3.3';
-import { APP_NAME, OUTBOX_RETENTION, storagePrefix } from '../core/config.js?v=1.3.3';
-import { Emitter, compareEvents, isHex, latest, nowSeconds, normalizeRelay, parseJSON, replyTags, unique } from '../core/utils.js?v=1.3.3';
+import { relayEntries, relayListTags, changeRelayTags } from '../profiles/relay-list.js?v=1.3.4';
+import { APP_NAME, OUTBOX_RETENTION, storagePrefix } from '../core/config.js?v=1.3.4';
+import { Emitter, compareEvents, isHex, latest, nowSeconds, normalizeRelay, parseJSON, replyTags, unique } from '../core/utils.js?v=1.3.4';
 const pubkeys = event => unique((event?.tags ?? []).filter(t=>t[0]==='p' && isHex(t[1])).map(t=>t[1]));
+const checkOutgoing = event => { if (event.kind === 7) throw new Error('いいねの送信には対応していません'); };
 export { pubkeys };
 export class Social extends Emitter {
   constructor(repository, session, settings, storage, network) {
     super(); this.repo=repository;this.session=session;this.settings=settings;this.storage=storage;this.network=network;
-    this.following=new Set();this.followingKnown=false;this.likes=new Set();this.pending=new Set();this.writeQueue=Promise.resolve();this.outboxQueue=Promise.resolve();this.deliveries=new Map();
+    this.following=new Set();this.followingKnown=false;this.pending=new Set();this.writeQueue=Promise.resolve();this.outboxQueue=Promise.resolve();this.deliveries=new Map();
     this.repo.on('replace',({event})=>{if(event.pubkey===this.session.pubkey && event.kind===3){this.following=new Set(pubkeys(event));this.followingKnown=true;this.emit('following',this.following);}});
   }
-  beginView() { this.following=new Set();this.followingKnown=false;this.likes=new Set();this.emit('following',this.following); }
+  beginView() { this.following=new Set();this.followingKnown=false;this.emit('following',this.following); }
   async loadAccount() {
     const key=this.session.pubkey;if(!key)return;
     const generation=this.repo.generation;
@@ -24,6 +25,7 @@ export class Social extends Emitter {
     if (!this.sameSession(context)) throw new Error('操作中にアカウントが変更されました。元のアカウントで操作し直してください');
   }
   async publish(template, context = this.sessionContext()) {
+    checkOutgoing(template);
     this.checkSession(context);
     const event=await this.session.sign({...template,tags:[...(template.tags??[]).filter(t=>t[0]!=='client'),['client',APP_NAME]]});
     this.checkSession(context);
@@ -54,6 +56,7 @@ export class Social extends Emitter {
     this.outboxQueue=run.catch(()=>{});return run;
   }
   sendSigned(event, relays = this.settings.value.relays, acceptedResults = []) {
+    try { checkOutgoing(event); } catch (error) { return Promise.reject(error); }
     if (this.deliveries.has(event.id)) return this.deliveries.get(event.id);
     const context=this.sessionContext(), generation=this.repo.generation;
     const job=(async()=>{
@@ -81,6 +84,7 @@ export class Social extends Emitter {
     this.deliveries.set(event.id,job);return job;
   }
   async retry(event) {
+    checkOutgoing(event);
     const context=this.sessionContext();this.checkSession(context);
     if(event.pubkey!==context.pubkey)throw new Error('別アカウントの送信は再実行できません');
     if(this.deliveries.has(event.id))return this.deliveries.get(event.id);
@@ -94,24 +98,6 @@ export class Social extends Emitter {
   post(content, parent=null) {
     const text=String(content).trim();if(!text)throw new Error('本文を入力してください');
     return this.publish({kind:1,content:text,tags:parent?replyTags(parent,this.session.pubkey):[]});
-  }
-  async like(event) {
-    const context=this.sessionContext();const id=event.id;if(this.likes.has(id)||this.pending.has(`like:${id}`))return;
-    this.pending.add(`like:${id}`);
-    try{
-      const signed=await this.publish({kind:7,content:'+',tags:[['e',event.id],['p',event.pubkey],['k',String(event.kind)]]});
-      if(this.sameSession(context)){this.likes.add(id);this.emit('like',id);}
-    }finally{this.pending.delete(`like:${id}`);}
-  }
-  applyLikes(reactions, page, key = this.session.pubkey) {
-    if (!key || this.session.pubkey !== key) return;
-    // Only update this batch. Do not erase other on-screen or locally published likes.
-    for (const e of reactions) {
-      if (e.kind !== 7 || e.pubkey !== key) continue;
-      const id = e.tags.filter(t => t[0] === 'e').at(-1)?.[1];
-      if (id && ['+', '❤', '❤️', '🤙'].includes(e.content)) this.likes.add(id);
-    }
-    this.emit('likes', this.likes);
   }
   exclusive(kind,task,context=this.sessionContext()) {
     const pubkey=context.pubkey;if(!pubkey)return Promise.reject(new Error('ログインしてください'));

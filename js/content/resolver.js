@@ -1,7 +1,7 @@
-import { verifyEvent } from '../core/crypto.js?v=1.3.3';
-import { LIMITS } from '../core/config.js?v=1.3.3';
-import { isHex, stableJSON } from '../core/utils.js?v=1.3.3';
-import { CONTENT_LIMITS, matchesReference, referenceKey, repostReference } from './references.js?v=1.3.3';
+import { verifyEvent } from '../core/crypto.js?v=1.3.4';
+import { LIMITS } from '../core/config.js?v=1.3.4';
+import { isHex, stableJSON } from '../core/utils.js?v=1.3.4';
+import { CONTENT_LIMITS, matchesReference, referenceKey, repostReference } from './references.js?v=1.3.4';
 
 /** Bounded, view-local single flight. No event/media storage or relay discovery. */
 export class ContentResolver {

@@ -9,12 +9,12 @@ const fixture=JSON.parse(read('tests/fixtures/rich-content.json'));
 const events=fixture.events;
 
 test('Application display name changes without renaming stored data',()=>{
-  assert.equal(APP_NAME,'マイク・ライアン');
+  assert.equal(APP_NAME,'舞久雷庵');
   assert.ok(storagePrefix().startsWith('mikeryan:v1:'));
   const entry=read('index.html');
-  assert.ok(entry.includes('<title>マイク・ライアン</title>'));
-  assert.ok(entry.includes('<span>マイク・ライアン</span>'));
-  assert.ok(entry.includes('id="page-title">マイク・ライアン</h1>'));
+  assert.ok(entry.includes('<title>舞久雷庵</title>'));
+  assert.ok(entry.includes('<span>舞久雷庵</span>'));
+  assert.ok(entry.includes('id="page-title">舞久雷庵</h1>'));
   assert.doesNotMatch(read('js/app.js'),/\/ mikeryan|\?\?'mikeryan'/);
 });
 test('Right search is deleted with its handlers; mobile search is preserved',()=>{

@@ -105,7 +105,7 @@ async def main():
             await page.wait_for_timeout(300)
             ok('Native initial access: no relay connection, REQ or NIP-05 HTTP', not connections and not requests() and http_count == 0)
             async def read(target):
-                await target.get_by_role('button', name='最新を読み込む', exact=True).click()
+                await target.get_by_role('button', name='最新', exact=True).click()
                 await target.wait_for_function('''()=>{const status=document.querySelector('.feed-status');return status &&
                     !/読み込み中|まだ取得/.test(status.textContent) && [...document.querySelectorAll('.feed-toolbar button')].every(b=>!b.disabled)}''')
                 await target.wait_for_selector('.timeline>.post')

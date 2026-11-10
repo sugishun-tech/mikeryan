@@ -1,12 +1,12 @@
-import { EventPager } from './pagination.js?v=1.3.3';
-import { chunks, sortEvents } from '../core/utils.js?v=1.3.3';
-import { el, button, busy, empty, avatar, toast } from '../ui/dom.js?v=1.3.3';
-import { local } from '../core/storage.js?v=1.3.3';
+import { EventPager } from './pagination.js?v=1.3.4';
+import { chunks, sortEvents } from '../core/utils.js?v=1.3.4';
+import { el, button, busy, empty, avatar, toast } from '../ui/dom.js?v=1.3.4';
+import { local } from '../core/storage.js?v=1.3.4';
 export function composer(app,parent=null){
   const area=el('textarea',{rows:3,placeholder:parent?'返信を投稿':'いまどうしてる？',maxLength:16000,'aria-label':parent?'返信本文':'投稿本文'});
   const draftKey=`draft:${app.session.pubkey}:${parent?.id??'post'}`;area.value=local.get(draftKey)??'';
   area.addEventListener('input',()=>local.set(draftKey,area.value));
-  const send=button(parent?'返信する':'ポストする',async()=>busy(send,async()=>{
+  const send=button(parent?'返信':'ポスト',async()=>busy(send,async()=>{
     if(!app.session.pubkey){await app.login();return;}
     const submitted=area.value;if(!submitted.trim())return;
     const onPosted=app.onPosted;
@@ -16,7 +16,7 @@ export function composer(app,parent=null){
     if(local.get(draftKey)===submitted)local.remove(draftKey);
     toast('投稿しました');if(row.isConnected)onPosted?.(event);
   }),'button primary');
-  const row=el('section',{class:'composer'},avatar(app.repo.peekProfile(app.session.pubkey),'avatar',app.settings.value.loadImages),el('div',{class:'composer-content'},area,el('div',{class:'composer-bottom'},el('span',{class:'muted-text'},'Nostr · テキスト投稿'),send)));
+  const row=el('section',{class:'composer'},avatar(app.repo.peekProfile(app.session.pubkey),'avatar',app.settings.value.loadImages),el('div',{class:'composer-content'},area,el('div',{class:'composer-bottom'},send)));
   if(!app.session.pubkey){area.disabled=true;area.placeholder='ログインすると投稿できます';send.textContent='ログイン';}
   return row;
 }
@@ -32,9 +32,9 @@ export class FeedView {
     this.toolbar=el('nav',{class:'feed-toolbar','aria-label':'投稿の読み込み'});
     this.buttons={};
     for (const [direction, label, title] of [
-      ['older','下に読み込む','画面内の一番下の投稿から、古い側へ最大30件'],
-      ['newer','上に読み込む','画面内の一番上の投稿から、新しい側へ最大30件'],
-      ['latest','最新を読み込む','現在時刻から、古い側へ最大30件']
+      ['older','下','古い投稿を読み込む'],
+      ['newer','上','新しい投稿を読み込む'],
+      ['latest','最新','最新の投稿を読み込む']
     ]) {
       const b=button(label,()=>this.read(direction).catch(e=>toast(e.message,true)),
         'button feed-read-button',{title,'aria-label':label,dataset:{direction}});
@@ -48,7 +48,7 @@ export class FeedView {
   }
   alive(){return !this.dead && this.host.isConnected;}
   dispose(){this.dead=true;}
-  init(){this.status.textContent='まだ取得していません。読み込みボタンを押してください。';return Promise.resolve();}
+  init(){return Promise.resolve();}
   viewport() {
     const top=Math.max(56,this.toolbar.getBoundingClientRect().bottom);
     const nav=document.querySelector('.sidebar');
@@ -89,9 +89,8 @@ export class FeedView {
         if(!this.alive())return;
         await Promise.all(page.map(e=>this.app.repo.accept(e)));
         const candidates=page.filter(e=>this.candidate(e));
-        const key=this.app.session.pubkey;
         let info;
-        try { info=await this.app.repo.decorate(candidates,key); }
+        try { info=await this.app.repo.decorate(candidates); }
         catch(error) { info={events:[],complete:false,errors:[{reason:error.message}]}; }
         // Unknown due to a failed metadata read is not a confirmed incomplete
         // profile. Keep the cursor retryable without changing any mute rules.
@@ -100,7 +99,6 @@ export class FeedView {
           throw new Error('投稿者情報の取得が未完了です。表示条件を確認できないため位置を進めず、同じページを再試行します');
         }
         if(!this.alive())return;
-        this.app.social.applyLikes(info.events,candidates,key);
         const reset=direction==='latest'&&(this.pager.complete||page.length>0);
         this.render({reset});
         const hidden=page.filter(e=>!this.visible(e)).length;
@@ -138,7 +136,6 @@ export class FeedView {
       if(node!==cursor)this.list.insertBefore(node,cursor);else cursor=cursor.nextElementSibling;
     }
     if(!this.visibleEvents.length)this.list.append(empty(events.length?'表示できる投稿がありません':'投稿が見つかりません',events.length?'現在の表示・ミュート条件で非表示になっています。':'設定中のリレーの範囲です。'));
-    this.app.posts.updateLikes();
   }
   async insert(event){
     if(!this.alive())return;

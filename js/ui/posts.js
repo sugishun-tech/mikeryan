@@ -1,9 +1,9 @@
-import { el, avatar, button, busy, icon, richText, copy } from './dom.js?v=1.3.3';
-import { cleanClient, parentId, shortKey, isHex } from '../core/utils.js?v=1.3.3';
-import { profileHref, threadHref } from '../core/router.js?v=1.3.3';
-import { encodeKey } from '../core/nip19.js?v=1.3.3';
-import { contentPlan, referenceHref, referenceURI, repostReference } from '../content/references.js?v=1.3.3';
-import { Embeds } from './embeds.js?v=1.3.3';
+import { el, avatar, button, busy, icon, richText, copy } from './dom.js?v=1.3.4';
+import { cleanClient, parentId, shortKey, isHex } from '../core/utils.js?v=1.3.4';
+import { profileHref, threadHref } from '../core/router.js?v=1.3.4';
+import { encodeKey } from '../core/nip19.js?v=1.3.4';
+import { contentPlan, referenceHref, referenceURI, repostReference } from '../content/references.js?v=1.3.4';
+import { Embeds } from './embeds.js?v=1.3.4';
 export class Posts {
   constructor(app){this.app=app;this.embeds=new Embeds(app,(event,options)=>this.render(event,options));}
   reset(){this.embeds.reset();}
@@ -52,8 +52,7 @@ export class Posts {
       const client=cleanClient(event);if(client)body.append(el('div',{class:'client-label'},'via '+client));
       const actions=el('div',{class:'post-actions'});
       actions.append(el('a',{href:threadHref(event.id),class:'icon-button reply-action',title:'返信・スレッドを開く','aria-label':'返信・スレッドを開く'},icon('reply',19)));
-      const heart=button('',async()=>busy(heart,()=>app.social.like(event)),'icon-button heart-action',{title:'いいね','aria-label':'いいね',dataset:{like:event.id}});heart.append(icon('heart',19));heart.classList.toggle('liked',app.social.likes.has(event.id));heart.setAttribute('aria-pressed',String(app.social.likes.has(event.id)));
-      actions.append(heart,button(icon('share',18),()=>copy(new URL(threadHref(event.id),location.href).href),'icon-button',{title:'リンクをコピー','aria-label':'リンクをコピー'}),button(icon('link',18),()=>copy('nostr:'+encodeKey('note',event.id)),'icon-button',{title:'Nostr投稿IDをコピー','aria-label':'Nostr投稿IDをコピー'}));body.append(actions);
+      actions.append(button(icon('link',18),()=>copy('nostr:'+encodeKey('note',event.id)),'icon-button',{title:'Nostr投稿IDをコピー','aria-label':'Nostr投稿IDをコピー'}));body.append(actions);
     }
     card.append(imageLink,body);
     card.addEventListener('click',e=>{if(e.target.closest('.post')!==card||e.target.closest('a,button,input,textarea,iframe,video,select')||window.getSelection()?.toString())return;app.router.go(threadHref(target||event.id));});
@@ -66,5 +65,4 @@ export class Posts {
       const b=button(label,async()=>busy(b,async()=>{const event=await app.repo.event(id);if(!box.isConnected)return;box.replaceChildren(event?el('a',{href:threadHref(id)},event.content.slice(0,160)):el('span',{},'設定中のリレーでは見つかりませんでした'));}),'text-button');box.append(b);
     }return box;
   }
-  updateLikes(){for(const b of document.querySelectorAll('[data-like]')){const on=this.app.social.likes.has(b.dataset.like);b.classList.toggle('liked',on);b.setAttribute('aria-pressed',String(on));}}
 }

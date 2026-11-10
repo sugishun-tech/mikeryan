@@ -1,5 +1,5 @@
-import { el, button, field, empty, toast } from '../ui/dom.js?v=1.3.3';
-import { normalizeRelay } from '../core/utils.js?v=1.3.3';
+import { el, button, field, empty, toast } from '../ui/dom.js?v=1.3.4';
+import { normalizeRelay } from '../core/utils.js?v=1.3.4';
 
 export function relayTab(app, owner, host) {
   const own=owner===app.session.pubkey, rows=el('div',{class:'public-relays'});
@@ -27,7 +27,6 @@ export function relayTab(app, owner, host) {
   };
   const read=button('リレーを取得',()=>run(async()=>paint(await app.social.relays(owner))),'button secondary');
   host.append(el('p',{class:'list-note'},'公開リレーリスト（NIP-65）。設定ページの接続先リレーとは別です。'),read,error,rows);
-  rows.append(empty('まだ取得していません','「リレーを取得」を押してください。'));
   if(own){
     const form=el('form',{class:'public-relay-form'}),url=el('input',{type:'url',placeholder:'wss://relay.example.com/',required:true,'aria-label':'追加する公開リレー',maxLength:2048});
     const mode=el('select',{'aria-label':'公開リレーの用途'},...['read/write','read','write'].map((m,i)=>el('option',{value:m},['読み書き','読み取り','書き込み'][i])));

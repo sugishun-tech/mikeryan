@@ -1,14 +1,14 @@
-import { relayTab } from './relays-view.js?v=1.3.3';
-import { editProfileDialog } from './editor.js?v=1.3.3';
+import { relayTab } from './relays-view.js?v=1.3.4';
+import { editProfileDialog } from './editor.js?v=1.3.4';
 export { editProfileDialog };
-import { FollowerDirectory } from '../social/followers.js?v=1.3.3';
-import { FeedView } from '../feed/view.js?v=1.3.3';
-import { pubkeys } from '../social/service.js?v=1.3.3';
-import { el, avatar, button, busy, empty, loading, richText, copy } from '../ui/dom.js?v=1.3.3';
-import { profileHref } from '../core/router.js?v=1.3.3';
-import { encodeKey } from '../core/nip19.js?v=1.3.3';
-import { validProfile } from './cache.js?v=1.3.3';
-import { safeURL, latest } from '../core/utils.js?v=1.3.3';
+import { FollowerDirectory } from '../social/followers.js?v=1.3.4';
+import { FeedView } from '../feed/view.js?v=1.3.4';
+import { pubkeys } from '../social/service.js?v=1.3.4';
+import { el, avatar, button, busy, empty, loading, richText, copy } from '../ui/dom.js?v=1.3.4';
+import { profileHref } from '../core/router.js?v=1.3.4';
+import { encodeKey } from '../core/nip19.js?v=1.3.4';
+import { validProfile } from './cache.js?v=1.3.4';
+import { safeURL, latest } from '../core/utils.js?v=1.3.4';
 export class ProfileView {
   constructor(app,route,host){this.app=app;this.route=route;this.host=host;this.owner=route.pubkey;this.offset=0;this.listOperation=null;this.listVersion=0;this.loadedUsers=new Set();this.list=el('div',{class:'profile-tab-content'});}
   async init(){
@@ -24,7 +24,7 @@ export class ProfileView {
     else {
       const type=this.route.tab,label=({following:'フォロー',followers:'フォロワー',mutes:'ミュート'})[type];
       const read=button(`${label}を取得`,()=>this.runList(async()=>{if(type==='followers')await this.followers();else await this.localList(type);}),'button secondary');
-      this.list.append(read,empty('まだ取得していません',`「${label}を取得」を押してください。`));
+      this.list.append(read);
     }
   }
   paintHeader(){
@@ -55,7 +55,6 @@ export class ProfileView {
     if(profile.lud16)info.append(el('div',{class:'muted-text'},'⚡ '+String(profile.lud16)));
     const refreshProfile=button('プロフィールを更新',()=>busy(refreshProfile,async()=>{await app.repo.profile(owner,{fresh:true});if(!this.header.isConnected)return;this.paintHeader();app.identity.refresh(owner);}), 'text-button');
     info.append(el('div',{class:'key-actions'},refreshProfile,button('npubをコピー',()=>copy(encodeKey('npub',owner)),'text-button'),button('hexをコピー',()=>copy(owner),'text-button')));
-    if(!app.repo.knownProfile(owner))info.append(el('p',{class:'help'},'未取得のプロフィールです。「プロフィールを更新」で取得します。'));
     this.header.replaceChildren(cover,info);
   }
   runList(task) {

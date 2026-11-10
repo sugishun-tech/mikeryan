@@ -1,7 +1,7 @@
-import { el, button } from './dom.js?v=1.3.3';
-import { ContentResolver } from '../content/resolver.js?v=1.3.3';
-import { CONTENT_LIMITS, referenceHref, referenceURI } from '../content/references.js?v=1.3.3';
-import { threadHref } from '../core/router.js?v=1.3.3';
+import { el, button } from './dom.js?v=1.3.4';
+import { ContentResolver } from '../content/resolver.js?v=1.3.4';
+import { CONTENT_LIMITS, referenceHref, referenceURI } from '../content/references.js?v=1.3.4';
+import { threadHref } from '../core/router.js?v=1.3.4';
 
 let serial=0;
 const readMessage=data=>{
@@ -15,7 +15,7 @@ const readMessage=data=>{
 export class Embeds {
   constructor(app, renderPost, {timeout=CONTENT_LIMITS.timeout}={}) {
     this.app=app; this.renderPost=renderPost; this.timeout=timeout;
-    this.resolver=new ContentResolver(app.repo); this.jobs=new Set(); this.owners=new Map();
+    this.resolver=new ContentResolver(app.repo); this.jobs=new Set();
     this.observer=new IntersectionObserver(entries=>{
       for (const entry of entries) if (entry.isIntersecting) {
         this.observer.unobserve(entry.target); entry.target._startEmbed?.();
@@ -23,14 +23,13 @@ export class Embeds {
     },{rootMargin:'200px'});
     this.removals=new MutationObserver(()=>{
       for (const job of this.jobs) if (!job.host.isConnected) job.cancel();
-      for (const [key,host] of this.owners) if (!host.isConnected) this.owners.delete(key);
     });
     this.removals.observe(document.body,{childList:true,subtree:true});
   }
   reset() {
     this.observer.disconnect();
     for (const job of [...this.jobs]) job.cancel();
-    this.owners.clear(); this.resolver.reset();
+    this.resolver.reset();
   }
   /** Start a new explicit read. Pending requests remain coalesced by Repository. */
   beginRead() { this.resolver.reset(); }
@@ -63,14 +62,10 @@ export class Embeds {
     };
     const listen=(target,type,handler)=>{target.addEventListener(type,handler);cleanups.push(()=>target.removeEventListener(type,handler));};
     const deadline=()=>{timer=setTimeout(()=>fail(),this.timeout);};
-    const externalKey=embed.id ? `${embed.type}:${embed.id}` : embed.type==='image' ? 'image:'+embed.href : null;
     const start=async()=>{
       if (started||!alive()) return; started=true;
-      if (externalKey) {
-        const owner=this.owners.get(externalKey);
-        if (owner && owner!==host && owner.isConnected) { fail('同じコンテンツの重複読み込みを省略しました'); return; }
-        this.owners.set(externalKey,host);
-      }
+      // Each post owns its renderer, even when another post links to the same
+      // media. Resolver/browser caches may share bytes without hiding cards.
       try {
         if (embed.type==='nostr' || embed.type==='repost') {
           deadline();

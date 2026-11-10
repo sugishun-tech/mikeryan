@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {ProfileCache} from '../js/profiles/cache.js';
 import {Repository} from '../js/core/repository.js';
+import {feedFilters} from '../js/feed/view.js';
 import {compactProfileFilters, missingProfileFilters} from '../js/network/profile-batch.js';
 import {canonicalFilters, stableJSON} from '../js/core/utils.js';
 import {LIMITS, DEFAULTS} from '../js/core/config.js';
@@ -30,25 +31,26 @@ test('30 profile authors compact to one bounded filter; never widen ordinary lim
  assert.equal(compact.length,5);assert.ok(compact.some(f=>f.kinds[0]===0&&f.limit===30&&f.authors.length===30));
  for(const f of canonicalFilters(extra))assert.ok(compact.some(g=>stableJSON(g)===stableJSON(f)));
 });
-test('A cold signed-in thirty-author page uses two REQs per relay, not three',async t=>{
+test('A cold thirty-author page reads posts and metadata without own-reaction queries',async t=>{
  const h=setup(t);const page=await h.repo.query([{kinds:[1],ids:data.pages[0].map(e=>e.id),limit:30}]);
  const info=await h.repo.decorate(page.events,data.user);
- assert.equal(h.requests().length,2);assert.equal(h.requests()[1].message.length-2,2);
- assert.equal(info.events.filter(e=>e.kind===0).length,30);assert.equal(info.events.filter(e=>e.kind===7).length,30);
+ assert.equal(h.requests().length,2);assert.equal(h.requests()[1].message.length-2,1);
+ assert.equal(info.events.filter(e=>e.kind===0).length,30);assert.equal(info.events.filter(e=>e.kind===7).length,0);
+ assert.ok(h.requests().every(request=>!kinds(request).includes(7)));
  assert.equal(h.pool.stats().relays[0].closes,2);assert.equal(h.pool.stats().relays[0].connections,1);
  assert.equal(h.storage.memory.size,0);
 });
-test('Known profiles are not re-requested; new page reactions remain a fresh scoped read',async t=>{
+test('Known profiles make repeated page decoration entirely local',async t=>{
  const h=setup(t);await h.repo.decorate(data.pages[0],data.user);const before=h.requests().length;
  await h.repo.decorate(data.pages[1],data.user);const sent=h.requests().slice(before);
- assert.equal(sent.length,1);assert.deepEqual(kinds(sent[0]),[7]);
- assert.deepEqual(new Set(sent[0].message[2]['#e']),new Set(data.pages[1].map(e=>e.id)));
- await h.repo.decorate(data.pages[1],data.user);assert.equal(h.requests().length,before+2);
+ assert.equal(sent.length,0);
+ await h.repo.decorate(data.pages[1],data.user);assert.equal(h.requests().length,before);
 });
-test('Mixed pages request only the ten unknown authors, plus one page-reaction filter',async t=>{
+test('Mixed pages request only the ten unknown authors',async t=>{
  const h=setup(t);await h.repo.decorate(data.pages[0],data.user);const before=h.requests().length;
  await h.repo.decorate(data.pages[2],data.user);const sent=h.requests().slice(before);
  assert.equal(sent.length,1);assert.equal(profileFilters(sent[0])[0].authors.length,10);
+ assert.deepEqual(kinds(sent[0]),[0]);
  assert.ok(profileFilters(sent[0])[0].authors.every(key=>!authors.includes(key)));
 });
 test('Anonymous warm decoration sends zero REQs; a subsequent explicit post read still sends one',async t=>{
@@ -56,9 +58,9 @@ test('Anonymous warm decoration sends zero REQs; a subsequent explicit post read
  await h.repo.decorate(data.pages[1],null);assert.equal(h.requests().length,before);
  await h.repo.query([{kinds:[1],limit:30}]);assert.equal(h.requests().length,before+1);
 });
-test('In-flight profile reads share the same batch with feed reactions; no per-post request leak',async t=>{
+test('In-flight profile reads and feed decoration share the same metadata batch',async t=>{
  const h=setup(t);await Promise.all([h.repo.profile(authors[0]),h.repo.profiles(authors),h.repo.decorate(data.pages[0],data.user)]);
- assert.equal(h.requests().length,1);assert.equal(h.requests()[0].message.length-2,2);assert.equal(h.repo.pending.size,0);
+ assert.equal(h.requests().length,1);assert.equal(h.requests()[0].message.length-2,1);assert.equal(h.repo.pending.size,0);
 });
 test('Already-running identity request is reused by a concurrent feed read',async t=>{
  const h=setup(t,{delay:80});const identity=h.repo.profile(authors[0]);
@@ -113,11 +115,18 @@ test('Empty EOSE has no pointless repair; positive-partial EOSE checks absent au
  assert.equal(partial.requests().length,3);assert.equal(partial.repo.profileReads.size,1);
  const before=partial.requests().length;await partial.repo.profiles(authors);assert.equal(partial.requests().length,before+1);
 });
-test('Repair never repeats own reactions, known authors, or starts after failed EOSE',async t=>{
+test('Metadata repair never requests reactions or starts after failed EOSE',async t=>{
  const h=setup(t,{caps:{[relay]:f=>f.kinds[0]===0?5:60}});await h.repo.decorate(data.pages[0],data.user);
- assert.equal(h.requests().length,3);assert.equal(h.requests().filter(r=>kinds(r).includes(7)).length,1);
+ assert.equal(h.requests().length,3);assert.equal(h.requests().filter(r=>kinds(r).includes(7)).length,0);
  const bad=setup(t,{fail:{[relay]:'rate-limited: test'}});const info=await bad.repo.decorate(data.pages[0],data.user);
  assert.equal(info.complete,false);assert.equal(bad.requests().length,1);assert.equal(bad.repo.profileReads.size,0);
+});
+test('Notification filters still receive signed reactions directed to the current user',async t=>{
+ const h=setup(t),reaction=data.reactions[0],recipient=reaction.tags.find(tag=>tag[0]==='p')[1];
+ const filters=feedFilters({session:{pubkey:recipient}},'notifications');
+ const result=await h.repo.query(filters.map(filter=>({...filter,limit:30})));
+ assert.equal(result.complete,true);assert.ok(result.events.some(event=>event.id===reaction.id));
+ assert.ok(result.events.filter(event=>event.kind===7).every(event=>event.tags.some(tag=>tag[0]==='p'&&tag[1]===recipient)));
 });
 test('The first repair rejection stops all further repair chunks on that relay',async t=>{
  let count=0;const h=setup(t,{caps:{[relay]:5},fail:{[relay]:()=>++count===2?'rate-limited: stop':null}});

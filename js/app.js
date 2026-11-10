@@ -1,22 +1,22 @@
-import { APP_NAME } from './core/config.js?v=1.3.3';
-import { nostrReference, referenceHref } from './content/references.js?v=1.3.3';
-import { Storage } from './core/storage.js?v=1.3.3';
-import { Settings } from './settings/store.js?v=1.3.3';
-import { NetworkClient } from './network/client.js?v=1.3.3';
-import { Session } from './auth/session.js?v=1.3.3';
-import { Repository } from './core/repository.js?v=1.3.3';
-import { Nip05 } from './profiles/nip05.js?v=1.3.3';
-import { Social } from './social/service.js?v=1.3.3';
-import { Moderation } from './feed/moderation.js?v=1.3.3';
-import { Identity } from './ui/identity.js?v=1.3.3';
-import { Posts } from './ui/posts.js?v=1.3.3';
-import { Router, profileHref, threadHref } from './core/router.js?v=1.3.3';
-import { FeedView, feedFilters, composer } from './feed/view.js?v=1.3.3';
-import { ProfileView } from './profiles/view.js?v=1.3.3';
-import { settingsView } from './settings/view.js?v=1.3.3';
-import { el, button, busy, icon, avatar, loading, empty, toast } from './ui/dom.js?v=1.3.3';
-import { parentId, stableJSON, matchesFilter } from './core/utils.js?v=1.3.3';
-import { decodeKey } from './core/nip19.js?v=1.3.3';
+import { APP_NAME } from './core/config.js?v=1.3.4';
+import { nostrReference, referenceHref } from './content/references.js?v=1.3.4';
+import { Storage } from './core/storage.js?v=1.3.4';
+import { Settings } from './settings/store.js?v=1.3.4';
+import { NetworkClient } from './network/client.js?v=1.3.4';
+import { Session } from './auth/session.js?v=1.3.4';
+import { Repository } from './core/repository.js?v=1.3.4';
+import { Nip05 } from './profiles/nip05.js?v=1.3.4';
+import { Social } from './social/service.js?v=1.3.4';
+import { Moderation } from './feed/moderation.js?v=1.3.4';
+import { Identity } from './ui/identity.js?v=1.3.4';
+import { Posts } from './ui/posts.js?v=1.3.4';
+import { Router, profileHref, threadHref } from './core/router.js?v=1.3.4';
+import { FeedView, feedFilters, composer } from './feed/view.js?v=1.3.4';
+import { ProfileView } from './profiles/view.js?v=1.3.4';
+import { settingsView } from './settings/view.js?v=1.3.4';
+import { el, button, busy, icon, avatar, loading, empty, toast } from './ui/dom.js?v=1.3.4';
+import { parentId, stableJSON, matchesFilter } from './core/utils.js?v=1.3.4';
+import { decodeKey } from './core/nip19.js?v=1.3.4';
 class App {
   async start(){
     this.settings=new Settings();await this.settings.load();this.storage=new Storage();
@@ -37,7 +37,6 @@ class App {
     document.getElementById('mobile-search-button').addEventListener('click',()=>this.searchDialog());
     this.session.on('change',()=>{for(const dialog of document.querySelectorAll('dialog[data-profile-editor]'))dialog.close();this.repo.resetSession();this.accountKey=null;this.updateAccount();void this.render(this.router.route??{view:'global'});});
     this.social.on('following',()=>this.identity.updateFollows());this.social.on('followBusy',()=>this.identity.updateFollows());
-    this.social.on('like',()=>this.posts.updateLikes());this.social.on('likes',()=>this.posts.updateLikes());
     this.social.on('notice',message=>toast(message));
     this.settings.on('change',()=>{this.moderation.rebuild();this.applyTheme();this.accountKey=null;});
     this.repo.on('warning',message=>{if(message!==this.lastWarning){this.lastWarning=message;toast('一部のリレーとの通信を休止しました。設定画面に理由を表示します。',true);}});
@@ -92,7 +91,7 @@ class App {
         this.onPosted=event=>{if(page.feed&&event.pubkey===route.pubkey)return page.feed.insert(event);};
       }else if(route.view==='thread'||route.view==='address'){
         const read=button('投稿を取得',()=>busy(read,()=>this.thread(route.reference??route.id,host,token)),'button secondary');
-        host.append(read,empty('まだ取得していません','「投稿を取得」を押すと本文と返信先を取得します。'));
+        host.append(read);
       }
       else{
         const filters=feedFilters(this,route.view);

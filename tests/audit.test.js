@@ -32,6 +32,18 @@ function socialHarness({read=async()=>null,publish,storage}={}){
  const social=new Social(repo,session,{value:{...DEFAULTS,relays:['wss://a.example/','wss://b.example/']}},storage,network);
  return {repo,session,social,network,storage,signed,values};
 }
+for (const operation of ['publish','sendSigned','retry']) test(`Outgoing reactions cannot be signed or sent through ${operation}`,async()=>{
+ let sends=0;const h=socialHarness({publish:async()=>{sends++;throw Error('Unexpected network send');}});
+ const reaction=fixture.events.find(e=>e.kind===7&&e.pubkey===alice);
+ await h.storage.set(`outbox:${alice}`,[{event:reaction,time:Date.now(),results:[{relay:'wss://a.example/',accepted:false}]}]);
+ await assert.rejects(h.social[operation](reaction),/いいねの送信/);
+ assert.equal(h.signed.length,0);assert.equal(sends,0);assert.equal(h.social.deliveries.size,0);
+});
+test('Ordinary posting still signs and publishes after reaction sending is removed',async()=>{
+ let sends=0;const h=socialHarness({publish:async({event,relays})=>{sends++;assert.equal(event.kind,1);return {results:relays.map(relay=>({relay,accepted:true}))};}});
+ const sent=await h.social.post('A normal post');
+ assert.equal(sent.kind,1);assert.equal(sent.content,'A normal post');assert.equal(h.signed.length,1);assert.equal(sends,1);
+});
 test('Pending login cannot undo an explicit logout',async t=>{
  browser(t);const gate=deferred(),started=deferred();window.nostr={getPublicKey:()=>{started.resolve();return gate.promise;},signEvent:async()=>{}};
  const s=new Session(),job=s.login();await started.promise;s.logout();gate.resolve(alice);

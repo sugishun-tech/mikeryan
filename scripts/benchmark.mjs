@@ -25,6 +25,7 @@ function snapshot(h) {
 }
 function delta(a,b){return Object.fromEntries(Object.keys(b).map(k=>[k,b[k]-a[k]]));}
 async function measure(version,Repo=Repository,Pool=RelayPool,anonymous=false){
+ const readsOwnReactions=Repo!==Repository&&!anonymous;
  const h=fakeRelay({events:[...fixture.profiles,...fixture.pages.flat(),...fixture.reactions],Pool});
  const settings={value:{...DEFAULTS,relays,readRelayCount:2,requestGapMs:0}};
  const repo=new Repo(h.storage,h.pool,settings), steps=[];
@@ -35,7 +36,7 @@ async function measure(version,Repo=Repository,Pool=RelayPool,anonymous=false){
   assert.equal(result.events.length,30);assert.equal(info.complete,true);
   assert.ok(page.every(e=>result.events.some(r=>r.id===e.id)));
   assert.ok(page.every(e=>repo.peekProfile(e.pubkey).name));
-  if(key)assert.equal(new Set(info.events.filter(e=>e.kind===7).flatMap(e=>e.tags.filter(t=>t[0]==='e').map(t=>t[1]))).size,30);
+  assert.equal(new Set(info.events.filter(e=>e.kind===7).flatMap(e=>e.tags.filter(t=>t[0]==='e').map(t=>t[1]))).size,readsOwnReactions?30:0);
   steps.push({name,...delta(before,snapshot(h)),requestsPerRelay:relays.map(relay=>({relay,count:h.requests().slice(from).filter(r=>r.url===relay).length})),
     profileAuthorsPerRelay:relays.map(relay=>({relay,count:h.requests().slice(from).filter(r=>r.url===relay).flatMap(r=>r.message.slice(2)).filter(f=>f.kinds?.includes(0)).reduce((n,f)=>n+f.authors.length,0)}))});
  }
@@ -52,7 +53,7 @@ async function measure(version,Repo=Repository,Pool=RelayPool,anonymous=false){
    await step('repeat: same 30 authors, still signed in',fixture.pages[1],fixture.user);
   }
   assert.equal(h.storage.memory.size,0);
-  return {version,relayCount:relays.length,steps,total:snapshot(h),connections:h.sockets.length};
+  return {version,relayCount:relays.length,readsOwnReactions,steps,total:snapshot(h),connections:h.sockets.length};
  }finally{await h.close();}
 }
 const runs=[],anonymousRuns=[];
@@ -67,7 +68,7 @@ if(baseIndex>=0){
 }
 runs.push(await measure(VERSION));
 anonymousRuns.push(await measure(VERSION,Repository,RelayPool,true));
-const result={conditions:{fixture:'tests/fixtures/traffic.json; public signed TEST data',signatureVerification:'Production BIP-340/id verification enabled',transport:'In-process WebSocket fixture using production RelayConnection; newest-first, bounded per-filter results',operations:'Five signed-in post/decorate reads, no logout; two selected relays; 30 posts per read; one own positive reaction per post. Independent anonymous sessions are measured separately.',excluded:'Account bootstrap, NIP-05 HTTP, images, TCP/TLS framing/handshakes, server CPU/I/O/latency and public-relay variation. Upward range probes and missing-profile repairs are separate tests.',note:'Metadata is complete on both fixture relays; this is not a universal request-count bound or a benchmark against original mynostr.'},runs,anonymousRuns};
+const result={conditions:{fixture:'tests/fixtures/traffic.json; public signed TEST data',signatureVerification:'Production BIP-340/id verification enabled',transport:'In-process WebSocket fixture using production RelayConnection; newest-first, bounded per-filter results',operations:'Five signed-in post/decorate reads, no logout; two selected relays; 30 posts per read. Independent anonymous sessions are measured separately.',reactions:'Fixtures retain one own positive reaction per post. The current Repository never requests these reactions; signed-in legacy --baseline runs still request all 30. Incoming reaction notifications are tested separately.',excluded:'Account bootstrap, NIP-05 HTTP, images, TCP/TLS framing/handshakes, server CPU/I/O/latency and public-relay variation. Upward range probes and missing-profile repairs are separate tests.',note:'Metadata is complete on both fixture relays; this is not a universal request-count bound or a benchmark against original mynostr. Current-versus-legacy reductions include removed outgoing-like synchronization, not just optimizations with identical features.'},runs,anonymousRuns};
 if(runs.length===2){
  result.reduction={};for(const key of ['requests','sentJSONBytes','receivedJSONBytes','receivedEvents','filters'])result.reduction[key]=Number(((1-runs[1].total[key]/runs[0].total[key])*100).toFixed(2));
 }

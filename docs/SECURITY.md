@@ -87,7 +87,8 @@ limits. A confirmed OK means that relay accepted the event, not perpetual
 retention or universal propagation. Paid/authenticated relays and other
 restrictions may require user action. No restriction-evasion mechanism exists.
 
-This release was checked with Node and native-module/offline-adapted DOM tests.
+This release was checked with Node tests and narrow DOM/event fixtures. Chromium
+could not start because the execution environment denied its socket operation.
 Live HTTP CSP, browser SharedWorker, extension interoperability, GitHub deployment
 and public-relay acceptance were not part of this removal verification.
 
@@ -96,7 +97,7 @@ and public-relay acceptance were not part of this removal verification.
 Public list kinds 3, 10000 and 10002 are bounded at 4 MiB of serialized UTF-8 and 50,000 tags. Other events retain the 256 KiB / 10,000-tag limits. Incoming frames are bounded at 8 MiB before parsing. Oversize public lists and frames fail the read instead of being treated as a successful empty list. Signatures and event IDs are still verified; these larger limits do not permit unsigned or malformed data. A verification-provider exception settles the request as incomplete instead of leaving the queue pending. No missing-row fix disables mute or display filters.
 
 
-## Rich embeds (1.3.3)
+## Rich embeds (1.3.4)
 
 The main page retains script-src self. frame-src permits the existing YouTube
 origin and platform.twitter.com. X/Twitter posts use the provider's display frame
@@ -105,8 +106,9 @@ frame permits scripts, its own origin and user-opened popups. The parent validat
 message source, exact origin, RPC envelope and positive finite height. It waits
 for rendering and size notifications, and falls back to a link on no results or
 timeout. This is a compatibility wire adapter, not a published JavaScript API.
-Existing visibility loading, cleanup and duplicate suppression apply. Direct
-media URLs continue to follow the ordinary image-loading rules.
+Visibility loading and cleanup apply independently to every post. Matching media
+URLs in different posts are displayed in each post. Direct media URLs continue
+to follow the ordinary image-loading rules.
 
 YouTube uses a direct cross-origin privacy-enhanced iframe. The sandbox permits
 its own origin, scripts and presentation; this is NOT a same-origin local script
@@ -124,3 +126,10 @@ mismatching, cyclic or oversized data is never rendered as an authenticated
 original. Referenced events use configured relays only. One direct slot per post, at most two nested levels,
 bounded memo and text/link pagination limit automatic expansion. Timers,
 listeners and frame jobs are disposed when their owner disappears.
+
+## Incoming reactions only
+
+The client no longer provides outgoing reaction controls or like-state synchronization.
+Social.publish, sendSigned and retry reject kind:7 before signing or transport.
+Legacy pending reactions are omitted from the resend list. Incoming kind:7
+notification queries and rendering remain available.

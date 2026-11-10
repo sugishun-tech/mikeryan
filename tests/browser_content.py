@@ -81,8 +81,8 @@ async def main():
   await page.wait_for_selector('.feed-toolbar')
   check('No relay REQ on startup, despite mixed rich-content fixtures',await page.evaluate('__messages.filter(m=>m[0]==="REQ").length')==0)
   check('Right-side search form, input and button are removed',await page.locator('#search-form,#search-input,#search-button,.right-column input').count()==0)
-  check('Right-side documentation links remain',await page.locator('.right-column .right-footer a').count()==2)
-  check('Brand and browser tab use the Japanese application name',await page.locator('.brand span').inner_text()=='マイク・ライアン' and (await page.title()).endswith(' / マイク・ライアン'))
+  check('Right column contains no explanatory links',await page.locator('.right-column').inner_text()=='')
+  check('Brand and browser tab use the Japanese application name',await page.locator('.brand span').inner_text()=='舞久雷庵' and (await page.title()).endswith(' / 舞久雷庵'))
   check('Japanese brand stays on one line within its sidebar',await page.locator('.brand').evaluate('''brand=>{const label=brand.querySelector('span'),box=label.getBoundingClientRect();
    return getComputedStyle(brand).whiteSpace==='nowrap' && box.right<=brand.getBoundingClientRect().right && box.height<=36;}'''))
   await page.screenshot(path=str(OUT/'ui-desktop.png'))
@@ -191,7 +191,8 @@ async def main():
     if name=='imeta':check('NIP-92 metadata provides alt and dimensions',await page.locator('.post-image').get_attribute('alt')=='青空の写真' and await page.locator('.post-image').get_attribute('width')=='3000')
     if name=='images':check('Additional image URLs remain links without fetch',await count('.post-text a')==3 and await value('__media.images.length')==1)
    await show('imageFailure');await settle('failed');check('Broken image hides image but retains both source links',await count('.post-image')==0 and await count('.embed-source')==1 and await count('.post-text a')==1)
-   await show(['image','image']);await page.wait_for_function('document.querySelectorAll("#rich-stage [data-state=pending]").length===0');check('Duplicate image fetched once per view',await value('__media.images.length')==1)
+   await show(['image','images']);await page.locator('#rich-stage > .post').last.scroll_into_view_if_needed();await settle()
+   check('Same image renders in two distinct posts without adding sibling slots',await root_slots()==2 and await count('.post-image')==2 and await count('[data-state=ready]')==2 and await value('__media.images.length')==2 and await count('.post-text a')==4)
    await show('image');await settle();await page.screenshot(path=str(OUT/'rich-image-desktop.png'))
    for width in [390,320]:
     await page.set_viewport_size({'width':width,'height':844});await page.wait_for_timeout(60)
@@ -209,6 +210,10 @@ async def main():
     check(name+': link remains on successful load',await count('.embed-source')==1)
    check('Multiple videos create only one player',await value('__media.frames.length')==1 and await count('.post-text a')==2)
    check('YouTube keeps origin-only Referer for player identification',await page.locator('.youtube-player').get_attribute('referrerpolicy')=='strict-origin-when-cross-origin')
+   await show(['youtube','youtubeWatch']);await page.locator('#rich-stage > .post').last.scroll_into_view_if_needed();await settle()
+   check('Same YouTube video renders in both posts across URL aliases',await root_slots()==2 and await count('.youtube-player')==2 and await count('[data-state=ready]')==2 and await value('__media.frames.length')==2)
+   await page.get_by_role('button',name='埋め込みを閉じる').first.click()
+   check('Closing one duplicate player leaves the other player ready',await count('.youtube-player')==1 and await count('[data-state=ready]')==1 and await count('[data-state=failed]')==1)
    for mode in ['error','hang']:
     await show('youtube',mode=mode,timeout=160);await settle('failed');check('YouTube '+mode+': iframe removed and ordinary links retained',await count('.youtube-player')==0 and await count('.embed-source')==1 and await count('.post-text a')==1)
    await show('youtube',mode='hang',timeout=2000);await page.wait_for_selector('.youtube-player');await page.evaluate('''()=>{const f=document.querySelector('.youtube-player');
@@ -235,8 +240,10 @@ async def main():
     event={**f['events']['x'],'content':x_url+suffix}
     await show([event]);await settle()
     check('X '+suffix+': embeds while preserving the original link',await count('.x-player')==1 and await page.locator('#rich-stage .post-text a').get_attribute('href')==event['content'])
-   await show(['x','twitter','xMultiple']);await page.wait_for_function('document.querySelectorAll("#rich-stage [data-state=pending]").length===0')
-   check('Duplicate X IDs across URL aliases load once without promoting later links',await count('.post-text a')==4 and await count('.x-player')==1 and await count('[data-state=failed]')==2 and await value('__media.frames.length')==1)
+   await show(['x','twitter','xMultiple'])
+   for post in await page.locator('#rich-stage > .post').all():await post.scroll_into_view_if_needed()
+   await settle()
+   check('Same X post renders in each distinct post across URL aliases without promoting later links',await root_slots()==3 and await count('.post-text a')==4 and await count('.x-player')==3 and await count('[data-state=ready]')==3 and await value('__media.frames.length')==3)
    await show('x',depth=1);await settle()
    check('Depth-one X consumes the last permitted embed level',await count('.post-text a')==1 and await count('.content-embed')==1 and await count('.x-player')==1)
    await show('x',depth=2);await page.wait_for_timeout(40)

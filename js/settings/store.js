@@ -1,6 +1,6 @@
-import { DEFAULTS, LIMITS } from '../core/config.js?v=1.3.3';
-import { local } from '../core/storage.js?v=1.3.3';
-import { Emitter, lines, normalizeRelay, parseJSON, unique, isHex } from '../core/utils.js?v=1.3.3';
+import { DEFAULTS, LIMITS } from '../core/config.js?v=1.3.4';
+import { local } from '../core/storage.js?v=1.3.4';
+import { Emitter, lines, normalizeRelay, parseJSON, unique, isHex } from '../core/utils.js?v=1.3.4';
 const array = (v, fallback = []) => Array.isArray(v) ? v : fallback;
 export function validateSettings(input = {}) {
   if (!input || typeof input !== 'object' || Array.isArray(input)) throw new Error('設定JSONはオブジェクトで指定してください');

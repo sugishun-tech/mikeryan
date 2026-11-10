@@ -1,8 +1,8 @@
-import { matchesReference, referenceKey } from '../content/references.js?v=1.3.3';
-import { Emitter, chunks, compareEvents, isHex, latest, matchesFilter, parseJSON, sortEvents, stableJSON, unique } from './utils.js?v=1.3.3';
-import { LIMITS } from './config.js?v=1.3.3';
-import { ProfileCache, validProfile } from '../profiles/cache.js?v=1.3.3';
-import { compactLatestFilters } from '../network/profile-batch.js?v=1.3.3';
+import { matchesReference, referenceKey } from '../content/references.js?v=1.3.4';
+import { Emitter, chunks, compareEvents, isHex, latest, matchesFilter, parseJSON, sortEvents, stableJSON, unique } from './utils.js?v=1.3.4';
+import { LIMITS } from './config.js?v=1.3.4';
+import { ProfileCache, validProfile } from '../profiles/cache.js?v=1.3.4';
+import { compactLatestFilters } from '../network/profile-batch.js?v=1.3.4';
 
 const emptyResult = () => ({events: [], complete: true, errors: []});
 const relayScope = relays => stableJSON(unique(relays).sort());
@@ -177,20 +177,11 @@ export class Repository extends Emitter {
       }
     }));
   }
-  /** Unknown authors + this page's own reactions, normally two filters in one REQ.
-   * Completed page/like results are not reused, including negative like results.
-   */
-  async decorate(events, pubkey) {
+  /** Load only the metadata needed to display this page's authors. */
+  async decorate(events) {
     const authors = unique(events.map(e => e.pubkey)).filter(isHex);
-    const ids = unique(events.filter(e => e.kind === 1).map(e => e.id)).filter(isHex);
     await this.cachedProfiles(authors);
     const reads = authors.map(author => this.replacementRead(0, author));
-    if (isHex(pubkey) && ids.length) {
-      const filters = chunks(ids, LIMITS.page).map(group => ({
-        kinds: [7], authors: [pubkey], '#e': group, limit: Math.min(60, group.length * 2)
-      }));
-      reads.push(this.batchQuery(filters));
-    }
     const results = await Promise.all(reads);
     await this.verifyProfiles(authors);
     const errors = [...new Map(results.flatMap(r => r.errors ?? []).map(e => [stableJSON(e), e])).values()];

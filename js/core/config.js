@@ -1,5 +1,5 @@
 export const APP_NAME = '舞久雷庵';
-export const VERSION = '1.3.3';
+export const VERSION = '1.3.4';
 export const DEFAULTS = Object.freeze({
   relays: ['wss://relay-jp.nostr.wirednet.jp/', 'wss://yabu.me/'],
   batchSize: 30,
