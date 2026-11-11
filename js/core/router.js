@@ -1,6 +1,6 @@
-import { nostrReference, referenceHref } from '../content/references.js?v=1.3.4';
-import { profileKey, decodeKey } from './nip19.js?v=1.3.4';
-import { isHex } from './utils.js?v=1.3.4';
+import { nostrReference, referenceHref } from '../content/references.js?v=1.3.5';
+import { profileKey, decodeKey } from './nip19.js?v=1.3.5';
+import { isHex } from './utils.js?v=1.3.5';
 const tabs=new Set(['posts','following','followers','mutes','relays']);
 export const profileHref=(key,tab='posts')=>`#/profile/${key}/${tab}`;
 export const threadHref=id=>`#/thread/${id}`;

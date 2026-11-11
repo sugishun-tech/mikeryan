@@ -1,6 +1,6 @@
 /** Pure content parsing and a single rich-slot policy. Never performs I/O. */
-import { decodeKey, encodeKey, encodeAddress } from '../core/nip19.js?v=1.3.4';
-import { isHex, safeURL } from '../core/utils.js?v=1.3.4';
+import { decodeKey, encodeKey, encodeAddress } from '../core/nip19.js?v=1.3.5';
+import { isHex, safeURL } from '../core/utils.js?v=1.3.5';
 
 export const CONTENT_LIMITS = Object.freeze({maxDepth:2, links:128, text:64000, reference:5006, memo:512, timeout:15000});
 const TYPES = /^(?:npub|nprofile|note|nevent|naddr)1[0-9a-z]+$/i;

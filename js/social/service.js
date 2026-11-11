@@ -1,16 +1,19 @@
-import { relayEntries, relayListTags, changeRelayTags } from '../profiles/relay-list.js?v=1.3.4';
-import { APP_NAME, OUTBOX_RETENTION, storagePrefix } from '../core/config.js?v=1.3.4';
-import { Emitter, compareEvents, isHex, latest, nowSeconds, normalizeRelay, parseJSON, replyTags, unique } from '../core/utils.js?v=1.3.4';
+import { relayEntries, relayListTags, changeRelayTags } from '../profiles/relay-list.js?v=1.3.5';
+import { APP_NAME, OUTBOX_RETENTION, storagePrefix } from '../core/config.js?v=1.3.5';
+import { Emitter, compareEvents, isHex, latest, nowSeconds, normalizeRelay, parseJSON, replyTags, unique } from '../core/utils.js?v=1.3.5';
+import { ReactionReplies } from './reaction-replies.js?v=1.3.5';
 const pubkeys = event => unique((event?.tags ?? []).filter(t=>t[0]==='p' && isHex(t[1])).map(t=>t[1]));
-const checkOutgoing = event => { if (event.kind === 7) throw new Error('いいねの送信には対応していません'); };
+const REACTION_REPLY = Symbol('notification reaction reply');
+const checkOutgoing = (event, permission) => { if (event.kind === 7 && permission !== REACTION_REPLY) throw new Error('いいねの送信は通知のリアクション専用ボタンから行ってください'); };
 export { pubkeys };
 export class Social extends Emitter {
   constructor(repository, session, settings, storage, network) {
     super(); this.repo=repository;this.session=session;this.settings=settings;this.storage=storage;this.network=network;
     this.following=new Set();this.followingKnown=false;this.pending=new Set();this.writeQueue=Promise.resolve();this.outboxQueue=Promise.resolve();this.deliveries=new Map();
+    this.reactionReplies=new ReactionReplies(this,(event,relays,results,onDelivery)=>this.sendSigned(event,relays,results,REACTION_REPLY,onDelivery));
     this.repo.on('replace',({event})=>{if(event.pubkey===this.session.pubkey && event.kind===3){this.following=new Set(pubkeys(event));this.followingKnown=true;this.emit('following',this.following);}});
   }
-  beginView() { this.following=new Set();this.followingKnown=false;this.emit('following',this.following); }
+  beginView() { this.following=new Set();this.followingKnown=false;this.emit('following',this.following);this.reactionReplies.beginView(); }
   async loadAccount() {
     const key=this.session.pubkey;if(!key)return;
     const generation=this.repo.generation;
@@ -55,8 +58,8 @@ export class Social extends Emitter {
       ? navigator.locks.request(`${storagePrefix()}outbox:${event.pubkey}`,task) : task());
     this.outboxQueue=run.catch(()=>{});return run;
   }
-  sendSigned(event, relays = this.settings.value.relays, acceptedResults = []) {
-    try { checkOutgoing(event); } catch (error) { return Promise.reject(error); }
+  sendSigned(event, relays = this.settings.value.relays, acceptedResults = [], permission, onDelivery) {
+    try { checkOutgoing(event,permission); } catch (error) { return Promise.reject(error); }
     if (this.deliveries.has(event.id)) return this.deliveries.get(event.id);
     const context=this.sessionContext(), generation=this.repo.generation;
     const job=(async()=>{
@@ -73,6 +76,7 @@ export class Social extends Emitter {
       catch(error) { response={results:targets.map(relay=>({relay,accepted:false,reason:error.message||'送信結果を確認できません'}))}; }
       const saved=await this.updateOutbox(event,[...acceptedResults,...response.results]);
       const result={results:saved.results,accepted:saved.results.filter(r=>r.accepted).length,total:saved.results.length};
+      if(onDelivery)await onDelivery(result);
       this.emit('delivery',result);
       if (!result.accepted) throw new Error(saved.persistent
         ? 'どのリレーにも受理を確認できませんでした。署名済みイベントを設定の「未完了の送信」に保存しました。新しく投稿し直す前に、そちらから再送してください'

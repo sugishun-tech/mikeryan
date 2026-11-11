@@ -1,7 +1,7 @@
-import { APP_NAME, DEFAULTS } from '../core/config.js?v=1.3.4';
-import { el, button, busy, field, toast, empty } from '../ui/dom.js?v=1.3.4';
-import { lines, normalizeRelay } from '../core/utils.js?v=1.3.4';
-import { local } from '../core/storage.js?v=1.3.4';
+import { APP_NAME, DEFAULTS } from '../core/config.js?v=1.3.5';
+import { el, button, busy, field, toast, empty } from '../ui/dom.js?v=1.3.5';
+import { lines, normalizeRelay } from '../core/utils.js?v=1.3.5';
+import { local } from '../core/storage.js?v=1.3.5';
 export async function settingsView(app,host){
   const s=app.settings.value,form=el('form',{class:'settings-form'}),inputs={};
   const add=(key,label,tag='input',attrs={})=>{const input=el(tag,{...attrs,value:Array.isArray(s[key])?s[key].join('\n'):s[key]});inputs[key]=input;form.append(field(label,input));return input;};
@@ -42,8 +42,15 @@ export async function settingsView(app,host){
   const refresh=button('状況を更新',()=>busy(refresh,inspect),'button secondary');diagnostics.append(refresh,output);host.append(diagnostics);await inspect();
   if(!host.isConnected)return;
   const outbox=el('section',{class:'settings-section'},el('h2',{},'未完了の送信'));host.append(outbox);
-  if(app.session.pubkey){const rows=(await app.storage.get(`outbox:${app.session.pubkey}`)??[]).filter(item=>item.event.kind!==7);if(!rows.length)outbox.append(el('p',{class:'help'},'未完了の送信はありません。'));
-    for(const item of rows){const row=el('div',{class:'outbox-item'},el('p',{},`kind:${item.event.kind} · ${new Date(item.time).toLocaleString()}`),el('p',{},item.event.content.slice(0,180)),el('p',{class:'help'},item.results.filter(r=>!r.accepted).map(r=>r.relay+': '+r.reason).join('\n')));
-      const retry=button('未達リレーへ再送',()=>busy(retry,async()=>{await app.social.retry(item.event);toast('再送結果を更新しました');await app.render(app.router.route);}),'button secondary');row.append(retry);outbox.append(row);}
+  if(app.session.pubkey){
+    const pubkey=app.session.pubkey,epoch=app.session.epoch;
+    const rows=(await app.storage.get(`outbox:${pubkey}`)??[]).filter(item=>item.event.kind!==7);
+    let reactionError='';
+    try{rows.push(...await app.social?.reactionReplies?.pendingRows?.()??[]);}catch(error){reactionError=error.message;}
+    if(!host.isConnected||app.session.pubkey!==pubkey||app.session.epoch!==epoch)return;
+    if(reactionError)outbox.append(el('p',{class:'warning'},reactionError));
+    if(!rows.length&&!reactionError)outbox.append(el('p',{class:'help'},'未完了の送信はありません。'));
+    for(const item of rows){const row=el('div',{class:'outbox-item'},el('p',{},`${item.event.kind===7?'リアクションへのいいね':`kind:${item.event.kind}`} · ${new Date(item.time).toLocaleString()}`),el('p',{},item.event.content.slice(0,180)),el('p',{class:'help'},item.results.filter(r=>!r.accepted).map(r=>r.relay+': '+r.reason).join('\n')));
+      const retry=button('未達リレーへ再送',()=>busy(retry,async()=>{await (item.event.kind===7?app.social.reactionReplies.retry(item.event):app.social.retry(item.event));toast('再送結果を更新しました');await app.render(app.router.route);}),'button secondary');row.append(retry);outbox.append(row);}
   }else outbox.append(el('p',{class:'help'},'ログインすると表示できます。'));
 }

@@ -1,13 +1,13 @@
-import { el, avatar, button, busy, icon, richText, copy } from './dom.js?v=1.3.4';
-import { cleanClient, parentId, shortKey, isHex } from '../core/utils.js?v=1.3.4';
-import { profileHref, threadHref } from '../core/router.js?v=1.3.4';
-import { encodeKey } from '../core/nip19.js?v=1.3.4';
-import { contentPlan, referenceHref, referenceURI, repostReference } from '../content/references.js?v=1.3.4';
-import { Embeds } from './embeds.js?v=1.3.4';
+import { el, avatar, button, busy, icon, richText, copy, toast } from './dom.js?v=1.3.5';
+import { cleanClient, parentId, shortKey, isHex } from '../core/utils.js?v=1.3.5';
+import { profileHref, threadHref } from '../core/router.js?v=1.3.5';
+import { encodeKey } from '../core/nip19.js?v=1.3.5';
+import { contentPlan, referenceHref, referenceURI, repostReference } from '../content/references.js?v=1.3.5';
+import { Embeds } from './embeds.js?v=1.3.5';
 export class Posts {
-  constructor(app){this.app=app;this.embeds=new Embeds(app,(event,options)=>this.render(event,options));}
-  reset(){this.embeds.reset();}
-  beginRead(){this.embeds.beginRead();}
+  constructor(app){this.app=app;this.embeds=new Embeds(app,(event,options)=>this.render(event,options));this.reactionButtons=new Set();this.offReactions=null;}
+  reset(){this.embeds.reset();this.offReactions?.();this.offReactions=null;this.reactionButtons.clear();}
+  beginRead(){this.embeds.beginRead();for(const entry of this.reactionButtons)if(!entry.button.isConnected)this.reactionButtons.delete(entry);}
   render(event,options={}){
     try { return this.renderCard(event,options); }
     catch {
@@ -38,7 +38,13 @@ export class Posts {
     const timestamp=new Date(event.created_at*1000);
     head.append(el('a',{href:threadHref(target||event.id),class:'post-time',title:timestamp.toLocaleString('ja-JP',{timeZone:'Asia/Tokyo'})},timestamp.toLocaleDateString('ja-JP',{month:'numeric',day:'numeric'})+' '+timestamp.toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'})));
     body.append(head);
-    if(event.kind===7){body.append(el('div',{class:'notification-label'},icon('heart',18),`リアクション ${event.content||'+'}`));if(target)body.append(this.preview(target,'対象の投稿を表示'));}
+    if(event.kind===7){
+      body.append(el('div',{class:'notification-label'},icon('heart',18),`リアクション ${event.content||'+'}`));
+      if(target)body.append(this.preview(target,'対象の投稿を表示'));
+      if(notification&&!thread&&!embedded&&depth===0&&app.social?.reactionReplies?.eligible(event)){
+        body.append(el('div',{class:'post-actions reaction-actions'},this.reactionButton(event)));
+      }
+    }
     else{
       const parent=parentId(event);if(parent&&!thread)body.append(this.preview(parent,'返信先の投稿を表示'));
       body.append(el('div',{class:'post-text'},richText(event.content)));
@@ -57,6 +63,40 @@ export class Posts {
     card.append(imageLink,body);
     card.addEventListener('click',e=>{if(e.target.closest('.post')!==card||e.target.closest('a,button,input,textarea,iframe,video,select')||window.getSelection()?.toString())return;app.router.go(threadHref(target||event.id));});
     return card;
+  }
+  reactionButton(event){
+    const app=this.app,replies=app.social.reactionReplies,pubkey=app.session.pubkey;
+    let working=false;
+    const heart=button(icon('heart',20),async e=>{
+      e.stopPropagation();
+      if(heart.disabled||working||pubkey!==app.session.pubkey)return;
+      working=true;paint();
+      try{await replies.like(event);}
+      catch(error){toast(error.message,true);}
+      finally{working=false;paint();}
+    },'icon-button heart-action',{dataset:{reactionId:event.id}});
+    const paint=()=>{
+      const state=replies.state(event),status=state.status;
+      const active=pubkey===app.session.pubkey&&replies.eligible(event);
+      const liked=status==='liked',waiting=working||status==='checking'||status==='sending';
+      const labels={liked:'このリアクションにいいね済み',checking:'いいねを確認中',sending:'いいねを送信中',pending:'送信結果を確認できません。設定の「未完了の送信」から再送できます',error:'いいねを再確認して送信'};
+      const label=working?'いいねを送信中':labels[status]??'このリアクションにいいね';
+      heart.disabled=!active||liked||waiting||status==='pending';
+      heart.classList.toggle('liked',liked);
+      heart.classList.toggle('is-pending',status==='pending');
+      heart.setAttribute('aria-pressed',String(liked));
+      heart.setAttribute('aria-label',label);
+      heart.setAttribute('title',status==='error'&&state.error?`${label}: ${state.error}`:label);
+      if(waiting)heart.setAttribute('aria-busy','true');else heart.removeAttribute('aria-busy');
+    };
+    this.reactionButtons.add({button:heart,event,pubkey,paint});
+    if(!this.offReactions)this.offReactions=replies.on('change',change=>{
+      for(const entry of this.reactionButtons){
+        if(!entry.button.isConnected){this.reactionButtons.delete(entry);continue;}
+        if((!change?.targetId||change.targetId===entry.event.id)&&(!change?.pubkey||change.pubkey===entry.pubkey))entry.paint();
+      }
+    });
+    paint();return heart;
   }
   preview(id,label){
     const app=this.app,box=el('div',{class:'reply-preview'}),known=app.repo.events.get(id);

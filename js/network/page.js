@@ -1,5 +1,5 @@
-import { LIMITS } from '../core/config.js?v=1.3.4';
-import { sortEvents } from '../core/utils.js?v=1.3.4';
+import { LIMITS } from '../core/config.js?v=1.3.5';
+import { sortEvents } from '../core/utils.js?v=1.3.5';
 
 /** A short EOSE is not proof that the requested interval was exhausted.
  * Probe below it before merging with another relay's older data. Repairs are

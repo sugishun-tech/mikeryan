@@ -1,2104 +1,400 @@
-TAP version 13
-# Subtest: Outgoing reactions cannot be signed or sent through publish
-ok 1 - Outgoing reactions cannot be signed or sent through publish
-  ---
-  duration_ms: 27.568914
-  type: 'test'
-  ...
-# Subtest: Outgoing reactions cannot be signed or sent through sendSigned
-ok 2 - Outgoing reactions cannot be signed or sent through sendSigned
-  ---
-  duration_ms: 4.589682
-  type: 'test'
-  ...
-# Subtest: Outgoing reactions cannot be signed or sent through retry
-ok 3 - Outgoing reactions cannot be signed or sent through retry
-  ---
-  duration_ms: 0.781051
-  type: 'test'
-  ...
-# Subtest: Ordinary posting still signs and publishes after reaction sending is removed
-ok 4 - Ordinary posting still signs and publishes after reaction sending is removed
-  ---
-  duration_ms: 2.188104
-  type: 'test'
-  ...
-# Subtest: Pending login cannot undo an explicit logout
-ok 5 - Pending login cannot undo an explicit logout
-  ---
-  duration_ms: 1.434584
-  type: 'test'
-  ...
-# Subtest: A stale login cannot overwrite a newer login attempt
-ok 6 - A stale login cannot overwrite a newer login attempt
-  ---
-  duration_ms: 0.61769
-  type: 'test'
-  ...
-# Subtest: Queued signing snapshots the requested body and tags at click time
-ok 7 - Queued signing snapshots the requested body and tags at click time
-  ---
-  duration_ms: 17.718327
-  type: 'test'
-  ...
-# Subtest: Logout and login to the same key invalidate an older signing operation
-ok 8 - Logout and login to the same key invalidate an older signing operation
-  ---
-  duration_ms: 1.559819
-  type: 'test'
-  ...
-# Subtest: Account changes during signature verification are checked again before return
-ok 9 - Account changes during signature verification are checked again before return
-  ---
-  duration_ms: 8.850129
-  type: 'test'
-  ...
-# Subtest: follow: delayed read cannot sign old-account data using a new account
-ok 10 - follow: delayed read cannot sign old-account data using a new account
-  ---
-  duration_ms: 1.254569
-  type: 'test'
-  ...
-# Subtest: profile: delayed read cannot sign old-account data using a new account
-ok 11 - profile: delayed read cannot sign old-account data using a new account
-  ---
-  duration_ms: 0.457344
-  type: 'test'
-  ...
-# Subtest: A successful old-view account read cannot overwrite a newer received follow list
-ok 12 - A successful old-view account read cannot overwrite a newer received follow list
-  ---
-  duration_ms: 0.601095
-  type: 'test'
-  ...
-# Subtest: Follow read-modify-write preserves a newer signed current-view list
-ok 13 - Follow read-modify-write preserves a newer signed current-view list
-  ---
-  duration_ms: 4.392883
-  type: 'test'
-  ...
-# Subtest: Concurrent incomplete sends retain both signed events in the outbox
-ok 14 - Concurrent incomplete sends retain both signed events in the outbox
-  ---
-  duration_ms: 6.520507
-  type: 'test'
-  ...
-# Subtest: A transport exception after signing preserves the exact event for retry
-ok 15 - A transport exception after signing preserves the exact event for retry
-  ---
-  duration_ms: 1.346904
-  type: 'test'
-  ...
-# Subtest: Concurrent retries of one event share one send operation
-ok 16 - Concurrent retries of one event share one send operation
-  ---
-  duration_ms: 4.680457
-  type: 'test'
-  ...
-# Subtest: Outbox removes acknowledgements completed in another tab, not stale memory
-ok 17 - Outbox removes acknowledgements completed in another tab, not stale memory
-  ---
-  duration_ms: 1.924105
-  type: 'test'
-  ...
-# Subtest: A failed persistent write remains readable from the current tab instead of stale disk
-ok 18 - A failed persistent write remains readable from the current tab instead of stale disk
-  ---
-  duration_ms: 0.581507
-  type: 'test'
-  ...
-# Subtest: State storage reports failed persistence instead of silently claiming success
-ok 19 - State storage reports failed persistence instead of silently claiming success
-  ---
-  duration_ms: 4.055245
-  type: 'test'
-  ...
-# Subtest: A failed profile write cannot downgrade a newer known record
-ok 20 - A failed profile write cannot downgrade a newer known record
-  ---
-  duration_ms: 1.45955
-  type: 'test'
-  ...
-# Subtest: Profile persistence failure retains current-session metadata for reload within the tab
-ok 21 - Profile persistence failure retains current-session metadata for reload within the tab
-  ---
-  duration_ms: 0.668876
-  type: 'test'
-  ...
-# Subtest: Malformed settings are rejected without replacing saved settings: null
-ok 22 - Malformed settings are rejected without replacing saved settings: null
-  ---
-  duration_ms: 0.491474
-  type: 'test'
-  ...
-# Subtest: Malformed settings are rejected without replacing saved settings: []
-ok 23 - Malformed settings are rejected without replacing saved settings: []
-  ---
-  duration_ms: 0.144523
-  type: 'test'
-  ...
-# Subtest: Malformed settings are rejected without replacing saved settings: 42
-ok 24 - Malformed settings are rejected without replacing saved settings: 42
-  ---
-  duration_ms: 0.146436
-  type: 'test'
-  ...
-# Subtest: Malformed settings are rejected without replacing saved settings: "broken"
-ok 25 - Malformed settings are rejected without replacing saved settings: "broken"
-  ---
-  duration_ms: 0.152795
-  type: 'test'
-  ...
-# Subtest: Malformed settings are rejected without replacing saved settings: {"relays":"wss://example.com"}
-ok 26 - Malformed settings are rejected without replacing saved settings: {"relays":"wss://example.com"}
-  ---
-  duration_ms: 0.428832
-  type: 'test'
-  ...
-# Subtest: Malformed settings are rejected without replacing saved settings: {"muteContentPatterns":"x"}
-ok 27 - Malformed settings are rejected without replacing saved settings: {"muteContentPatterns":"x"}
-  ---
-  duration_ms: 0.162159
-  type: 'test'
-  ...
-# Subtest: Malformed settings are rejected without replacing saved settings: {"loadImages":"false"}
-ok 28 - Malformed settings are rejected without replacing saved settings: {"loadImages":"false"}
-  ---
-  duration_ms: 0.164663
-  type: 'test'
-  ...
-# Subtest: Legacy settings migration remains usable when persistence is denied
-ok 29 - Legacy settings migration remains usable when persistence is denied
-  ---
-  duration_ms: 1.197514
-  type: 'test'
-  ...
-# Subtest: A queued event lookup does not start new traffic after its view is disposed
-ok 30 - A queued event lookup does not start new traffic after its view is disposed
-  ---
-  duration_ms: 61.641923
-  type: 'test'
-  ...
-# Subtest: Event lookup failures remain retryable errors rather than false not-found results
-ok 31 - Event lookup failures remain retryable errors rather than false not-found results
-  ---
-  duration_ms: 62.13226
-  type: 'test'
-  ...
-# Subtest: A late CLOSE from an old socket does not fail a replacement socket request
-ok 32 - A late CLOSE from an old socket does not fail a replacement socket request
-  ---
-  duration_ms: 3.444675
-  type: 'test'
-  ...
-# Subtest: Invalid signed contact response is not a confirmed empty public list
-ok 33 - Invalid signed contact response is not a confirmed empty public list
-  ---
-  duration_ms: 2.827996
-  type: 'test'
-  ...
-# Subtest: Public relay edits preserve the newer signed current-view list over stale relay reads
-ok 34 - Public relay edits preserve the newer signed current-view list over stale relay reads
-  ---
-  duration_ms: 1.706865
-  type: 'test'
-  ...
-# Subtest: Account switching during public relay preflight cannot sign the previous account edit
-ok 35 - Account switching during public relay preflight cannot sign the previous account edit
-  ---
-  duration_ms: 0.412668
-  type: 'test'
-  ...
-# Subtest: Rejected signing is not stored as an unsigned outbox item and the next write can proceed
-ok 36 - Rejected signing is not stored as an unsigned outbox item and the next write can proceed
-  ---
-  duration_ms: 0.253804
-  type: 'test'
-  ...
-# Subtest: Profile editing rejects malformed latest JSON instead of erasing fields: {broken
-ok 37 - Profile editing rejects malformed latest JSON instead of erasing fields: {broken
-  ---
-  duration_ms: 0.319641
-  type: 'test'
-  ...
-# Subtest: Profile editing rejects malformed latest JSON instead of erasing fields: null
-ok 38 - Profile editing rejects malformed latest JSON instead of erasing fields: null
-  ---
-  duration_ms: 0.232352
-  type: 'test'
-  ...
-# Subtest: Profile editing rejects malformed latest JSON instead of erasing fields: []
-ok 39 - Profile editing rejects malformed latest JSON instead of erasing fields: []
-  ---
-  duration_ms: 0.250158
-  type: 'test'
-  ...
-# Subtest: Profile editing rejects malformed latest JSON instead of erasing fields: 42
-ok 40 - Profile editing rejects malformed latest JSON instead of erasing fields: 42
-  ---
-  duration_ms: 0.255467
-  type: 'test'
-  ...
-# Subtest: Nonempty partial latest results never replace the screen or become a cursor
-ok 41 - Nonempty partial latest results never replace the screen or become a cursor
-  ---
-  duration_ms: 3.200266
-  type: 'test'
-  ...
-# Subtest: First read with one failed relay does not install a partial timeline
-ok 42 - First read with one failed relay does not install a partial timeline
-  ---
-  duration_ms: 0.478726
-  type: 'test'
-  ...
-# Subtest: Snapshot rollback retains both timeline and directional search state
-ok 43 - Snapshot rollback retains both timeline and directional search state
-  ---
-  duration_ms: 1.392942
-  type: 'test'
-  ...
-# Subtest: A short page with older data is not marked exhausted and repairs stay bounded
-ok 44 - A short page with older data is not marked exhausted and repairs stay bounded
-  ---
-  duration_ms: 0.97761
-  type: 'test'
-  ...
-# Subtest: Ordinary capped streams merge without jumping over a slower stream
-ok 45 - Ordinary capped streams merge without jumping over a slower stream
-  ---
-  duration_ms: 27.713167
-  type: 'test'
-  ...
-# Subtest: A capped same-second response cannot jump to an older peer relay
-ok 46 - A capped same-second response cannot jump to an older peer relay
-  ---
-  duration_ms: 2.559
-  type: 'test'
-  ...
-# Subtest: Unequal relay histories retain a safe common coverage boundary
-ok 47 - Unequal relay histories retain a safe common coverage boundary
-  ---
-  duration_ms: 3.103112
-  type: 'test'
-  ...
-# Subtest: Short exhausted histories still allow other relay streams to continue
-ok 48 - Short exhausted histories still allow other relay streams to continue
-  ---
-  duration_ms: 2.600742
-  type: 'test'
-  ...
-# Subtest: Nearest-newer pages with a silently capped relay do not skip nearer seconds
-ok 49 - Nearest-newer pages with a silently capped relay do not skip nearer seconds
-  ---
-  duration_ms: 8.821929
-  type: 'test'
-  ...
-# Subtest: Saturation is evaluated per filter rather than from the merged union
-ok 50 - Saturation is evaluated per filter rather than from the merged union
-  ---
-  duration_ms: 0.795011
-  type: 'test'
-  ...
-# Subtest: Older search resumes at its increased limit instead of repeating the same six probes
-ok 51 - Older search resumes at its increased limit instead of repeating the same six probes
-  ---
-  duration_ms: 19.558778
-  type: 'test'
-  ...
-# Subtest: Latest list batching preserves kinds and never changes ordinary timeline filters
-ok 52 - Latest list batching preserves kinds and never changes ordinary timeline filters
-  ---
-  duration_ms: 1.086541
-  type: 'test'
-  ...
-# Subtest: Missing latest contacts are repaired per author, never inferred as unfollowed
-ok 53 - Missing latest contacts are repaired per author, never inferred as unfollowed
-  ---
-  duration_ms: 0.343977
-  type: 'test'
-  ...
-# Subtest: All-empty multi-filter replies still isolate required public lists
-ok 54 - All-empty multi-filter replies still isolate required public lists
-  ---
-  duration_ms: 0.171102
-  type: 'test'
-  ...
-# Subtest: Wire path repairs a mute list ignored by a first-filter-only relay
-ok 55 - Wire path repairs a mute list ignored by a first-filter-only relay
-  ---
-  duration_ms: 46.277376
-  type: 'test'
-  ...
-# Subtest: Wire page queries isolate different author groups so ignored filters cannot lose users
-ok 56 - Wire page queries isolate different author groups so ignored filters cannot lose users
-  ---
-  duration_ms: 424.87964
-  type: 'test'
-  ...
-# Subtest: 4000-person signed follow and mute lists verify without relaxing note/profile bounds
-ok 57 - 4000-person signed follow and mute lists verify without relaxing note/profile bounds
-  ---
-  duration_ms: 18.128101
-  type: 'test'
-  ...
-# Subtest: Large follow/mute lists survive the full transport/repository path with all keys intact
-ok 58 - Large follow/mute lists survive the full transport/repository path with all keys intact
-  ---
-  duration_ms: 86.2738
-  type: 'test'
-  ...
-# Subtest: An oversize public list is an incomplete read, not a successful empty list
-ok 59 - An oversize public list is an incomplete read, not a successful empty list
-  ---
-  duration_ms: 69.646856
-  type: 'test'
-  ...
-# Subtest: A crypto-provider exception settles the request and closes it instead of hanging
-ok 60 - A crypto-provider exception settles the request and closes it instead of hanging
-  ---
-  duration_ms: 2.820329
-  type: 'test'
-  ...
-# Subtest: Connection queue still spaces requests after successful EOSE
-ok 61 - Connection queue still spaces requests after successful EOSE
-  ---
-  duration_ms: 195.039164
-  type: 'test'
-  ...
-# Subtest: NIP-21 note: decoding, winner, clickable route
-ok 62 - NIP-21 note: decoding, winner, clickable route
-  ---
-  duration_ms: 4.639556
-  type: 'test'
-  ...
-# Subtest: NIP-21 note: depth 2 cannot start another rich reference
-ok 63 - NIP-21 note: depth 2 cannot start another rich reference
-  ---
-  duration_ms: 0.165333
-  type: 'test'
-  ...
-# Subtest: NIP-21 note: retrieval failure is contained and coalesced
-ok 64 - NIP-21 note: retrieval failure is contained and coalesced
-  ---
-  duration_ms: 36.477461
-  type: 'test'
-  ...
-# Subtest: NIP-21 nevent: decoding, winner, clickable route
-ok 65 - NIP-21 nevent: decoding, winner, clickable route
-  ---
-  duration_ms: 0.879346
-  type: 'test'
-  ...
-# Subtest: NIP-21 nevent: depth 2 cannot start another rich reference
-ok 66 - NIP-21 nevent: depth 2 cannot start another rich reference
-  ---
-  duration_ms: 0.1897
-  type: 'test'
-  ...
-# Subtest: NIP-21 nevent: retrieval failure is contained and coalesced
-ok 67 - NIP-21 nevent: retrieval failure is contained and coalesced
-  ---
-  duration_ms: 2.425413
-  type: 'test'
-  ...
-# Subtest: NIP-21 npub: decoding, winner, clickable route
-ok 68 - NIP-21 npub: decoding, winner, clickable route
-  ---
-  duration_ms: 0.787721
-  type: 'test'
-  ...
-# Subtest: NIP-21 npub: depth 2 cannot start another rich reference
-ok 69 - NIP-21 npub: depth 2 cannot start another rich reference
-  ---
-  duration_ms: 0.066898
-  type: 'test'
-  ...
-# Subtest: NIP-21 npub: retrieval failure is contained and coalesced
-ok 70 - NIP-21 npub: retrieval failure is contained and coalesced
-  ---
-  duration_ms: 0.410225
-  type: 'test'
-  ...
-# Subtest: NIP-21 nprofile: decoding, winner, clickable route
-ok 71 - NIP-21 nprofile: decoding, winner, clickable route
-  ---
-  duration_ms: 0.33926
-  type: 'test'
-  ...
-# Subtest: NIP-21 nprofile: depth 2 cannot start another rich reference
-ok 72 - NIP-21 nprofile: depth 2 cannot start another rich reference
-  ---
-  duration_ms: 0.134348
-  type: 'test'
-  ...
-# Subtest: NIP-21 nprofile: retrieval failure is contained and coalesced
-ok 73 - NIP-21 nprofile: retrieval failure is contained and coalesced
-  ---
-  duration_ms: 0.153055
-  type: 'test'
-  ...
-# Subtest: NIP-21 naddr: decoding, winner, clickable route
-ok 74 - NIP-21 naddr: decoding, winner, clickable route
-  ---
-  duration_ms: 0.322395
-  type: 'test'
-  ...
-# Subtest: NIP-21 naddr: depth 2 cannot start another rich reference
-ok 75 - NIP-21 naddr: depth 2 cannot start another rich reference
-  ---
-  duration_ms: 0.046309
-  type: 'test'
-  ...
-# Subtest: NIP-21 naddr: retrieval failure is contained and coalesced
-ok 76 - NIP-21 naddr: retrieval failure is contained and coalesced
-  ---
-  duration_ms: 0.367821
-  type: 'test'
-  ...
-# Subtest: NIP-19 naddr coordinate includes UTF-8 identifier, pubkey, kind and is reversible
-ok 77 - NIP-19 naddr coordinate includes UTF-8 identifier, pubkey, kind and is reversible
-  ---
-  duration_ms: 0.990439
-  type: 'test'
-  ...
-# Subtest: NIP-19 nevent retains optional author/kind/relay hints
-ok 78 - NIP-19 nevent retains optional author/kind/relay hints
-  ---
-  duration_ms: 2.337354
-  type: 'test'
-  ...
-# Subtest: naddr local routes survive parse and reconstruction
-ok 79 - naddr local routes survive parse and reconstruction
-  ---
-  duration_ms: 0.833388
-  type: 'test'
-  ...
-# Subtest: Invalid checksum, secrets, overlong and mixed-case NIP-21 never become embeds
-ok 80 - Invalid checksum, secrets, overlong and mixed-case NIP-21 never become embeds
-  ---
-  duration_ms: 0.586825
-  type: 'test'
-  ...
-# Subtest: First NIP-21 only; all later links preserved by lexer
-ok 81 - First NIP-21 only; all later links preserved by lexer
-  ---
-  duration_ms: 0.309626
-  type: 'test'
-  ...
-# Subtest: Lexer removes sentence punctuation without breaking balanced URL paths or losing offsets
-ok 82 - Lexer removes sentence punctuation without breaking balanced URL paths or losing offsets
-  ---
-  duration_ms: 0.265171
-  type: 'test'
-  ...
-# Subtest: First body candidate wins across Nostr, image, X, YouTube and q
-ok 83 - First body candidate wins across Nostr, image, X, YouTube and q
-  ---
-  duration_ms: 1.25612
-  type: 'test'
-  ...
-# Subtest: Direct image jpg: query safe, HTTPS only, depth and settings limits
-ok 84 - Direct image jpg: query safe, HTTPS only, depth and settings limits
-  ---
-  duration_ms: 0.281545
-  type: 'test'
-  ...
-# Subtest: Direct image JPEG: query safe, HTTPS only, depth and settings limits
-ok 85 - Direct image JPEG: query safe, HTTPS only, depth and settings limits
-  ---
-  duration_ms: 0.205623
-  type: 'test'
-  ...
-# Subtest: Direct image png: query safe, HTTPS only, depth and settings limits
-ok 86 - Direct image png: query safe, HTTPS only, depth and settings limits
-  ---
-  duration_ms: 0.141919
-  type: 'test'
-  ...
-# Subtest: Direct image webp: query safe, HTTPS only, depth and settings limits
-ok 87 - Direct image webp: query safe, HTTPS only, depth and settings limits
-  ---
-  duration_ms: 0.152745
-  type: 'test'
-  ...
-# Subtest: Direct image gif: query safe, HTTPS only, depth and settings limits
-ok 88 - Direct image gif: query safe, HTTPS only, depth and settings limits
-  ---
-  duration_ms: 0.167076
-  type: 'test'
-  ...
-# Subtest: Direct image avif: query safe, HTTPS only, depth and settings limits
-ok 89 - Direct image avif: query safe, HTTPS only, depth and settings limits
-  ---
-  duration_ms: 0.119045
-  type: 'test'
-  ...
-# Subtest: Direct image apng: query safe, HTTPS only, depth and settings limits
-ok 90 - Direct image apng: query safe, HTTPS only, depth and settings limits
-  ---
-  duration_ms: 0.109882
-  type: 'test'
-  ...
-# Subtest: Direct image bmp: query safe, HTTPS only, depth and settings limits
-ok 91 - Direct image bmp: query safe, HTTPS only, depth and settings limits
-  ---
-  duration_ms: 0.113567
-  type: 'test'
-  ...
-# Subtest: NIP-92 m/dim/alt allow extensionless images without arbitrary imeta-only loading
-ok 92 - NIP-92 m/dim/alt allow extensionless images without arbitrary imeta-only loading
-  ---
-  duration_ms: 0.576179
-  type: 'test'
-  ...
-# Subtest: Multiple image links select exactly the first
-ok 93 - Multiple image links select exactly the first
-  ---
-  duration_ms: 0.135239
-  type: 'test'
-  ...
-# Subtest: YouTube youtube: one valid ID, no player beyond depth 2
-ok 94 - YouTube youtube: one valid ID, no player beyond depth 2
-  ---
-  duration_ms: 0.181648
-  type: 'test'
-  ...
-# Subtest: YouTube youtubeWatch: one valid ID, no player beyond depth 2
-ok 95 - YouTube youtubeWatch: one valid ID, no player beyond depth 2
-  ---
-  duration_ms: 0.202628
-  type: 'test'
-  ...
-# Subtest: YouTube youtubeShorts: one valid ID, no player beyond depth 2
-ok 96 - YouTube youtubeShorts: one valid ID, no player beyond depth 2
-  ---
-  duration_ms: 0.138153
-  type: 'test'
-  ...
-# Subtest: YouTube youtubeMultiple: one valid ID, no player beyond depth 2
-ok 97 - YouTube youtubeMultiple: one valid ID, no player beyond depth 2
-  ---
-  duration_ms: 0.138103
-  type: 'test'
-  ...
-# Subtest: X x: one post embed within the depth limit, with links retained
-ok 98 - X x: one post embed within the depth limit, with links retained
-  ---
-  duration_ms: 0.33243
-  type: 'test'
-  ...
-# Subtest: X twitter: one post embed within the depth limit, with links retained
-ok 99 - X twitter: one post embed within the depth limit, with links retained
-  ---
-  duration_ms: 0.136211
-  type: 'test'
-  ...
-# Subtest: X xMultiple: one post embed within the depth limit, with links retained
-ok 100 - X xMultiple: one post embed within the depth limit, with links retained
-  ---
-  duration_ms: 0.137392
-  type: 'test'
-  ...
-# Subtest: No arbitrary iframe or unsafe URL: https://youtube.com.evil.example/watch?v=M7lc1UVf-VE
-ok 101 - No arbitrary iframe or unsafe URL: https://youtube.com.evil.example/watch?v=M7lc1UVf-VE
-  ---
-  duration_ms: 0.125815
-  type: 'test'
-  ...
-# Subtest: No arbitrary iframe or unsafe URL: https://youtu.be/a
-ok 102 - No arbitrary iframe or unsafe URL: https://youtu.be/a
-  ---
-  duration_ms: 0.089542
-  type: 'test'
-  ...
-# Subtest: No arbitrary iframe or unsafe URL: https://youtube.com/watch?v=M7lc1UVf-VE.bad
-ok 103 - No arbitrary iframe or unsafe URL: https://youtube.com/watch?v=M7lc1UVf-VE.bad
-  ---
-  duration_ms: 0.093348
-  type: 'test'
-  ...
-# Subtest: No arbitrary iframe or unsafe URL: https://x.com/a/status/1/trailing
-ok 104 - No arbitrary iframe or unsafe URL: https://x.com/a/status/1/trailing
-  ---
-  duration_ms: 0.076602
-  type: 'test'
-  ...
-# Subtest: No arbitrary iframe or unsafe URL: https://x.com.evil.example/a/status/123
-ok 105 - No arbitrary iframe or unsafe URL: https://x.com.evil.example/a/status/123
-  ---
-  duration_ms: 0.087879
-  type: 'test'
-  ...
-# Subtest: No arbitrary iframe or unsafe URL: https://evil.example/video.mp4
-ok 106 - No arbitrary iframe or unsafe URL: https://evil.example/video.mp4
-  ---
-  duration_ms: 0.08876
-  type: 'test'
-  ...
-# Subtest: No arbitrary iframe or unsafe URL: javascript:alert(1)
-ok 107 - No arbitrary iframe or unsafe URL: javascript:alert(1)
-  ---
-  duration_ms: 0.069202
-  type: 'test'
-  ...
-# Subtest: No arbitrary iframe or unsafe URL: data:image/png;base64,xxx
-ok 108 - No arbitrary iframe or unsafe URL: data:image/png;base64,xxx
-  ---
-  duration_ms: 0.067279
-  type: 'test'
-  ...
-# Subtest: No arbitrary iframe or unsafe URL: https://u:p@x.com/a/status/1
-ok 109 - No arbitrary iframe or unsafe URL: https://u:p@x.com/a/status/1
-  ---
-  duration_ms: 0.073198
-  type: 'test'
-  ...
-# Subtest: No arbitrary iframe or unsafe URL: https://x.com:444/a/status/123
-ok 110 - No arbitrary iframe or unsafe URL: https://x.com:444/a/status/123
-  ---
-  duration_ms: 0.086878
-  type: 'test'
-  ...
-# Subtest: No arbitrary iframe or unsafe URL: https://x.com/home
-ok 111 - No arbitrary iframe or unsafe URL: https://x.com/home
-  ---
-  duration_ms: 0.086197
-  type: 'test'
-  ...
-# Subtest: q-only references are quotes and not legacy replies
-ok 112 - q-only references are quotes and not legacy replies
-  ---
-  duration_ms: 0.822512
-  type: 'test'
-  ...
-# Subtest: Reposts have no reply parent and their original consumes the sole slot
-ok 113 - Reposts have no reply parent and their original consumes the sole slot
-  ---
-  duration_ms: 1.111628
-  type: 'test'
-  ...
-# Subtest: Repost repostJSON: verifies and uses JSON without event fetch
-ok 114 - Repost repostJSON: verifies and uses JSON without event fetch
-  ---
-  duration_ms: 29.701031
-  type: 'test'
-  ...
-# Subtest: Repost generic: verifies and uses JSON without event fetch
-ok 115 - Repost generic: verifies and uses JSON without event fetch
-  ---
-  duration_ms: 18.523357
-  type: 'test'
-  ...
-# Subtest: Repost genericNested: verifies and uses JSON without event fetch
-ok 116 - Repost genericNested: verifies and uses JSON without event fetch
-  ---
-  duration_ms: 10.563235
-  type: 'test'
-  ...
-# Subtest: Repost repostEmpty: safely fetches its exact tagged original
-ok 117 - Repost repostEmpty: safely fetches its exact tagged original
-  ---
-  duration_ms: 1.775827
-  type: 'test'
-  ...
-# Subtest: Repost repostMalformed: safely fetches its exact tagged original
-ok 118 - Repost repostMalformed: safely fetches its exact tagged original
-  ---
-  duration_ms: 0.932233
-  type: 'test'
-  ...
-# Subtest: Repost repostForged: safely fetches its exact tagged original
-ok 119 - Repost repostForged: safely fetches its exact tagged original
-  ---
-  duration_ms: 6.48822
-  type: 'test'
-  ...
-# Subtest: Repost genericEmpty: safely fetches its exact tagged original
-ok 120 - Repost genericEmpty: safely fetches its exact tagged original
-  ---
-  duration_ms: 0.390605
-  type: 'test'
-  ...
-# Subtest: Forged embedded JSON is not trusted even when wrapper was signed
-ok 121 - Forged embedded JSON is not trusted even when wrapper was signed
-  ---
-  duration_ms: 2.285378
-  type: 'test'
-  ...
-# Subtest: Repost missing and network-failure cases resolve to null, never reject
-ok 122 - Repost missing and network-failure cases resolve to null, never reject
-  ---
-  duration_ms: 3.069823
-  type: 'test'
-  ...
-# Subtest: NIP-18 inner event ID/kind constraints reject mismatching content
-ok 123 - NIP-18 inner event ID/kind constraints reject mismatching content
-  ---
-  duration_ms: 0.543681
-  type: 'test'
-  ...
-# Subtest: Self-repost returns null without recursive resolution
-ok 124 - Self-repost returns null without recursive resolution
-  ---
-  duration_ms: 0.32582
-  type: 'test'
-  ...
-# Subtest: NIP-21 duplicates and note/nevent aliases share a single fetch
-ok 125 - NIP-21 duplicates and note/nevent aliases share a single fetch
-  ---
-  duration_ms: 2.217057
-  type: 'test'
-  ...
-# Subtest: nevent constraints are applied per caller even after a shared ID fetch
-ok 126 - nevent constraints are applied per caller even after a shared ID fetch
-  ---
-  duration_ms: 1.57493
-  type: 'test'
-  ...
-# Subtest: Current-view events are reused, never fetched twice from relay
-ok 127 - Current-view events are reused, never fetched twice from relay
-  ---
-  duration_ms: 1.925107
-  type: 'test'
-  ...
-# Subtest: View changes invalidate settled and late results; relay hints do not add connections
-ok 128 - View changes invalidate settled and late results; relay hints do not add connections
-  ---
-  duration_ms: 4.440713
-  type: 'test'
-  ...
-# Subtest: Single-flight memo is bounded and explicit read reset allows retry
-ok 129 - Single-flight memo is bounded and explicit read reset allows retry
-  ---
-  duration_ms: 660.485231
-  type: 'test'
-  ...
-# Subtest: Address fetch sends exact kind/author/d filter and selects newest matching version
-ok 130 - Address fetch sends exact kind/author/d filter and selects newest matching version
-  ---
-  duration_ms: 62.050377
-  type: 'test'
-  ...
-# Subtest: Global, home and notifications include repost kinds in actual feed filters
-ok 131 - Global, home and notifications include repost kinds in actual feed filters
-  ---
-  duration_ms: 0.405588
-  type: 'test'
-  ...
-# Subtest: npub and note roundtrip with checksum / uppercase validation
-ok 132 - npub and note roundtrip with checksum / uppercase validation
-  ---
-  duration_ms: 4.284192
-  type: 'test'
-  ...
-# Subtest: Hash / legacy routing supports a single project subpath
-ok 133 - Hash / legacy routing supports a single project subpath
-  ---
-  duration_ms: 2.856338
-  type: 'test'
-  ...
-# Subtest: Safe URLs reject insecure remote WebSocket and credentials
-ok 134 - Safe URLs reject insecure remote WebSocket and credentials
-  ---
-  duration_ms: 0.400089
-  type: 'test'
-  ...
-# Subtest: NIP-10 direct and nested reply tags preserve root but exclude self
-ok 135 - NIP-10 direct and nested reply tags preserve root but exclude self
-  ---
-  duration_ms: 0.430154
-  type: 'test'
-  ...
-# Subtest: Settings validation, old-schema compatibility, and regular expression errors
-ok 136 - Settings validation, old-schema compatibility, and regular expression errors
-  ---
-  duration_ms: 1.741206
-  type: 'test'
-  ...
-# Subtest: Persisted public key restores without asking extension again; logout stays out
-ok 137 - Persisted public key restores without asking extension again; logout stays out
-  ---
-  duration_ms: 2.107936
-  type: 'test'
-  ...
-# Subtest: Restored session refuses signing with another extension account
-ok 138 - Restored session refuses signing with another extension account
-  ---
-  duration_ms: 0.742314
-  type: 'test'
-  ...
-# Subtest: Signature cancellation is not retried automatically
-ok 139 - Signature cancellation is not retried automatically
-  ---
-  duration_ms: 0.484664
-  type: 'test'
-  ...
-# Subtest: Only relay cooldowns and pending user-authored sends can be persisted
-ok 140 - Only relay cooldowns and pending user-authored sends can be persisted
-  ---
-  duration_ms: 8.235354
-  type: 'test'
-  ...
-# Subtest: Concurrent profiles use one author-list filter; only explicit refresh re-fetches known profiles
-ok 141 - Concurrent profiles use one author-list filter; only explicit refresh re-fetches known profiles
-  ---
-  duration_ms: 268.745802
-  type: 'test'
-  ...
-# Subtest: Navigation discards posts but retains persistent public profiles through logout
-ok 142 - Navigation discards posts but retains persistent public profiles through logout
-  ---
-  duration_ms: 63.459465
-  type: 'test'
-  ...
-# Subtest: Old replaceable events cannot overwrite newer current-screen metadata
-ok 143 - Old replaceable events cannot overwrite newer current-screen metadata
-  ---
-  duration_ms: 0.683187
-  type: 'test'
-  ...
-# Subtest: Read-modify-write refuses incomplete latest list reads
-ok 144 - Read-modify-write refuses incomplete latest list reads
-  ---
-  duration_ms: 60.377048
-  type: 'test'
-  ...
-# Subtest: NIP-05 validates identifier and pubkey equality without response storage
-ok 145 - NIP-05 validates identifier and pubkey equality without response storage
-  ---
-  duration_ms: 6.707351
-  type: 'test'
-  ...
-# Subtest: NIP-05 singleflight and semaphore never exceed two concurrent requests
-ok 146 - NIP-05 singleflight and semaphore never exceed two concurrent requests
-  ---
-  duration_ms: 53.337288
-  type: 'test'
-  ...
-# Subtest: NIP-05 CORS / HTTP failure remains unknown and does not suppress a subsequent request
-ok 147 - NIP-05 CORS / HTTP failure remains unknown and does not suppress a subsequent request
-  ---
-  duration_ms: 0.636138
-  type: 'test'
-  ...
-# Subtest: BIP-340 official verification vector 0
-ok 148 - BIP-340 official verification vector 0
-  ---
-  duration_ms: 34.004753
-  type: 'test'
-  ...
-# Subtest: BIP-340 official verification vector 1
-ok 149 - BIP-340 official verification vector 1
-  ---
-  duration_ms: 15.074201
-  type: 'test'
-  ...
-# Subtest: BIP-340 official verification vector 2
-ok 150 - BIP-340 official verification vector 2
-  ---
-  duration_ms: 13.487412
-  type: 'test'
-  ...
-# Subtest: BIP-340 official verification vector 3
-ok 151 - BIP-340 official verification vector 3
-  ---
-  duration_ms: 10.153951
-  type: 'test'
-  ...
-# Subtest: BIP-340 official verification vector 4
-ok 152 - BIP-340 official verification vector 4
-  ---
-  duration_ms: 10.801644
-  type: 'test'
-  ...
-# Subtest: BIP-340 official verification vector 5
-ok 153 - BIP-340 official verification vector 5
-  ---
-  duration_ms: 1.437618
-  type: 'test'
-  ...
-# Subtest: BIP-340 official verification vector 6
-ok 154 - BIP-340 official verification vector 6
-  ---
-  duration_ms: 7.978736
-  type: 'test'
-  ...
-# Subtest: BIP-340 official verification vector 7
-ok 155 - BIP-340 official verification vector 7
-  ---
-  duration_ms: 12.68486
-  type: 'test'
-  ...
-# Subtest: BIP-340 official verification vector 8
-ok 156 - BIP-340 official verification vector 8
-  ---
-  duration_ms: 15.683017
-  type: 'test'
-  ...
-# Subtest: BIP-340 official verification vector 9
-ok 157 - BIP-340 official verification vector 9
-  ---
-  duration_ms: 7.969311
-  type: 'test'
-  ...
-# Subtest: BIP-340 official verification vector 10
-ok 158 - BIP-340 official verification vector 10
-  ---
-  duration_ms: 11.74132
-  type: 'test'
-  ...
-# Subtest: BIP-340 official verification vector 11
-ok 159 - BIP-340 official verification vector 11
-  ---
-  duration_ms: 5.448838
-  type: 'test'
-  ...
-# Subtest: BIP-340 official verification vector 12
-ok 160 - BIP-340 official verification vector 12
-  ---
-  duration_ms: 0.165895
-  type: 'test'
-  ...
-# Subtest: BIP-340 official verification vector 13
-ok 161 - BIP-340 official verification vector 13
-  ---
-  duration_ms: 0.089893
-  type: 'test'
-  ...
-# Subtest: BIP-340 official verification vector 14
-ok 162 - BIP-340 official verification vector 14
-  ---
-  duration_ms: 0.076113
-  type: 'test'
-  ...
-# Subtest: BIP-340 official verification vector 15
-ok 163 - BIP-340 official verification vector 15
-  ---
-  duration_ms: 5.596606
-  type: 'test'
-  ...
-# Subtest: BIP-340 official verification vector 16
-ok 164 - BIP-340 official verification vector 16
-  ---
-  duration_ms: 5.369973
-  type: 'test'
-  ...
-# Subtest: BIP-340 official verification vector 17
-ok 165 - BIP-340 official verification vector 17
-  ---
-  duration_ms: 5.28027
-  type: 'test'
-  ...
-# Subtest: BIP-340 official verification vector 18
-ok 166 - BIP-340 official verification vector 18
-  ---
-  duration_ms: 5.397333
-  type: 'test'
-  ...
-# Subtest: Independent OpenSSL/Python fixture: all signed Nostr kinds verify
-ok 167 - Independent OpenSSL/Python fixture: all signed Nostr kinds verify
-  ---
-  duration_ms: 373.153104
-  type: 'test'
-  ...
-# Subtest: Reject modified content, id, signature, author, tags and timestamp
-ok 168 - Reject modified content, id, signature, author, tags and timestamp
-  ---
-  duration_ms: 3.110286
-  type: 'test'
-  ...
-# Subtest: Strict event format rejects invalid scalar types and large bodies
-ok 169 - Strict event format rejects invalid scalar types and large bodies
-  ---
-  duration_ms: 1.6146
-  type: 'test'
-  ...
-# Subtest: Malformed signatures and non-curve public keys never throw
-ok 170 - Malformed signatures and non-curve public keys never throw
-  ---
-  duration_ms: 0.359139
-  type: 'test'
-  ...
-# Subtest: Same image media remains visible in every distinct post
-ok 171 - Same image media remains visible in every distinct post
-  ---
-  duration_ms: 20.046396
-  type: 'test'
-  ...
-# Subtest: Same YouTube media remains visible in every distinct post
-ok 172 - Same YouTube media remains visible in every distinct post
-  ---
-  duration_ms: 10.946158
-  type: 'test'
-  ...
-# Subtest: Same X media remains visible in every distinct post
-ok 173 - Same X media remains visible in every distinct post
-  ---
-  duration_ms: 10.110016
-  type: 'test'
-  ...
-# Subtest: Closing a repeated player leaves the other post ready and mounted
-ok 174 - Closing a repeated player leaves the other post ready and mounted
-  ---
-  duration_ms: 5.317544
-  type: 'test'
-  ...
-# Subtest: Worker RPC synchronous send failure removes its pending request and timer
-ok 175 - Worker RPC synchronous send failure removes its pending request and timer
-  ---
-  duration_ms: 17.56479
-  type: 'test'
-  ...
-# Subtest: Worker crash rejects in-flight requests immediately without replaying a send
-ok 176 - Worker crash rejects in-flight requests immediately without replaying a send
-  ---
-  duration_ms: 16.37102
-  type: 'test'
-  ...
-# Subtest: Worker deserialization error rejects all pending requests and enables manual fallback
-ok 177 - Worker deserialization error rejects all pending requests and enables manual fallback
-  ---
-  duration_ms: 1.385332
-  type: 'test'
-  ...
-# Subtest: Malformed worker messages cannot throw an uncaught handler exception
-ok 178 - Malformed worker messages cannot throw an uncaught handler exception
-  ---
-  duration_ms: 2.459945
-  type: 'test'
-  ...
-# Subtest: A late old-worker response cannot resolve a failed request or revive a dead worker
-ok 179 - A late old-worker response cannot resolve a failed request or revive a dead worker
-  ---
-  duration_ms: 1.127982
-  type: 'test'
-  ...
-# Subtest: Unavailable SharedWorker falls back without opening unsolicited relay sockets
-ok 180 - Unavailable SharedWorker falls back without opening unsolicited relay sockets
-  ---
-  duration_ms: 0.45457
-  type: 'test'
-  ...
-# Subtest: One relay connection, finite REQ/CLOSE per page and verified deduplication
-ok 181 - One relay connection, finite REQ/CLOSE per page and verified deduplication
-  ---
-  duration_ms: 78.112596
-  type: 'test'
-  ...
-# Subtest: Bad event IDs and signatures are discarded before UI/cache
-ok 182 - Bad event IDs and signatures are discarded before UI/cache
-  ---
-  duration_ms: 23.238639
-  type: 'test'
-  ...
-# Subtest: Rate limit creates durable cooldown without reconnects or blind retry
-ok 183 - Rate limit creates durable cooldown without reconnects or blind retry
-  ---
-  duration_ms: 5.13813
-  type: 'test'
-  ...
-# Subtest: Timeout always sends CLOSE and is not a successful empty result
-ok 184 - Timeout always sends CLOSE and is not a successful empty result
-  ---
-  duration_ms: 47.559565
-  type: 'test'
-  ...
-# Subtest: Only in-flight queries coalesce; the same completed query is sent again
-ok 185 - Only in-flight queries coalesce; the same completed query is sent again
-  ---
-  duration_ms: 33.043195
-  type: 'test'
-  ...
-# Subtest: Fast EOSE does not truncate slower relay completion
-ok 186 - Fast EOSE does not truncate slower relay completion
-  ---
-  duration_ms: 39.804979
-  type: 'test'
-  ...
-# Subtest: Publication is re-sent when explicitly requested; no stored ACK response
-ok 187 - Publication is re-sent when explicitly requested; no stored ACK response
-  ---
-  duration_ms: 29.020174
-  type: 'test'
-  ...
-# Subtest: Relay rejected publish remains failure, does not report saved
-ok 188 - Relay rejected publish remains failure, does not report saved
-  ---
-  duration_ms: 9.711148
-  type: 'test'
-  ...
-# Subtest: Backoff is exponential, rate limits longer than generic errors
-ok 189 - Backoff is exponential, rate limits longer than generic errors
-  ---
-  duration_ms: 0.424866
-  type: 'test'
-  ...
-# Subtest: Filter limits and unsafe relay addresses are rejected without connection
-ok 190 - Filter limits and unsafe relay addresses are rejected without connection
-  ---
-  duration_ms: 7.175918
-  type: 'test'
-  ...
-# Subtest: 100 seeded duplicate-time, multi-author datasets page downward without gaps or duplicates
-ok 191 - 100 seeded duplicate-time, multi-author datasets page downward without gaps or duplicates
-  ---
-  duration_ms: 168.721536
-  type: 'test'
-  ...
-# Subtest: 100 seeded upward searches return nearest neighbors, not the newest remote page
-ok 192 - 100 seeded upward searches return nearest neighbors, not the newest remote page
-  ---
-  duration_ms: 39.384795
-  type: 'test'
-  ...
-# Subtest: Latest means now-down, at most 30 combined unique rows, replacing the old window
-ok 193 - Latest means now-down, at most 30 combined unique rows, replacing the old window
-  ---
-  duration_ms: 12.170092
-  type: 'test'
-  ...
-# Subtest: Down reads below the supplied viewport anchor, not the oldest loaded row
-ok 194 - Down reads below the supplied viewport anchor, not the oldest loaded row
-  ---
-  duration_ms: 1.151566
-  type: 'test'
-  ...
-# Subtest: Up finds the nearest newer rows instead of jumping to the newest 30
-ok 195 - Up finds the nearest newer rows instead of jumping to the newest 30
-  ---
-  duration_ms: 8.394829
-  type: 'test'
-  ...
-# Subtest: At most six bounded time searches per upward click, with a resumable cursor only
-ok 196 - At most six bounded time searches per upward click, with a resumable cursor only
-  ---
-  duration_ms: 0.697017
-  type: 'test'
-  ...
-# Subtest: Same-second down boundaries are inclusive and do not blindly subtract a second
-ok 197 - Same-second down boundaries are inclusive and do not blindly subtract a second
-  ---
-  duration_ms: 2.346918
-  type: 'test'
-  ...
-# Subtest: Same-second upward page is the nearest lexicographic predecessors
-ok 198 - Same-second upward page is the nearest lexicographic predecessors
-  ---
-  duration_ms: 1.523395
-  type: 'test'
-  ...
-# Subtest: A failed latest read preserves the current timeline and a failed up does not jump
-ok 199 - A failed latest read preserves the current timeline and a failed up does not jump
-  ---
-  duration_ms: 0.560726
-  type: 'test'
-  ...
-# Subtest: Repeated rapid clicks share one operation only, not a completed result
-ok 200 - Repeated rapid clicks share one operation only, not a completed result
-  ---
-  duration_ms: 0.405748
-  type: 'test'
-  ...
-# Subtest: Multiple author filters still add at most thirty total posts
-ok 201 - Multiple author filters still add at most thirty total posts
-  ---
-  duration_ms: 1.216722
-  type: 'test'
-  ...
-# Subtest: Old saved page sizes cannot expand the thirty-row limit
-ok 202 - Old saved page sizes cannot expand the thirty-row limit
-  ---
-  duration_ms: 0.815492
-  type: 'test'
-  ...
-# Subtest: Timeline, thread and embedded post actions offer no like or copy-link control
-ok 203 - Timeline, thread and embedded post actions offer no like or copy-link control
-  ---
-  duration_ms: 49.676114
-  type: 'test'
-  ...
-# Subtest: Received likes retain their notification label and link to the original post
-ok 204 - Received likes retain their notification label and link to the original post
-  ---
-  duration_ms: 3.2551
-  type: 'test'
-  ...
-# Subtest: Legacy pending likes have no resend row while ordinary pending posts remain available
-ok 205 - Legacy pending likes have no resend row while ordinary pending posts remain available
-  ---
-  duration_ms: 7.858018
-  type: 'test'
-  ...
-# Subtest: Persistent profile store rejects posts, lists, reactions and malformed kind:0
-ok 206 - Persistent profile store rejects posts, lists, reactions and malformed kind:0
-  ---
-  duration_ms: 1.82421
-  type: 'test'
-  ...
-# Subtest: Saved public profile is reverified from local storage and survives independent cache instances
-ok 207 - Saved public profile is reverified from local storage and survives independent cache instances
-  ---
-  duration_ms: 239.932462
-  type: 'test'
-  ...
-# Subtest: Persistent profile records have no TTL or automatic expiration
-ok 208 - Persistent profile records have no TTL or automatic expiration
-  ---
-  duration_ms: 5.630222
-  type: 'test'
-  ...
-# Subtest: Saved signature corruption is rejected and repaired by the next valid explicit fetch
-ok 209 - Saved signature corruption is rejected and repaired by the next valid explicit fetch
-  ---
-  duration_ms: 6.921837
-  type: 'test'
-  ...
-# Subtest: Incidental newer events do not refresh a saved profile; explicit refresh does
-ok 210 - Incidental newer events do not refresh a saved profile; explicit refresh does
-  ---
-  duration_ms: 145.143455
-  type: 'test'
-  ...
-# Subtest: Failed explicit refresh retains persisted metadata and reports the failure
-ok 211 - Failed explicit refresh retains persisted metadata and reports the failure
-  ---
-  duration_ms: 140.551825
-  type: 'test'
-  ...
-# Subtest: Warm known anonymous authors cause neither relay reads nor profile writes
-ok 212 - Warm known anonymous authors cause neither relay reads nor profile writes
-  ---
-  duration_ms: 164.001978
-  type: 'test'
-  ...
-# Subtest: Posts, follow, mute and relay lists are never reused on repeated explicit reads
-ok 213 - Posts, follow, mute and relay lists are never reused on repeated explicit reads
-  ---
-  duration_ms: 529.995867
-  type: 'test'
-  ...
-# Subtest: Navigation also clears current-account contacts, mutes and relays from runtime view state
-ok 214 - Navigation also clears current-account contacts, mutes and relays from runtime view state
-  ---
-  duration_ms: 3.094373
-  type: 'test'
-  ...
-# Subtest: All metadata consumers share persistence after repository reset, logout, and relay-setting change
-ok 215 - All metadata consumers share persistence after repository reset, logout, and relay-setting change
-  ---
-  duration_ms: 313.118878
-  type: 'test'
-  ...
-# Subtest: NIP-05 verification is persisted once, event/pubkey bound, and refreshed only explicitly
-ok 216 - NIP-05 verification is persisted once, event/pubkey bound, and refreshed only explicitly
-  ---
-  duration_ms: 141.270763
-  type: 'test'
-  ...
-# Subtest: A cached NIP-05 failure does not trigger repeated verification on every display
-ok 217 - A cached NIP-05 failure does not trigger repeated verification on every display
-  ---
-  duration_ms: 138.617284
-  type: 'test'
-  ...
-# Subtest: Verification record for another pubkey or event cannot be reused as a badge
-ok 218 - Verification record for another pubkey or event cannot be reused as a badge
-  ---
-  duration_ms: 0.437335
-  type: 'test'
-  ...
-# Subtest: Storage-full failure is visible, nonfatal and not reported as a successful persistent write
-ok 219 - Storage-full failure is visible, nonfatal and not reported as a successful persistent write
-  ---
-  duration_ms: 4.228656
-  type: 'test'
-  ...
-# Subtest: IndexedDB branch uses only profiles store and survives a closed/reopened cache (API fixture)
-ok 220 - IndexedDB branch uses only profiles store and survives a closed/reopened cache (API fixture)
-  ---
-  duration_ms: 9.796986
-  type: 'test'
-  ...
-# Subtest: Concurrent IndexedDB profile refresh transactions cannot downgrade a newer version (API fixture)
-ok 221 - Concurrent IndexedDB profile refresh transactions cannot downgrade a newer version (API fixture)
-  ---
-  duration_ms: 12.47848
-  type: 'test'
-  ...
-# Subtest: IndexedDB transaction abort is surfaced without crashing profile rendering (API fixture)
-ok 222 - IndexedDB transaction abort is surfaced without crashing profile rendering (API fixture)
-  ---
-  duration_ms: 3.028886
-  type: 'test'
-  ...
-# Subtest: Persistent profile survives an actual separate Node process with disk-backed storage adapter
-ok 223 - Persistent profile survives an actual separate Node process with disk-backed storage adapter
-  ---
-  duration_ms: 70.239131
-  type: 'test'
-  ...
-# Subtest: Blocked browser storage getters degrade to memory without crashing construction
-ok 224 - Blocked browser storage getters degrade to memory without crashing construction
-  ---
-  duration_ms: 3.895655
-  type: 'test'
-  ...
-# Subtest: Evicted hot profile is restored from the persistent store with zero relay requests
-ok 225 - Evicted hot profile is restored from the persistent store with zero relay requests
-  ---
-  duration_ms: 75.448802
-  type: 'test'
-  ...
-# Subtest: Discovered signed follow survives an empty author lookup
-ok 226 - Discovered signed follow survives an empty author lookup
-  ---
-  duration_ms: 2.604571
-  type: 'test'
-  ...
-# Subtest: Newer discovered follow wins over an older direct lookup without the owner
-ok 227 - Newer discovered follow wins over an older direct lookup without the owner
-  ---
-  duration_ms: 0.412799
-  type: 'test'
-  ...
-# Subtest: A failed author lookup cannot erase a signed positive candidate
-ok 228 - A failed author lookup cannot erase a signed positive candidate
-  ---
-  duration_ms: 0.309947
-  type: 'test'
-  ...
-# Subtest: A silent empty multi-author contact response must be isolated per author
-ok 229 - A silent empty multi-author contact response must be isolated per author
-  ---
-  duration_ms: 0.582409
-  type: 'test'
-  ...
-# Subtest: A newer explicit unfollow overrides discovered follow evidence
-ok 230 - A newer explicit unfollow overrides discovered follow evidence
-  ---
-  duration_ms: 10.547141
-  type: 'test'
-  ...
-# Subtest: Same-second replaceable-event tie selects the lexically lower ID
-ok 231 - Same-second replaceable-event tie selects the lexically lower ID
-  ---
-  duration_ms: 0.967967
-  type: 'test'
-  ...
-# Subtest: Same-second discovered winner is not overridden by a losing direct event
-ok 232 - Same-second discovered winner is not overridden by a losing direct event
-  ---
-  duration_ms: 0.505566
-  type: 'test'
-  ...
-# Subtest: Missing kind:3 is unknown, whereas signed empty kind:3 is negative
-ok 233 - Missing kind:3 is unknown, whereas signed empty kind:3 is negative
-  ---
-  duration_ms: 4.874798
-  type: 'test'
-  ...
-# Subtest: One rejected user lookup cannot suppress another user's positive result
-ok 234 - One rejected user lookup cannot suppress another user's positive result
-  ---
-  duration_ms: 0.554838
-  type: 'test'
-  ...
-# Subtest: Previously observed newer unfollow is not resurrected by an older positive reply
-ok 235 - Previously observed newer unfollow is not resurrected by an older positive reply
-  ---
-  duration_ms: 0.48855
-  type: 'test'
-  ...
-# Subtest: Direct positive becomes repository evidence for badge updates
-ok 236 - Direct positive becomes repository evidence for badge updates
-  ---
-  duration_ms: 0.342635
-  type: 'test'
-  ...
-# Subtest: Late replies after navigation cannot install relationship evidence in a new view
-ok 237 - Late replies after navigation cannot install relationship evidence in a new view
-  ---
-  duration_ms: 0.788153
-  type: 'test'
-  ...
-# Subtest: Directory construction and read-state inspection perform no automatic network reads
-ok 238 - Directory construction and read-state inspection perform no automatic network reads
-  ---
-  duration_ms: 0.432167
-  type: 'test'
-  ...
-# Subtest: Missing reverse index does not omit a directly verifiable mutual follow
-ok 239 - Missing reverse index does not omit a directly verifiable mutual follow
-  ---
-  duration_ms: 3.503507
-  type: 'test'
-  ...
-# Subtest: An offline relay cannot hide another relay's confirmed followers
-ok 240 - An offline relay cannot hide another relay's confirmed followers
-  ---
-  duration_ms: 0.667264
-  type: 'test'
-  ...
-# Subtest: A partial timed-out discovery response retains positive users without advancing that relay cursor
-ok 241 - A partial timed-out discovery response retains positive users without advancing that relay cursor
-  ---
-  duration_ms: 0.26442
-  type: 'test'
-  ...
-# Subtest: Recovered relay is retried at the original cursor and does not duplicate existing followers
-ok 242 - Recovered relay is retried at the original cursor and does not duplicate existing followers
-  ---
-  duration_ms: 0.950732
-  type: 'test'
-  ...
-# Subtest: Unknown known-followee remains retryable and is recovered without advancing the discovery page
-ok 243 - Unknown known-followee remains retryable and is recovered without advancing the discovery page
-  ---
-  duration_ms: 0.586165
-  type: 'test'
-  ...
-# Subtest: Signed newer unfollow removes a previously displayed uncertain follower on retry
-ok 244 - Signed newer unfollow removes a previously displayed uncertain follower on retry
-  ---
-  duration_ms: 0.541368
-  type: 'test'
-  ...
-# Subtest: Merged discovery and direct-followee lanes append at most thirty unique people per operation
-ok 245 - Merged discovery and direct-followee lanes append at most thirty unique people per operation
-  ---
-  duration_ms: 3.633678
-  type: 'test'
-  ...
-# Subtest: Duplicate events from multiple relays are one identity, and buffers drain without additional traffic
-ok 246 - Duplicate events from multiple relays are one identity, and buffers drain without additional traffic
-  ---
-  duration_ms: 5.245795
-  type: 'test'
-  ...
-# Subtest: Concurrent follower button operations share one in-flight directory read
-ok 247 - Concurrent follower button operations share one in-flight directory read
-  ---
-  duration_ms: 0.548129
-  type: 'test'
-  ...
-# Subtest: Relay selection remains exactly the configured read-relay set
-ok 248 - Relay selection remains exactly the configured read-relay set
-  ---
-  duration_ms: 0.513327
-  type: 'test'
-  ...
-# Subtest: List evidence is view-local and is not carried through Repository.beginView
-ok 249 - List evidence is view-local and is not carried through Repository.beginView
-  ---
-  duration_ms: 0.641556
-  type: 'test'
-  ...
-# Subtest: Coverage-probe failure preserves the initial verified page as partial evidence
-ok 250 - Coverage-probe failure preserves the initial verified page as partial evidence
-  ---
-  duration_ms: 0.388784
-  type: 'test'
-  ...
-# Subtest: Real wire path isolates every author after a silently empty combined kind:3 response
-ok 251 - Real wire path isolates every author after a silently empty combined kind:3 response
-  ---
-  duration_ms: 29.567299
-  type: 'test'
-  ...
-# Subtest: A newer signed unfollow received while buffered is not later painted as a follower
-ok 252 - A newer signed unfollow received while buffered is not later painted as a follower
-  ---
-  duration_ms: 4.75403
-  type: 'test'
-  ...
-# Subtest: Repository updates remove an already displayed stale positive on the next manual operation
-ok 253 - Repository updates remove an already displayed stale positive on the next manual operation
-  ---
-  duration_ms: 0.354032
-  type: 'test'
-  ...
-# Subtest: Successful owner retry removes the obsolete owner-unknown warning
-ok 254 - Successful owner retry removes the obsolete owner-unknown warning
-  ---
-  duration_ms: 0.281625
-  type: 'test'
-  ...
-# Subtest: NIP-65 tags expose read/write modes and retain unknown markers
-ok 255 - NIP-65 tags expose read/write modes and retain unknown markers
-  ---
-  duration_ms: 1.963966
-  type: 'test'
-  ...
-# Subtest: Legacy contact-list relay flags migrate without changing follow tags
-ok 256 - Legacy contact-list relay flags migrate without changing follow tags
-  ---
-  duration_ms: 0.524373
-  type: 'test'
-  ...
-# Subtest: Adding one relay preserves all existing tags and chosen mode
-ok 257 - Adding one relay preserves all existing tags and chosen mode
-  ---
-  duration_ms: 0.566365
-  type: 'test'
-  ...
-# Subtest: Normalized duplicate addition does not change the list
-ok 258 - Normalized duplicate addition does not change the list
-  ---
-  duration_ms: 0.141789
-  type: 'test'
-  ...
-# Subtest: Removal deletes only matching relay tags, preserves unknown/nonrelay tags
-ok 259 - Removal deletes only matching relay tags, preserves unknown/nonrelay tags
-  ---
-  duration_ms: 0.250078
-  type: 'test'
-  ...
-# Subtest: Invalid relay protocols, credentials, fragments and modes are rejected
-ok 260 - Invalid relay protocols, credentials, fragments and modes are rejected
-  ---
-  duration_ms: 0.431707
-  type: 'test'
-  ...
-# Subtest: Only the logged-in owner can mutate public relay metadata
-ok 261 - Only the logged-in owner can mutate public relay metadata
-  ---
-  duration_ms: 0.667214
-  type: 'test'
-  ...
-# Subtest: Read-modify-write fetches latest all-relay data, not a UI snapshot
-ok 262 - Read-modify-write fetches latest all-relay data, not a UI snapshot
-  ---
-  duration_ms: 1.09198
-  type: 'test'
-  ...
-# Subtest: Public relay changes never change local application relay settings
-ok 263 - Public relay changes never change local application relay settings
-  ---
-  duration_ms: 0.273203
-  type: 'test'
-  ...
-# Subtest: Incomplete preflight refuses to sign or replace a public relay list
-ok 264 - Incomplete preflight refuses to sign or replace a public relay list
-  ---
-  duration_ms: 1.325094
-  type: 'test'
-  ...
-# Subtest: A duplicate addition and an absent deletion do not sign new events
-ok 265 - A duplicate addition and an absent deletion do not sign new events
-  ---
-  duration_ms: 0.350536
-  type: 'test'
-  ...
-# Subtest: The last relay can be removed without falling back to app relay settings
-ok 266 - The last relay can be removed without falling back to app relay settings
-  ---
-  duration_ms: 0.227405
-  type: 'test'
-  ...
-# Subtest: Back follows anchor-created routes, not only Router.go calls
-ok 267 - Back follows anchor-created routes, not only Router.go calls
-  ---
-  duration_ms: 2.892034
-  type: 'test'
-  ...
-# Subtest: Native back then forward then header back retains accurate history
-ok 268 - Native back then forward then header back retains accurate history
-  ---
-  duration_ms: 0.762274
-  type: 'test'
-  ...
-# Subtest: Reloading a route retains the within-app back target and foreign state
-ok 269 - Reloading a route retains the within-app back target and foreign state
-  ---
-  duration_ms: 0.579595
-  type: 'test'
-  ...
-# Subtest: New navigation after native back discards forward entries without a wrong back depth
-ok 270 - New navigation after native back discards forward entries without a wrong back depth
-  ---
-  duration_ms: 0.708364
-  type: 'test'
-  ...
-# Subtest: Opening a deep link directly does not navigate back out of the app
-ok 271 - Opening a deep link directly does not navigate back out of the app
-  ---
-  duration_ms: 1.459642
-  type: 'test'
-  ...
-# Subtest: 30 profile authors compact to one bounded filter; never widen ordinary limit/time/tag queries
-ok 272 - 30 profile authors compact to one bounded filter; never widen ordinary limit/time/tag queries
-  ---
-  duration_ms: 3.195692
-  type: 'test'
-  ...
-# Subtest: A cold thirty-author page reads posts and metadata without own-reaction queries
-ok 273 - A cold thirty-author page reads posts and metadata without own-reaction queries
-  ---
-  duration_ms: 319.018582
-  type: 'test'
-  ...
-# Subtest: Known profiles make repeated page decoration entirely local
-ok 274 - Known profiles make repeated page decoration entirely local
-  ---
-  duration_ms: 156.624379
-  type: 'test'
-  ...
-# Subtest: Mixed pages request only the ten unknown authors
-ok 275 - Mixed pages request only the ten unknown authors
-  ---
-  duration_ms: 252.653078
-  type: 'test'
-  ...
-# Subtest: Anonymous warm decoration sends zero REQs; a subsequent explicit post read still sends one
-ok 276 - Anonymous warm decoration sends zero REQs; a subsequent explicit post read still sends one
-  ---
-  duration_ms: 246.924876
-  type: 'test'
-  ...
-# Subtest: In-flight profile reads and feed decoration share the same metadata batch
-ok 277 - In-flight profile reads and feed decoration share the same metadata batch
-  ---
-  duration_ms: 152.835473
-  type: 'test'
-  ...
-# Subtest: Already-running identity request is reused by a concurrent feed read
-ok 278 - Already-running identity request is reused by a concurrent feed read
-  ---
-  duration_ms: 149.20497
-  type: 'test'
-  ...
-# Subtest: Manual fresh read sees an updated profile; ordinary use keeps session metadata
-ok 279 - Manual fresh read sees an updated profile; ordinary use keeps session metadata
-  ---
-  duration_ms: 136.798244
-  type: 'test'
-  ...
-# Subtest: Write preflight bypasses known profiles and refuses partial all-relay results
-ok 280 - Write preflight bypasses known profiles and refuses partial all-relay results
-  ---
-  duration_ms: 138.876919
-  type: 'test'
-  ...
-# Subtest: Changing read-relay coverage does not refresh persistent profiles
-ok 281 - Changing read-relay coverage does not refresh persistent profiles
-  ---
-  duration_ms: 70.061464
-  type: 'test'
-  ...
-# Subtest: Navigation, logout and a new repository all reuse persistent profiles
-ok 282 - Navigation, logout and a new repository all reuse persistent profiles
-  ---
-  duration_ms: 71.476676
-  type: 'test'
-  ...
-# Subtest: Absent and invalid results are not cached; verified positive partial profiles can be reused
-ok 283 - Absent and invalid results are not cached; verified positive partial profiles can be reused
-  ---
-  duration_ms: 198.402884
-  type: 'test'
-  ...
-# Subtest: Missing-author repair is per-relay, preserves newer metadata on a capped second relay
-ok 284 - Missing-author repair is per-relay, preserves newer metadata on a capped second relay
-  ---
-  duration_ms: 239.939692
-  type: 'test'
-  ...
-# Subtest: Historical versions cannot crowd out missing profiles permanently; recovery is bounded
-ok 285 - Historical versions cannot crowd out missing profiles permanently; recovery is bounded
-  ---
-  duration_ms: 97.071386
-  type: 'test'
-  ...
-# Subtest: Empty EOSE has no pointless repair; positive-partial EOSE checks absent authors at most once
-ok 286 - Empty EOSE has no pointless repair; positive-partial EOSE checks absent authors at most once
-  ---
-  duration_ms: 203.803126
-  type: 'test'
-  ...
-# Subtest: Metadata repair never requests reactions or starts after failed EOSE
-ok 287 - Metadata repair never requests reactions or starts after failed EOSE
-  ---
-  duration_ms: 228.089861
-  type: 'test'
-  ...
-# Subtest: Notification filters still receive signed reactions directed to the current user
-ok 288 - Notification filters still receive signed reactions directed to the current user
-  ---
-  duration_ms: 13.210138
-  type: 'test'
-  ...
-# Subtest: The first repair rejection stops all further repair chunks on that relay
-ok 289 - The first repair rejection stops all further repair chunks on that relay
-  ---
-  duration_ms: 101.772418
-  type: 'test'
-  ...
-# Subtest: A logout during a pending read cannot restore old session metadata
-ok 290 - A logout during a pending read cannot restore old session metadata
-  ---
-  duration_ms: 148.024197
-  type: 'test'
-  ...
-# Subtest: Hot profile memory is bounded without evicting persistent records or the account
-ok 291 - Hot profile memory is bounded without evicting persistent records or the account
-  ---
-  duration_ms: 100.859863
-  type: 'test'
-  ...
-# Subtest: Malformed latest metadata cannot become a successful reusable profile via an older valid version
-ok 292 - Malformed latest metadata cannot become a successful reusable profile via an older valid version
-  ---
-  duration_ms: 138.723846
-  type: 'test'
-  ...
-# Subtest: Profile batching respects the 100-author ceiling without changing ordinary filter limits
-ok 293 - Profile batching respects the 100-author ceiling without changing ordinary filter limits
-  ---
-  duration_ms: 0.811997
-  type: 'test'
-  ...
-# Subtest: Application display name changes without renaming stored data
-ok 294 - Application display name changes without renaming stored data
-  ---
-  duration_ms: 1.975033
-  type: 'test'
-  ...
-# Subtest: Right search is deleted with its handlers; mobile search is preserved
-ok 295 - Right search is deleted with its handlers; mobile search is preserved
-  ---
-  duration_ms: 3.737345
-  type: 'test'
-  ...
-# Subtest: Maximum embed depth is two and not a per-post width setting
-ok 296 - Maximum embed depth is two and not a per-post width setting
-  ---
-  duration_ms: 0.14896
-  type: 'test'
-  ...
-# Subtest: ref_note: depths zero and one select the same sole candidate; two and above stop
-ok 297 - ref_note: depths zero and one select the same sole candidate; two and above stop
-  ---
-  duration_ms: 2.053698
-  type: 'test'
-  ...
-# Subtest: ref_nevent: depths zero and one select the same sole candidate; two and above stop
-ok 298 - ref_nevent: depths zero and one select the same sole candidate; two and above stop
-  ---
-  duration_ms: 0.880488
-  type: 'test'
-  ...
-# Subtest: ref_npub: depths zero and one select the same sole candidate; two and above stop
-ok 299 - ref_npub: depths zero and one select the same sole candidate; two and above stop
-  ---
-  duration_ms: 0.307743
-  type: 'test'
-  ...
-# Subtest: ref_nprofile: depths zero and one select the same sole candidate; two and above stop
-ok 300 - ref_nprofile: depths zero and one select the same sole candidate; two and above stop
-  ---
-  duration_ms: 0.285441
-  type: 'test'
-  ...
-# Subtest: ref_naddr: depths zero and one select the same sole candidate; two and above stop
-ok 301 - ref_naddr: depths zero and one select the same sole candidate; two and above stop
-  ---
-  duration_ms: 0.341303
-  type: 'test'
-  ...
-# Subtest: image: depths zero and one select the same sole candidate; two and above stop
-ok 302 - image: depths zero and one select the same sole candidate; two and above stop
-  ---
-  duration_ms: 0.539286
-  type: 'test'
-  ...
-# Subtest: imeta: depths zero and one select the same sole candidate; two and above stop
-ok 303 - imeta: depths zero and one select the same sole candidate; two and above stop
-  ---
-  duration_ms: 0.456693
-  type: 'test'
-  ...
-# Subtest: images: depths zero and one select the same sole candidate; two and above stop
-ok 304 - images: depths zero and one select the same sole candidate; two and above stop
-  ---
-  duration_ms: 0.334573
-  type: 'test'
-  ...
-# Subtest: youtubeMultiple: depths zero and one select the same sole candidate; two and above stop
-ok 305 - youtubeMultiple: depths zero and one select the same sole candidate; two and above stop
-  ---
-  duration_ms: 0.231331
-  type: 'test'
-  ...
-# Subtest: quote: depths zero and one select the same sole candidate; two and above stop
-ok 306 - quote: depths zero and one select the same sole candidate; two and above stop
-  ---
-  duration_ms: 0.662697
-  type: 'test'
-  ...
-# Subtest: quoteAddress: depths zero and one select the same sole candidate; two and above stop
-ok 307 - quoteAddress: depths zero and one select the same sole candidate; two and above stop
-  ---
-  duration_ms: 0.980425
-  type: 'test'
-  ...
-# Subtest: repostJSON: depths zero and one select the same sole candidate; two and above stop
-ok 308 - repostJSON: depths zero and one select the same sole candidate; two and above stop
-  ---
-  duration_ms: 0.250309
-  type: 'test'
-  ...
-# Subtest: generic: depths zero and one select the same sole candidate; two and above stop
-ok 309 - generic: depths zero and one select the same sole candidate; two and above stop
-  ---
-  duration_ms: 0.33194
-  type: 'test'
-  ...
-# Subtest: genericNested: depths zero and one select the same sole candidate; two and above stop
-ok 310 - genericNested: depths zero and one select the same sole candidate; two and above stop
-  ---
-  duration_ms: 0.172344
-  type: 'test'
-  ...
-# Subtest: mixed: depths zero and one select the same sole candidate; two and above stop
-ok 311 - mixed: depths zero and one select the same sole candidate; two and above stop
-  ---
-  duration_ms: 1.686526
-  type: 'test'
-  ...
-# Subtest: mixedNostrFirst: depths zero and one select the same sole candidate; two and above stop
-ok 312 - mixedNostrFirst: depths zero and one select the same sole candidate; two and above stop
-  ---
-  duration_ms: 0.392448
-  type: 'test'
-  ...
-# Subtest: multiple: added depth never consumes additional sibling links
-ok 313 - multiple: added depth never consumes additional sibling links
-  ---
-  duration_ms: 1.15927
-  type: 'test'
-  ...
-# Subtest: images: added depth never consumes additional sibling links
-ok 314 - images: added depth never consumes additional sibling links
-  ---
-  duration_ms: 0.100278
-  type: 'test'
-  ...
-# Subtest: youtubeMultiple: added depth never consumes additional sibling links
-ok 315 - youtubeMultiple: added depth never consumes additional sibling links
-  ---
-  duration_ms: 0.173015
-  type: 'test'
-  ...
-# Subtest: mixed: added depth never consumes additional sibling links
-ok 316 - mixed: added depth never consumes additional sibling links
-  ---
-  duration_ms: 0.15555
-  type: 'test'
-  ...
-# Subtest: mixedNostrFirst: added depth never consumes additional sibling links
-ok 317 - mixedNostrFirst: added depth never consumes additional sibling links
-  ---
-  duration_ms: 0.177792
-  type: 'test'
-  ...
-# Subtest: Invalid first Nostr URI and disabled images remain enforced at depth one
-ok 318 - Invalid first Nostr URI and disabled images remain enforced at depth one
-  ---
-  duration_ms: 0.151594
-  type: 'test'
-  ...
-# Subtest: X/Twitter x.com embeds within the existing depth limit and keeps its link
-ok 319 - X/Twitter x.com embeds within the existing depth limit and keeps its link
-  ---
-  duration_ms: 4.260172
-  type: 'test'
-  ...
-# Subtest: X/Twitter www.x.com embeds within the existing depth limit and keeps its link
-ok 320 - X/Twitter www.x.com embeds within the existing depth limit and keeps its link
-  ---
-  duration_ms: 1.550827
-  type: 'test'
-  ...
-# Subtest: X/Twitter mobile.x.com embeds within the existing depth limit and keeps its link
-ok 321 - X/Twitter mobile.x.com embeds within the existing depth limit and keeps its link
-  ---
-  duration_ms: 0.451726
-  type: 'test'
-  ...
-# Subtest: X/Twitter twitter.com embeds within the existing depth limit and keeps its link
-ok 322 - X/Twitter twitter.com embeds within the existing depth limit and keeps its link
-  ---
-  duration_ms: 0.286913
-  type: 'test'
-  ...
-# Subtest: X/Twitter www.twitter.com embeds within the existing depth limit and keeps its link
-ok 323 - X/Twitter www.twitter.com embeds within the existing depth limit and keeps its link
-  ---
-  duration_ms: 0.301204
-  type: 'test'
-  ...
-# Subtest: X/Twitter mobile.twitter.com embeds within the existing depth limit and keeps its link
-ok 324 - X/Twitter mobile.twitter.com embeds within the existing depth limit and keeps its link
-  ---
-  duration_ms: 0.160857
-  type: 'test'
-  ...
-# Subtest: X share suffix (none) selects the same post ID
-ok 325 - X share suffix (none) selects the same post ID
-  ---
-  duration_ms: 0.147097
-  type: 'test'
-  ...
-# Subtest: X share suffix / selects the same post ID
-ok 326 - X share suffix / selects the same post ID
-  ---
-  duration_ms: 0.154828
-  type: 'test'
-  ...
-# Subtest: X share suffix /photo/1 selects the same post ID
-ok 327 - X share suffix /photo/1 selects the same post ID
-  ---
-  duration_ms: 0.12187
-  type: 'test'
-  ...
-# Subtest: X share suffix /video/1 selects the same post ID
-ok 328 - X share suffix /video/1 selects the same post ID
-  ---
-  duration_ms: 0.419108
-  type: 'test'
-  ...
-# Subtest: X share suffix /photo/4?s=20 selects the same post ID
-ok 329 - X share suffix /photo/4?s=20 selects the same post ID
-  ---
-  duration_ms: 0.242618
-  type: 'test'
-  ...
-# Subtest: X share suffix ?s=20&t=tracking selects the same post ID
-ok 330 - X share suffix ?s=20&t=tracking selects the same post ID
-  ---
-  duration_ms: 0.154969
-  type: 'test'
-  ...
-# Subtest: HTTP and username-free X post URLs select the same string ID
-ok 331 - HTTP and username-free X post URLs select the same string ID
-  ---
-  duration_ms: 0.204722
-  type: 'test'
-  ...
-# Subtest: X URL stays link-only: https://x.com/home
-ok 332 - X URL stays link-only: https://x.com/home
-  ---
-  duration_ms: 0.126677
-  type: 'test'
-  ...
-# Subtest: X URL stays link-only: https://x.com/a/status/123/unrecognized
-ok 333 - X URL stays link-only: https://x.com/a/status/123/unrecognized
-  ---
-  duration_ms: 0.21716
-  type: 'test'
-  ...
-# Subtest: X URL stays link-only: https://x.com:9000/a/status/123
-ok 334 - X URL stays link-only: https://x.com:9000/a/status/123
-  ---
-  duration_ms: 0.136261
-  type: 'test'
-  ...
-# Subtest: X URL stays link-only: https://x.com/a/status/not-an-id
-ok 335 - X URL stays link-only: https://x.com/a/status/not-an-id
-  ---
-  duration_ms: 0.072938
-  type: 'test'
-  ...
-# Subtest: X URL stays link-only: https://x.com/a/status/0
-ok 336 - X URL stays link-only: https://x.com/a/status/0
-  ---
-  duration_ms: 0.063824
-  type: 'test'
-  ...
-# Subtest: X URL stays link-only: https://x.com/a/status/123456789012345678901
-ok 337 - X URL stays link-only: https://x.com/a/status/123456789012345678901
-  ---
-  duration_ms: 0.064675
-  type: 'test'
-  ...
-# Subtest: Multiple and duplicate X URLs consume only the first rich slot and retain all links
-ok 338 - Multiple and duplicate X URLs consume only the first rich slot and retain all links
-  ---
-  duration_ms: 0.236008
-  type: 'test'
-  ...
-# Subtest: X and image share the first-candidate slot: https://media.example/photo.png
-ok 339 - X and image share the first-candidate slot: https://media.example/photo.png
-  ---
-  duration_ms: 0.378678
-  type: 'test'
-  ...
-# Subtest: X and youtube share the first-candidate slot: https://youtu.be/M7lc1UVf-VE
-ok 340 - X and youtube share the first-candidate slot: https://youtu.be/M7lc1UVf-VE
-  ---
-  duration_ms: 0.177542
-  type: 'test'
-  ...
-# Subtest: X and nostr share the first-candidate slot: nostr:note14untwwd442932dcsqqp0zet550h095jpaqh9w22tyrgncf6qmdlst77m0x
-ok 341 - X and nostr share the first-candidate slot: nostr:note14untwwd442932dcsqqp0zet550h095jpaqh9w22tyrgncf6qmdlst77m0x
-  ---
-  duration_ms: 1.00414
-  type: 'test'
-  ...
-# Subtest: X and nostr share the first-candidate slot: nostr:npub1ujfahuwppkq0xkq7fyzfxzc5qnxxcyuspms8tpr5l222h6xye5fsccv64k
-ok 342 - X and nostr share the first-candidate slot: nostr:npub1ujfahuwppkq0xkq7fyzfxzc5qnxxcyuspms8tpr5l222h6xye5fsccv64k
-  ---
-  duration_ms: 0.296047
-  type: 'test'
-  ...
-# Subtest: X and nostr share the first-candidate slot: nostr:naddr1qqgkzun5d93kcef6u6t6te5u4n5248szyrjf8kl3cyxcpu6creysfyctzszvcmqnjq8wqavywnaff2lgcnx3xqcyqqq823c48eejl
-ok 343 - X and nostr share the first-candidate slot: nostr:naddr1qqgkzun5d93kcef6u6t6te5u4n5248szyrjf8kl3cyxcpu6creysfyctzszvcmqnjq8wqavywnaff2lgcnx3xqcyqqq823c48eejl
-  ---
-  duration_ms: 0.35295
-  type: 'test'
-  ...
-# Subtest: A body X post consumes the slot before q-only quotes while retaining their links
-ok 344 - A body X post consumes the slot before q-only quotes while retaining their links
-  ---
-  duration_ms: 0.716266
-  type: 'test'
-  ...
-# Subtest: Image settings skip images, not X, under the same first-candidate policy
-ok 345 - Image settings skip images, not X, under the same first-candidate policy
-  ---
-  duration_ms: 0.279442
-  type: 'test'
-  ...
-# Subtest: imeta cannot turn an X/Twitter page URL into an image request
-ok 346 - imeta cannot turn an X/Twitter page URL into an image request
-  ---
-  duration_ms: 0.432288
-  type: 'test'
-  ...
-# Subtest: Direct X-hosted media is still a normal image, including NIP-92 metadata
-ok 347 - Direct X-hosted media is still a normal image, including NIP-92 metadata
-  ---
-  duration_ms: 0.232222
-  type: 'test'
-  ...
-# Subtest: X uses an official cross-origin frame without widgets in the account document
-ok 348 - X uses an official cross-origin frame without widgets in the account document
-  ---
-  duration_ms: 0.683378
-  type: 'test'
-  ...
-# Subtest: Entry and all shipped module import versions match the release
-ok 349 - Entry and all shipped module import versions match the release
-  ---
-  duration_ms: 3.172128
-  type: 'test'
-  ...
-1..349
-# tests 349
-# suites 0
-# pass 349
-# fail 0
-# cancelled 0
-# skipped 0
-# todo 0
-# duration_ms 4060.581977
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> mikeryan@1.3.5 test
+> node --test tests/*.test.js
+
+✔ Outgoing reactions cannot be signed or sent through publish (22.973214ms)
+✔ Outgoing reactions cannot be signed or sent through sendSigned (2.790642ms)
+✔ Outgoing reactions cannot be signed or sent through retry (0.569396ms)
+✔ Ordinary posting still signs and publishes after reaction sending is removed (7.020568ms)
+✔ Pending login cannot undo an explicit logout (1.607916ms)
+✔ A stale login cannot overwrite a newer login attempt (3.306478ms)
+✔ Queued signing snapshots the requested body and tags at click time (16.096943ms)
+✔ Logout and login to the same key invalidate an older signing operation (0.768394ms)
+✔ Account changes during signature verification are checked again before return (6.4099ms)
+✔ follow: delayed read cannot sign old-account data using a new account (0.897559ms)
+✔ profile: delayed read cannot sign old-account data using a new account (0.455715ms)
+✔ A successful old-view account read cannot overwrite a newer received follow list (1.321556ms)
+✔ Follow read-modify-write preserves a newer signed current-view list (1.932413ms)
+✔ Concurrent incomplete sends retain both signed events in the outbox (1.532653ms)
+✔ A transport exception after signing preserves the exact event for retry (1.16479ms)
+✔ Concurrent retries of one event share one send operation (1.119953ms)
+✔ Outbox removes acknowledgements completed in another tab, not stale memory (0.741554ms)
+✔ A failed persistent write remains readable from the current tab instead of stale disk (0.32579ms)
+✔ State storage reports failed persistence instead of silently claiming success (0.283976ms)
+✔ A failed profile write cannot downgrade a newer known record (0.923758ms)
+✔ Profile persistence failure retains current-session metadata for reload within the tab (0.32622ms)
+✔ Malformed settings are rejected without replacing saved settings: null (0.241663ms)
+✔ Malformed settings are rejected without replacing saved settings: [] (0.058027ms)
+✔ Malformed settings are rejected without replacing saved settings: 42 (0.0468ms)
+✔ Malformed settings are rejected without replacing saved settings: "broken" (0.061523ms)
+✔ Malformed settings are rejected without replacing saved settings: {"relays":"wss://example.com"} (0.044076ms)
+✔ Malformed settings are rejected without replacing saved settings: {"muteContentPatterns":"x"} (0.037817ms)
+✔ Malformed settings are rejected without replacing saved settings: {"loadImages":"false"} (0.037226ms)
+✔ Legacy settings migration remains usable when persistence is denied (1.042145ms)
+✔ A queued event lookup does not start new traffic after its view is disposed (62.168909ms)
+✔ Event lookup failures remain retryable errors rather than false not-found results (61.169558ms)
+✔ A late CLOSE from an old socket does not fail a replacement socket request (7.887189ms)
+✔ Invalid signed contact response is not a confirmed empty public list (6.611613ms)
+✔ Public relay edits preserve the newer signed current-view list over stale relay reads (1.545582ms)
+✔ Account switching during public relay preflight cannot sign the previous account edit (0.367062ms)
+✔ Rejected signing is not stored as an unsigned outbox item and the next write can proceed (0.233201ms)
+✔ Profile editing rejects malformed latest JSON instead of erasing fields: {broken (0.341994ms)
+✔ Profile editing rejects malformed latest JSON instead of erasing fields: null (0.223506ms)
+✔ Profile editing rejects malformed latest JSON instead of erasing fields: [] (0.210326ms)
+✔ Profile editing rejects malformed latest JSON instead of erasing fields: 42 (0.231748ms)
+✔ Nonempty partial latest results never replace the screen or become a cursor (4.651398ms)
+✔ First read with one failed relay does not install a partial timeline (0.496827ms)
+✔ Snapshot rollback retains both timeline and directional search state (1.833564ms)
+✔ A short page with older data is not marked exhausted and repairs stay bounded (3.533758ms)
+✔ Ordinary capped streams merge without jumping over a slower stream (41.143932ms)
+✔ A capped same-second response cannot jump to an older peer relay (2.7092ms)
+✔ Unequal relay histories retain a safe common coverage boundary (3.459207ms)
+✔ Short exhausted histories still allow other relay streams to continue (2.358903ms)
+✔ Nearest-newer pages with a silently capped relay do not skip nearer seconds (10.847236ms)
+✔ Saturation is evaluated per filter rather than from the merged union (0.843247ms)
+✔ Older search resumes at its increased limit instead of repeating the same six probes (19.627527ms)
+✔ Latest list batching preserves kinds and never changes ordinary timeline filters (1.060954ms)
+✔ Missing latest contacts are repaired per author, never inferred as unfollowed (0.378749ms)
+✔ All-empty multi-filter replies still isolate required public lists (0.188714ms)
+✔ Wire path repairs a mute list ignored by a first-filter-only relay (45.911695ms)
+✔ Wire page queries isolate different author groups so ignored filters cannot lose users (196.759585ms)
+✔ 4000-person signed follow and mute lists verify without relaxing note/profile bounds (25.401687ms)
+✔ Large follow/mute lists survive the full transport/repository path with all keys intact (103.743929ms)
+✔ An oversize public list is an incomplete read, not a successful empty list (105.979968ms)
+✔ A crypto-provider exception settles the request and closes it instead of hanging (13.283046ms)
+✔ Connection queue still spaces requests after successful EOSE (292.73694ms)
+✔ NIP-21 note: decoding, winner, clickable route (8.177776ms)
+✔ NIP-21 note: depth 2 cannot start another rich reference (1.693214ms)
+✔ NIP-21 note: retrieval failure is contained and coalesced (35.501054ms)
+✔ NIP-21 nevent: decoding, winner, clickable route (10.927137ms)
+✔ NIP-21 nevent: depth 2 cannot start another rich reference (0.148073ms)
+✔ NIP-21 nevent: retrieval failure is contained and coalesced (4.635034ms)
+✔ NIP-21 npub: decoding, winner, clickable route (3.80697ms)
+✔ NIP-21 npub: depth 2 cannot start another rich reference (0.083416ms)
+✔ NIP-21 npub: retrieval failure is contained and coalesced (0.274503ms)
+✔ NIP-21 nprofile: decoding, winner, clickable route (0.448374ms)
+✔ NIP-21 nprofile: depth 2 cannot start another rich reference (0.095604ms)
+✔ NIP-21 nprofile: retrieval failure is contained and coalesced (0.43959ms)
+✔ NIP-21 naddr: decoding, winner, clickable route (0.673272ms)
+✔ NIP-21 naddr: depth 2 cannot start another rich reference (0.06611ms)
+✔ NIP-21 naddr: retrieval failure is contained and coalesced (0.582294ms)
+✔ NIP-19 naddr coordinate includes UTF-8 identifier, pubkey, kind and is reversible (1.250429ms)
+✔ NIP-19 nevent retains optional author/kind/relay hints (0.628574ms)
+✔ naddr local routes survive parse and reconstruction (0.749055ms)
+✔ Invalid checksum, secrets, overlong and mixed-case NIP-21 never become embeds (0.53293ms)
+✔ First NIP-21 only; all later links preserved by lexer (0.268133ms)
+✔ Lexer removes sentence punctuation without breaking balanced URL paths or losing offsets (0.197747ms)
+✔ First body candidate wins across Nostr, image, X, YouTube and q (1.474956ms)
+✔ Direct image jpg: query safe, HTTPS only, depth and settings limits (0.257166ms)
+✔ Direct image JPEG: query safe, HTTPS only, depth and settings limits (0.203887ms)
+✔ Direct image png: query safe, HTTPS only, depth and settings limits (0.205639ms)
+✔ Direct image webp: query safe, HTTPS only, depth and settings limits (0.221223ms)
+✔ Direct image gif: query safe, HTTPS only, depth and settings limits (0.147222ms)
+✔ Direct image avif: query safe, HTTPS only, depth and settings limits (0.155083ms)
+✔ Direct image apng: query safe, HTTPS only, depth and settings limits (0.156325ms)
+✔ Direct image bmp: query safe, HTTPS only, depth and settings limits (0.127792ms)
+✔ NIP-92 m/dim/alt allow extensionless images without arbitrary imeta-only loading (0.704919ms)
+✔ Multiple image links select exactly the first (0.152178ms)
+✔ YouTube youtube: one valid ID, no player beyond depth 2 (0.220902ms)
+✔ YouTube youtubeWatch: one valid ID, no player beyond depth 2 (0.175413ms)
+✔ YouTube youtubeShorts: one valid ID, no player beyond depth 2 (0.13981ms)
+✔ YouTube youtubeMultiple: one valid ID, no player beyond depth 2 (0.165058ms)
+✔ X x: one post embed within the depth limit, with links retained (0.322435ms)
+✔ X twitter: one post embed within the depth limit, with links retained (0.144708ms)
+✔ X xMultiple: one post embed within the depth limit, with links retained (0.137636ms)
+✔ No arbitrary iframe or unsafe URL: https://youtube.com.evil.example/watch?v=M7lc1UVf-VE (0.122494ms)
+✔ No arbitrary iframe or unsafe URL: https://youtu.be/a (0.094973ms)
+✔ No arbitrary iframe or unsafe URL: https://youtube.com/watch?v=M7lc1UVf-VE.bad (0.090946ms)
+✔ No arbitrary iframe or unsafe URL: https://x.com/a/status/1/trailing (0.077286ms)
+✔ No arbitrary iframe or unsafe URL: https://x.com.evil.example/a/status/123 (0.087461ms)
+✔ No arbitrary iframe or unsafe URL: https://evil.example/video.mp4 (0.070256ms)
+✔ No arbitrary iframe or unsafe URL: javascript:alert(1) (0.094071ms)
+✔ No arbitrary iframe or unsafe URL: data:image/png;base64,xxx (0.078538ms)
+✔ No arbitrary iframe or unsafe URL: https://u:p@x.com/a/status/1 (0.076966ms)
+✔ No arbitrary iframe or unsafe URL: https://x.com:444/a/status/123 (0.098678ms)
+✔ No arbitrary iframe or unsafe URL: https://x.com/home (0.107461ms)
+✔ q-only references are quotes and not legacy replies (0.922295ms)
+✔ Reposts have no reply parent and their original consumes the sole slot (1.141645ms)
+✔ Repost repostJSON: verifies and uses JSON without event fetch (23.894969ms)
+✔ Repost generic: verifies and uses JSON without event fetch (8.716484ms)
+✔ Repost genericNested: verifies and uses JSON without event fetch (5.546323ms)
+✔ Repost repostEmpty: safely fetches its exact tagged original (1.704191ms)
+✔ Repost repostMalformed: safely fetches its exact tagged original (1.459122ms)
+✔ Repost repostForged: safely fetches its exact tagged original (8.946811ms)
+✔ Repost genericEmpty: safely fetches its exact tagged original (0.205098ms)
+✔ Forged embedded JSON is not trusted even when wrapper was signed (7.553167ms)
+✔ Repost missing and network-failure cases resolve to null, never reject (4.099839ms)
+✔ NIP-18 inner event ID/kind constraints reject mismatching content (0.771039ms)
+✔ Self-repost returns null without recursive resolution (0.354132ms)
+✔ NIP-21 duplicates and note/nevent aliases share a single fetch (2.07083ms)
+✔ nevent constraints are applied per caller even after a shared ID fetch (0.494313ms)
+✔ Current-view events are reused, never fetched twice from relay (0.290707ms)
+✔ View changes invalidate settled and late results; relay hints do not add connections (2.024672ms)
+✔ Single-flight memo is bounded and explicit read reset allows retry (670.436409ms)
+✔ Address fetch sends exact kind/author/d filter and selects newest matching version (61.582087ms)
+✔ Global, home and notifications include repost kinds in actual feed filters (0.391418ms)
+✔ npub and note roundtrip with checksum / uppercase validation (6.70945ms)
+✔ Hash / legacy routing supports a single project subpath (1.1847ms)
+✔ Safe URLs reject insecure remote WebSocket and credentials (3.355301ms)
+✔ NIP-10 direct and nested reply tags preserve root but exclude self (0.627533ms)
+✔ Settings validation, old-schema compatibility, and regular expression errors (0.667483ms)
+✔ Persisted public key restores without asking extension again; logout stays out (0.670438ms)
+✔ Restored session refuses signing with another extension account (0.734564ms)
+✔ Signature cancellation is not retried automatically (0.311187ms)
+✔ Only relay cooldowns and pending user-authored sends can be persisted (15.77513ms)
+✔ Concurrent profiles use one author-list filter; only explicit refresh re-fetches known profiles (262.396183ms)
+✔ Navigation discards posts but retains persistent public profiles through logout (63.415882ms)
+✔ Old replaceable events cannot overwrite newer current-screen metadata (0.675295ms)
+✔ Read-modify-write refuses incomplete latest list reads (64.529785ms)
+✔ NIP-05 validates identifier and pubkey equality without response storage (11.602131ms)
+✔ NIP-05 singleflight and semaphore never exceed two concurrent requests (54.009024ms)
+✔ NIP-05 CORS / HTTP failure remains unknown and does not suppress a subsequent request (0.710788ms)
+✔ BIP-340 official verification vector 0 (38.541222ms)
+✔ BIP-340 official verification vector 1 (8.981814ms)
+✔ BIP-340 official verification vector 2 (8.848623ms)
+✔ BIP-340 official verification vector 3 (6.506265ms)
+✔ BIP-340 official verification vector 4 (5.101764ms)
+✔ BIP-340 official verification vector 5 (0.431018ms)
+✔ BIP-340 official verification vector 6 (6.429188ms)
+✔ BIP-340 official verification vector 7 (6.184812ms)
+✔ BIP-340 official verification vector 8 (12.271416ms)
+✔ BIP-340 official verification vector 9 (8.011977ms)
+✔ BIP-340 official verification vector 10 (10.34988ms)
+✔ BIP-340 official verification vector 11 (5.242506ms)
+✔ BIP-340 official verification vector 12 (0.180541ms)
+✔ BIP-340 official verification vector 13 (0.077377ms)
+✔ BIP-340 official verification vector 14 (0.069304ms)
+✔ BIP-340 official verification vector 15 (6.039484ms)
+✔ BIP-340 official verification vector 16 (5.703795ms)
+✔ BIP-340 official verification vector 17 (8.723075ms)
+✔ BIP-340 official verification vector 18 (4.139159ms)
+✔ Independent OpenSSL/Python fixture: all signed Nostr kinds verify (287.793173ms)
+✔ Reject modified content, id, signature, author, tags and timestamp (3.97339ms)
+✔ Strict event format rejects invalid scalar types and large bodies (2.008247ms)
+✔ Malformed signatures and non-curve public keys never throw (0.464007ms)
+✔ Same image media remains visible in every distinct post (18.440424ms)
+✔ Same YouTube media remains visible in every distinct post (20.933019ms)
+✔ Same X media remains visible in every distinct post (11.377332ms)
+✔ Closing a repeated player leaves the other post ready and mounted (2.731164ms)
+✔ Worker RPC synchronous send failure removes its pending request and timer (5.865893ms)
+✔ Worker crash rejects in-flight requests immediately without replaying a send (9.052781ms)
+✔ Worker deserialization error rejects all pending requests and enables manual fallback (1.415346ms)
+✔ Malformed worker messages cannot throw an uncaught handler exception (2.308007ms)
+✔ A late old-worker response cannot resolve a failed request or revive a dead worker (1.353944ms)
+✔ Unavailable SharedWorker falls back without opening unsolicited relay sockets (0.475835ms)
+✔ One relay connection, finite REQ/CLOSE per page and verified deduplication (60.204287ms)
+✔ Bad event IDs and signatures are discarded before UI/cache (28.230533ms)
+✔ Rate limit creates durable cooldown without reconnects or blind retry (7.706377ms)
+✔ Timeout always sends CLOSE and is not a successful empty result (46.469524ms)
+✔ Only in-flight queries coalesce; the same completed query is sent again (21.930496ms)
+✔ Fast EOSE does not truncate slower relay completion (37.5353ms)
+✔ Publication is re-sent when explicitly requested; no stored ACK response (15.816793ms)
+✔ Relay rejected publish remains failure, does not report saved (8.399088ms)
+✔ Backoff is exponential, rate limits longer than generic errors (0.338659ms)
+✔ Filter limits and unsafe relay addresses are rejected without connection (2.119073ms)
+✔ 100 seeded duplicate-time, multi-author datasets page downward without gaps or duplicates (142.872021ms)
+✔ 100 seeded upward searches return nearest neighbors, not the newest remote page (70.520946ms)
+✔ Latest means now-down, at most 30 combined unique rows, replacing the old window (17.257447ms)
+✔ Down reads below the supplied viewport anchor, not the oldest loaded row (1.624812ms)
+✔ Up finds the nearest newer rows instead of jumping to the newest 30 (10.380845ms)
+✔ At most six bounded time searches per upward click, with a resumable cursor only (3.8535ms)
+✔ Same-second down boundaries are inclusive and do not blindly subtract a second (8.485838ms)
+✔ Same-second upward page is the nearest lexicographic predecessors (4.092549ms)
+✔ A failed latest read preserves the current timeline and a failed up does not jump (0.619651ms)
+✔ Repeated rapid clicks share one operation only, not a completed result (0.737508ms)
+✔ Multiple author filters still add at most thirty total posts (1.12431ms)
+✔ Old saved page sizes cannot expand the thirty-row limit (0.845471ms)
+✔ Timeline, thread and embedded post actions offer no like or copy-link control (26.164308ms)
+✔ Only incoming top-level reaction notifications have an actionable heart (13.456576ms)
+✔ Reaction heart submits its reaction once, then remains pressed and disabled (5.347654ms)
+✔ Reaction state updates affect the matching mounted heart without publishing (1.640705ms)
+✔ Reaction controls cannot act after the account changes, and reset releases the subscription (2.628619ms)
+✔ Received likes retain their notification label and link to the original post (3.087108ms)
+✔ Legacy pending likes have no resend row while ordinary pending posts remain available (5.236247ms)
+✔ Settings retry uses only the dedicated authored reaction ledger (3.874241ms)
+✔ Persistent profile store rejects posts, lists, reactions and malformed kind:0 (3.010503ms)
+✔ Saved public profile is reverified from local storage and survives independent cache instances (27.341086ms)
+✔ Persistent profile records have no TTL or automatic expiration (11.333357ms)
+✔ Saved signature corruption is rejected and repaired by the next valid explicit fetch (12.493284ms)
+✔ Incidental newer events do not refresh a saved profile; explicit refresh does (159.624416ms)
+✔ Failed explicit refresh retains persisted metadata and reports the failure (155.804992ms)
+✔ Warm known anonymous authors cause neither relay reads nor profile writes (201.806452ms)
+✔ Posts, follow, mute and relay lists are never reused on repeated explicit reads (518.714756ms)
+✔ Navigation also clears current-account contacts, mutes and relays from runtime view state (3.024293ms)
+✔ All metadata consumers share persistence after repository reset, logout, and relay-setting change (294.094761ms)
+✔ NIP-05 verification is persisted once, event/pubkey bound, and refreshed only explicitly (141.995926ms)
+✔ A cached NIP-05 failure does not trigger repeated verification on every display (135.964559ms)
+✔ Verification record for another pubkey or event cannot be reused as a badge (0.325369ms)
+✔ Storage-full failure is visible, nonfatal and not reported as a successful persistent write (4.321993ms)
+✔ IndexedDB branch uses only profiles store and survives a closed/reopened cache (API fixture) (9.981966ms)
+✔ Concurrent IndexedDB profile refresh transactions cannot downgrade a newer version (API fixture) (12.14765ms)
+✔ IndexedDB transaction abort is surfaced without crashing profile rendering (API fixture) (3.939859ms)
+✔ Persistent profile survives an actual separate Node process with disk-backed storage adapter (68.120803ms)
+✔ Blocked browser storage getters degrade to memory without crashing construction (4.388764ms)
+✔ Evicted hot profile is restored from the persistent store with zero relay requests (78.353779ms)
+✔ Only other-authored kind:7 directly addressed to this account is eligible (3.731657ms)
+✔ Preparing normal posts does not start reaction queries or signing (0.546881ms)
+✔ A reply like references the received reaction itself with one e, one p and k:7 (44.705012ms)
+✔ Incoming reaction content "+" can receive a normal like (38.389675ms)
+✔ Incoming reaction content "" can receive a normal like (33.371605ms)
+✔ Incoming reaction content "🎉" can receive a normal like (38.549214ms)
+✔ Incoming reaction content ":wave:" can receive a normal like (22.1688ms)
+✔ Existing "+" like is red without another signature (5.779954ms)
+✔ Existing "" like is red without another signature (5.579823ms)
+✔ An earlier e match, another author, or an emoji is not mistaken for an existing like (33.544065ms)
+✔ Concurrent clicks share one signature and one transport operation (19.480131ms)
+✔ A confirmed authored reply survives reload even when relays no longer return it (24.205064ms)
+✔ Concurrent tabs serialize by account and retain one reply event (31.415767ms)
+✔ Incomplete own-like lookup cannot be treated as permission to sign a new like (6.01671ms)
+✔ Spoofing a p tag does not make somebody else’s post an incoming reaction (7.538976ms)
+✔ A tampered incoming reaction fails signature verification before any send (0.880643ms)
+✔ Lost relay acknowledgements retain one exact signed reply for manual retry (48.520975ms)
+✔ Partial acceptance turns the heart red and retry targets only failed relays (29.073598ms)
+✔ Without durable storage no signed reply reaches the network (11.804685ms)
+✔ Without cross-tab locking a new reply fails closed (0.690808ms)
+✔ Account switch during lookup does not sign or publish for either account (3.525837ms)
+✔ Signer refusal leaves no pending delivery and a later explicit attempt can work (29.058486ms)
+✔ Generic publish, sendSigned and retry still reject arbitrary kind:7 events (0.839862ms)
+✔ Pending reply survives a fresh instance and missing generic outbox without creating a new event (65.205201ms)
+✔ Concurrent different targets preserve both authored records under the account lock (50.324795ms)
+✔ A modified persistent receipt cannot authorize retry or a fresh reply (17.992431ms)
+✔ Account switch while a signing prompt is outstanding discards its signed result (8.376234ms)
+✔ Retry stops before transport when the durable ledger cannot be rewritten (22.947004ms)
+✔ Unreadable authored ledger fails closed instead of being treated as empty (3.200489ms)
+✔ Malformed authored-ledger JSON fails closed instead of being treated as empty (3.597645ms)
+✔ A tab with a failed ledger write cannot overwrite newer records from another tab (31.787366ms)
+✔ A verified remote like remains liked when a later relay response is empty (3.840901ms)
+✔ A saturated exact-target lookup does not treat an unobserved like as absent (293.697378ms)
+✔ Discovered signed follow survives an empty author lookup (2.846947ms)
+✔ Newer discovered follow wins over an older direct lookup without the owner (0.747984ms)
+✔ A failed author lookup cannot erase a signed positive candidate (0.51201ms)
+✔ A silent empty multi-author contact response must be isolated per author (0.717758ms)
+✔ A newer explicit unfollow overrides discovered follow evidence (11.769853ms)
+✔ Same-second replaceable-event tie selects the lexically lower ID (0.93811ms)
+✔ Same-second discovered winner is not overridden by a losing direct event (3.9071ms)
+✔ Missing kind:3 is unknown, whereas signed empty kind:3 is negative (1.833575ms)
+✔ One rejected user lookup cannot suppress another user's positive result (0.716316ms)
+✔ Previously observed newer unfollow is not resurrected by an older positive reply (0.806581ms)
+✔ Direct positive becomes repository evidence for badge updates (0.381803ms)
+✔ Late replies after navigation cannot install relationship evidence in a new view (0.695024ms)
+✔ Directory construction and read-state inspection perform no automatic network reads (0.490026ms)
+✔ Missing reverse index does not omit a directly verifiable mutual follow (1.77759ms)
+✔ An offline relay cannot hide another relay's confirmed followers (0.89171ms)
+✔ A partial timed-out discovery response retains positive users without advancing that relay cursor (0.405629ms)
+✔ Recovered relay is retried at the original cursor and does not duplicate existing followers (1.370399ms)
+✔ Unknown known-followee remains retryable and is recovered without advancing the discovery page (0.695134ms)
+✔ Signed newer unfollow removes a previously displayed uncertain follower on retry (0.662936ms)
+✔ Merged discovery and direct-followee lanes append at most thirty unique people per operation (7.426702ms)
+✔ Duplicate events from multiple relays are one identity, and buffers drain without additional traffic (8.937357ms)
+✔ Concurrent follower button operations share one in-flight directory read (0.633712ms)
+✔ Relay selection remains exactly the configured read-relay set (0.581564ms)
+✔ List evidence is view-local and is not carried through Repository.beginView (1.085661ms)
+✔ Coverage-probe failure preserves the initial verified page as partial evidence (0.584809ms)
+✔ Real wire path isolates every author after a silently empty combined kind:3 response (45.36633ms)
+✔ A newer signed unfollow received while buffered is not later painted as a follower (6.304853ms)
+✔ Repository updates remove an already displayed stale positive on the next manual operation (0.49221ms)
+✔ Successful owner retry removes the obsolete owner-unknown warning (0.371808ms)
+✔ NIP-65 tags expose read/write modes and retain unknown markers (2.313596ms)
+✔ Legacy contact-list relay flags migrate without changing follow tags (0.563807ms)
+✔ Adding one relay preserves all existing tags and chosen mode (0.510587ms)
+✔ Normalized duplicate addition does not change the list (0.229746ms)
+✔ Removal deletes only matching relay tags, preserves unknown/nonrelay tags (0.246791ms)
+✔ Invalid relay protocols, credentials, fragments and modes are rejected (0.701684ms)
+✔ Only the logged-in owner can mutate public relay metadata (2.357833ms)
+✔ Read-modify-write fetches latest all-relay data, not a UI snapshot (1.04512ms)
+✔ Public relay changes never change local application relay settings (0.350166ms)
+✔ Incomplete preflight refuses to sign or replace a public relay list (0.237807ms)
+✔ A duplicate addition and an absent deletion do not sign new events (0.357297ms)
+✔ The last relay can be removed without falling back to app relay settings (0.300141ms)
+✔ Back follows anchor-created routes, not only Router.go calls (2.637092ms)
+✔ Native back then forward then header back retains accurate history (0.51934ms)
+✔ Reloading a route retains the within-app back target and foreign state (0.570497ms)
+✔ New navigation after native back discards forward entries without a wrong back depth (0.85826ms)
+✔ Opening a deep link directly does not navigate back out of the app (0.884338ms)
+✔ 30 profile authors compact to one bounded filter; never widen ordinary limit/time/tag queries (3.429336ms)
+✔ A cold thirty-author page reads posts and metadata without own-reaction queries (344.586466ms)
+✔ Known profiles make repeated page decoration entirely local (156.943899ms)
+✔ Mixed pages request only the ten unknown authors (262.080714ms)
+✔ Anonymous warm decoration sends zero REQs; a subsequent explicit post read still sends one (307.439955ms)
+✔ In-flight profile reads and feed decoration share the same metadata batch (154.788455ms)
+✔ Already-running identity request is reused by a concurrent feed read (149.163891ms)
+✔ Manual fresh read sees an updated profile; ordinary use keeps session metadata (136.509189ms)
+✔ Write preflight bypasses known profiles and refuses partial all-relay results (143.608799ms)
+✔ Changing read-relay coverage does not refresh persistent profiles (93.597896ms)
+✔ Navigation, logout and a new repository all reuse persistent profiles (73.507744ms)
+✔ Absent and invalid results are not cached; verified positive partial profiles can be reused (199.3018ms)
+✔ Missing-author repair is per-relay, preserves newer metadata on a capped second relay (256.744385ms)
+✔ Historical versions cannot crowd out missing profiles permanently; recovery is bounded (98.121324ms)
+✔ Empty EOSE has no pointless repair; positive-partial EOSE checks absent authors at most once (203.577862ms)
+✔ Metadata repair never requests reactions or starts after failed EOSE (225.617224ms)
+✔ Notification filters still receive signed reactions directed to the current user (13.180075ms)
+✔ The first repair rejection stops all further repair chunks on that relay (83.67014ms)
+✔ A logout during a pending read cannot restore old session metadata (157.769248ms)
+✔ Hot profile memory is bounded without evicting persistent records or the account (110.365522ms)
+✔ Malformed latest metadata cannot become a successful reusable profile via an older valid version (136.221842ms)
+✔ Profile batching respects the 100-author ceiling without changing ordinary filter limits (0.804969ms)
+✔ Application display name changes without renaming stored data (3.09472ms)
+✔ Right search is deleted with its handlers; mobile search is preserved (1.629999ms)
+✔ Maximum embed depth is two and not a per-post width setting (0.118438ms)
+✔ ref_note: depths zero and one select the same sole candidate; two and above stop (2.972916ms)
+✔ ref_nevent: depths zero and one select the same sole candidate; two and above stop (0.790017ms)
+✔ ref_npub: depths zero and one select the same sole candidate; two and above stop (0.63909ms)
+✔ ref_nprofile: depths zero and one select the same sole candidate; two and above stop (1.468977ms)
+✔ ref_naddr: depths zero and one select the same sole candidate; two and above stop (0.669295ms)
+✔ image: depths zero and one select the same sole candidate; two and above stop (0.794424ms)
+✔ imeta: depths zero and one select the same sole candidate; two and above stop (0.806061ms)
+✔ images: depths zero and one select the same sole candidate; two and above stop (0.71209ms)
+✔ youtubeMultiple: depths zero and one select the same sole candidate; two and above stop (0.381312ms)
+✔ quote: depths zero and one select the same sole candidate; two and above stop (1.287865ms)
+✔ quoteAddress: depths zero and one select the same sole candidate; two and above stop (1.422938ms)
+✔ repostJSON: depths zero and one select the same sole candidate; two and above stop (0.58545ms)
+✔ generic: depths zero and one select the same sole candidate; two and above stop (0.782696ms)
+✔ genericNested: depths zero and one select the same sole candidate; two and above stop (0.345589ms)
+✔ mixed: depths zero and one select the same sole candidate; two and above stop (8.234551ms)
+✔ mixedNostrFirst: depths zero and one select the same sole candidate; two and above stop (0.565289ms)
+✔ multiple: added depth never consumes additional sibling links (0.745379ms)
+✔ images: added depth never consumes additional sibling links (0.1529ms)
+✔ youtubeMultiple: added depth never consumes additional sibling links (0.123897ms)
+✔ mixed: added depth never consumes additional sibling links (0.24584ms)
+✔ mixedNostrFirst: added depth never consumes additional sibling links (0.246129ms)
+✔ Invalid first Nostr URI and disabled images remain enforced at depth one (0.386911ms)
+✔ X/Twitter x.com embeds within the existing depth limit and keeps its link (3.843664ms)
+✔ X/Twitter www.x.com embeds within the existing depth limit and keeps its link (0.635925ms)
+✔ X/Twitter mobile.x.com embeds within the existing depth limit and keeps its link (0.316576ms)
+✔ X/Twitter twitter.com embeds within the existing depth limit and keeps its link (0.256636ms)
+✔ X/Twitter www.twitter.com embeds within the existing depth limit and keeps its link (0.300632ms)
+✔ X/Twitter mobile.twitter.com embeds within the existing depth limit and keeps its link (0.210436ms)
+✔ X share suffix (none) selects the same post ID (0.235253ms)
+✔ X share suffix / selects the same post ID (0.201823ms)
+✔ X share suffix /photo/1 selects the same post ID (0.336245ms)
+✔ X share suffix /video/1 selects the same post ID (0.324468ms)
+✔ X share suffix /photo/4?s=20 selects the same post ID (0.195734ms)
+✔ X share suffix ?s=20&t=tracking selects the same post ID (0.198498ms)
+✔ HTTP and username-free X post URLs select the same string ID (0.422384ms)
+✔ X URL stays link-only: https://x.com/home (0.158057ms)
+✔ X URL stays link-only: https://x.com/a/status/123/unrecognized (0.099209ms)
+✔ X URL stays link-only: https://x.com:9000/a/status/123 (0.169434ms)
+✔ X URL stays link-only: https://x.com/a/status/not-an-id (0.117917ms)
+✔ X URL stays link-only: https://x.com/a/status/0 (0.058538ms)
+✔ X URL stays link-only: https://x.com/a/status/123456789012345678901 (0.048533ms)
+✔ Multiple and duplicate X URLs consume only the first rich slot and retain all links (0.371097ms)
+✔ X and image share the first-candidate slot: https://media.example/photo.png (0.220572ms)
+✔ X and youtube share the first-candidate slot: https://youtu.be/M7lc1UVf-VE (0.226611ms)
+✔ X and nostr share the first-candidate slot: nostr:note14untwwd442932dcsqqp0zet550h095jpaqh9w22tyrgncf6qmdlst77m0x (0.753031ms)
+✔ X and nostr share the first-candidate slot: nostr:npub1ujfahuwppkq0xkq7fyzfxzc5qnxxcyuspms8tpr5l222h6xye5fsccv64k (0.223616ms)
+✔ X and nostr share the first-candidate slot: nostr:naddr1qqgkzun5d93kcef6u6t6te5u4n5248szyrjf8kl3cyxcpu6creysfyctzszvcmqnjq8wqavywnaff2lgcnx3xqcyqqq823c48eejl (0.293601ms)
+✔ A body X post consumes the slot before q-only quotes while retaining their links (0.534773ms)
+✔ Image settings skip images, not X, under the same first-candidate policy (0.25948ms)
+✔ imeta cannot turn an X/Twitter page URL into an image request (0.298799ms)
+✔ Direct X-hosted media is still a normal image, including NIP-92 metadata (0.135053ms)
+✔ X uses an official cross-origin frame without widgets in the account document (0.511168ms)
+✔ Entry and all shipped module import versions match the release (2.55608ms)
+ℹ tests 387
+ℹ suites 0
+ℹ pass 387
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4211.421834

@@ -1,7 +1,7 @@
-import { EventPager } from './pagination.js?v=1.3.4';
-import { chunks, sortEvents } from '../core/utils.js?v=1.3.4';
-import { el, button, busy, empty, avatar, toast } from '../ui/dom.js?v=1.3.4';
-import { local } from '../core/storage.js?v=1.3.4';
+import { EventPager } from './pagination.js?v=1.3.5';
+import { chunks, sortEvents } from '../core/utils.js?v=1.3.5';
+import { el, button, busy, empty, avatar, toast } from '../ui/dom.js?v=1.3.5';
+import { local } from '../core/storage.js?v=1.3.5';
 export function composer(app,parent=null){
   const area=el('textarea',{rows:3,placeholder:parent?'返信を投稿':'いまどうしてる？',maxLength:16000,'aria-label':parent?'返信本文':'投稿本文'});
   const draftKey=`draft:${app.session.pubkey}:${parent?.id??'post'}`;area.value=local.get(draftKey)??'';
@@ -99,6 +99,12 @@ export class FeedView {
           throw new Error('投稿者情報の取得が未完了です。表示条件を確認できないため位置を進めず、同じページを再試行します');
         }
         if(!this.alive())return;
+        let reactionWarning='';
+        if(this.notification&&this.app.social?.reactionReplies){
+          try{await this.app.social.reactionReplies.prepare(candidates);}
+          catch{reactionWarning='いいね済みの確認を完了できませんでした';}
+          if(!this.alive())return;
+        }
         const reset=direction==='latest'&&(this.pager.complete||page.length>0);
         this.render({reset});
         const hidden=page.filter(e=>!this.visible(e)).length;
@@ -107,7 +113,7 @@ export class FeedView {
         else delete this.hiddenCursors[direction];
         this.status.textContent=[this.pager.warning,
           page.length?`${page.length}件を取得${hidden?`（${hidden}件は表示条件により非表示）`:''}`:this.pager.warning?'取得未完了です。読み込みボタンで再試行できます':'この範囲に投稿はありません',
-          !info.complete?'投稿者情報の一部を取得できませんでした':null].filter(Boolean).join(' · ');
+          !info.complete?'投稿者情報の一部を取得できませんでした':null,reactionWarning].filter(Boolean).join(' · ');
         if(direction==='latest'&&!initial) window.scrollTo({top:Math.max(0,window.scrollY+this.start.getBoundingClientRect().top-56),behavior:'instant'});
         else if(position){
           const node=this.nodes.get(position.id);

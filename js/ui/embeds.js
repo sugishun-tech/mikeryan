@@ -1,7 +1,7 @@
-import { el, button } from './dom.js?v=1.3.4';
-import { ContentResolver } from '../content/resolver.js?v=1.3.4';
-import { CONTENT_LIMITS, referenceHref, referenceURI } from '../content/references.js?v=1.3.4';
-import { threadHref } from '../core/router.js?v=1.3.4';
+import { el, button } from './dom.js?v=1.3.5';
+import { ContentResolver } from '../content/resolver.js?v=1.3.5';
+import { CONTENT_LIMITS, referenceHref, referenceURI } from '../content/references.js?v=1.3.5';
+import { threadHref } from '../core/router.js?v=1.3.5';
 
 let serial=0;
 const readMessage=data=>{
