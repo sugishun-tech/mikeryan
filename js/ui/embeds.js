@@ -77,7 +77,7 @@ export class Embeds {
             visual.append(this.app.identity.userRow(result.pubkey));
           } else {
             if (ancestors.has(result.id)) { fail('循環参照のため埋め込みを省略しました'); return; }
-            if (this.app.moderation?.pubkeyMuted(result.pubkey)) { fail('ミュート中の投稿です'); return; }
+            if (!this.app.settings.value.allowVerifiedNip05 && this.app.moderation?.pubkeyMuted(result.pubkey)) { fail('ミュート中の投稿です'); return; }
             // An author's metadata failure never discards the signed post itself.
             try { await this.app.repo.profiles([result.pubkey]); } catch { /* Show hex identity if unavailable. */ }
             if (!alive()) return;

@@ -16,13 +16,14 @@ export async function settingsView(app,host){
   form.append(el('p',{class:'help'},'投稿の読み込みは1回につき最大30件です。'));
   form.append(el('h2',{},'表示・ミュート'));
   const select=el('select',{},...Object.entries({light:'ライト',dark:'ダーク',auto:'システム設定'}).map(([value,label])=>el('option',{value,selected:s.theme===value},label)));inputs.theme=select;form.append(field('テーマ',select));
-  for(const [key,label]of Object.entries({loadImages:'プロフィール画像を読み込む',verifyNip05:'NIP-05を検証して認証マークを表示',hideIncompleteProfiles:'name / display_name が揃わない投稿者を非表示にする'})){
+  for(const [key,label]of Object.entries({loadImages:'プロフィール画像を読み込む',verifyNip05:'NIP-05を検証して認証マークを表示',allowVerifiedNip05:'nip-05は無条件許可',hideIncompleteProfiles:'name / display_name が揃わない投稿者を非表示にする'})){
     const input=el('input',{type:'checkbox',checked:s[key]});inputs[key]=input;form.append(el('label',{class:'checkbox-field'},input,label));
   }
   form.append(el('p',{class:'help'},'初期値は添付mynostrのミュート条件を引き継ぎます。URL・nostr:・#・かなを含まない投稿が非表示になります。NIP-05のマークは識別子と公開鍵の一致であり、実在の本人や発言内容の保証ではありません。'));
   add('muteDisplayNamePatterns','名前のミュート正規表現（1行に1つ）','textarea',{rows:3,spellcheck:false});
   add('muteContentPatterns','本文のミュート正規表現（1行に1つ）','textarea',{rows:4,spellcheck:false});
   add('mutedPubkeys','ミュート公開鍵hex（1行に1つ）','textarea',{rows:3,spellcheck:false});
+  form.append(el('p',{class:'help'},'名前・本文の正規表現や公開鍵の末尾に[[@]]を付けると、NIP-05認証済みでもそのルールを適用します（例: https[[@]]）。'));
   form.append(button('表示フィルターをすべて解除',()=>{inputs.muteDisplayNamePatterns.value='';inputs.muteContentPatterns.value='';inputs.mutedPubkeys.value='';inputs.hideIncompleteProfiles.checked=false;toast('フォームに反映しました。保存すると有効になります');},'text-button'));
   const read=()=>Object.fromEntries(Object.entries(inputs).map(([key,input])=>[key,input.type==='checkbox'?input.checked:['relays','muteDisplayNamePatterns','muteContentPatterns','mutedPubkeys'].includes(key)?lines(input.value):['readRelayCount','requestGapMs','batchSize'].includes(key)?Number(input.value):input.value]));
   const save=button('設定を保存',()=>busy(save,async()=>{app.settings.save(read());toast('設定を保存しました');app.applyTheme();}),'button primary');

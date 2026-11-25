@@ -124,7 +124,8 @@ export class FeedView {
     })().finally(()=>{this.operation=null;});
     return this.operation;
   }
-  candidate(event){return !this.moderate||(!this.app.moderation.pubkeyMuted(event.pubkey)&&(this.notification||!this.app.moderation.content.some(r=>r.test(event.content))));}
+  // With the exemption enabled, load and verify authors before applying mute rules in visible().
+  candidate(event){return !this.moderate||this.app.settings.value.allowVerifiedNip05||(!this.app.moderation.pubkeyMuted(event.pubkey)&&(this.notification||!this.app.moderation.content.some(r=>r.test(event.content))));}
   visible(event){return this.candidate(event)&&(!this.threadId||this.app.parentId(event)===this.threadId)&&(!this.moderate||!this.app.moderation.muted(event,this.app.repo.peekProfile(event.pubkey),{notification:this.notification}));}
   render({reset=false}={}){
     if(!this.alive())return;

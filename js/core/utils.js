@@ -5,6 +5,10 @@ export const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 export const unique = values => [...new Set(values)];
 export const chunks = (items, size) => Array.from({ length: Math.ceil(items.length / size) }, (_, i) => items.slice(i * size, (i + 1) * size));
 export const lines = value => String(value ?? '').split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+export function parseMuteRule(rule) {
+  const marker = /\s*\[\[@\]\]\s*$/.exec(rule);
+  return {value: marker ? rule.slice(0, marker.index) : rule, forced: !!marker};
+}
 export const shortKey = key => `${String(key).slice(0, 8)}…${String(key).slice(-4)}`;
 export const compareEvents = (a, b) => b.created_at - a.created_at || a.id.localeCompare(b.id);
 export const sortEvents = events => [...new Map(events.filter(Boolean).map(e => [e.id, e])).values()].sort(compareEvents);

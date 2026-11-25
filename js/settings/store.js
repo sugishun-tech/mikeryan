@@ -1,6 +1,6 @@
 import { DEFAULTS, LIMITS } from '../core/config.js?v=1.3.5';
 import { local } from '../core/storage.js?v=1.3.5';
-import { Emitter, lines, normalizeRelay, parseJSON, unique, isHex } from '../core/utils.js?v=1.3.5';
+import { Emitter, lines, normalizeRelay, parseJSON, unique, isHex, parseMuteRule } from '../core/utils.js?v=1.3.5';
 const array = (v, fallback = []) => Array.isArray(v) ? v : fallback;
 export function validateSettings(input = {}) {
   if (!input || typeof input !== 'object' || Array.isArray(input)) throw new Error('設定JSONはオブジェクトで指定してください');
@@ -9,7 +9,7 @@ export function validateSettings(input = {}) {
       throw new Error(`${key} は文字列の配列で指定してください`);
     }
   }
-  for (const key of ['hideIncompleteProfiles','loadImages','verifyNip05']) {
+  for (const key of ['hideIncompleteProfiles','loadImages','verifyNip05','allowVerifiedNip05']) {
     if (key in input && typeof input[key] !== 'boolean') throw new Error(`${key} は true または false で指定してください`);
   }
   for (const key of ['readRelayCount','requestGapMs']) {
@@ -31,10 +31,13 @@ export function validateSettings(input = {}) {
     hideIncompleteProfiles: Boolean(merged.hideIncompleteProfiles),
     loadImages: Boolean(merged.loadImages),
     verifyNip05: Boolean(merged.verifyNip05),
+    allowVerifiedNip05: Boolean(merged.allowVerifiedNip05),
     theme: ['light', 'dark', 'auto'].includes(merged.theme) ? merged.theme : 'light'
   };
-  if (!result.mutedPubkeys.every(isHex)) throw new Error('ミュート公開鍵は64桁のhexで指定してください');
-  for (const pattern of [...result.muteDisplayNamePatterns, ...result.muteContentPatterns]) {
+  if (!result.mutedPubkeys.every(key => isHex(parseMuteRule(key).value))) throw new Error('ミュート公開鍵は64桁のhexで指定してください');
+  for (const rule of [...result.muteDisplayNamePatterns, ...result.muteContentPatterns]) {
+    const {value: pattern, forced} = parseMuteRule(rule);
+    if (forced && !pattern) throw new Error('[[@]] の前にミュート正規表現を指定してください');
     if (pattern.length > 512) throw new Error('ミュート正規表現は512文字以内にしてください');
     try { new RegExp(pattern, 'i'); } catch { throw new Error(`ミュート正規表現が不正です: ${pattern}`); }
   }

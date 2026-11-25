@@ -11,6 +11,7 @@ export const DEFAULTS = Object.freeze({
   hideIncompleteProfiles: true,
   loadImages: true,
   verifyNip05: true,
+  allowVerifiedNip05: true,
   theme: 'light'
 });
 export const OUTBOX_RETENTION = 7 * 24 * 3600000;
